@@ -128,8 +128,8 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
           "backdrop-blur-2xl border border-border/40"
         )}
         style={{
-          background: "linear-gradient(160deg, hsl(0 0% 100% / 0.78), hsl(0 0% 100% / 0.52))",
-          boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.6)",
+          background: "linear-gradient(160deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.6))",
+          boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.08), inset 0 1px 0 hsl(var(--card) / 0.6)",
         }}
       >
         {/* Header */}

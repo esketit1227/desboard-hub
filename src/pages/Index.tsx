@@ -169,9 +169,14 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem("widget-pixel-sizes", JSON.stringify(pixelSizes));
   }, [pixelSizes]);
-  // Light warm theme with dot-grid background
+  // Respect saved theme preference
   useEffect(() => {
-    document.documentElement.classList.add("light");
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, []);
 
   const sensors = useSensors(
@@ -237,13 +242,6 @@ const Index = () => {
                   <span className="hidden sm:inline">Reset Sizes</span>
                 </button>
               }
-              <button
-                onClick={() => setCustomizerOpen(true)}
-                className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors">
-
-                <Plus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Add Widget</span>
-              </button>
               <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors relative">
                 <Bell className="w-4 h-4 text-muted-foreground" />
                 <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-destructive" />
