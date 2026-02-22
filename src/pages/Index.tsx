@@ -169,9 +169,9 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem("widget-pixel-sizes", JSON.stringify(pixelSizes));
   }, [pixelSizes]);
-  // Dark mode is default — no toggle needed
+  // Light warm theme with dot-grid background
   useEffect(() => {
-    document.documentElement.classList.remove("light");
+    document.documentElement.classList.add("light");
   }, []);
 
   const sensors = useSensors(

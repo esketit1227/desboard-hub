@@ -25,16 +25,16 @@ interface WidgetCardProps {
 }
 
 const TINT_COLORS = [
-  { bg: "hsl(150 30% 85%)", fg: "hsl(150 25% 20%)" },
-  { bg: "hsl(260 30% 85%)", fg: "hsl(260 25% 20%)" },
-  { bg: "hsl(340 30% 88%)", fg: "hsl(340 25% 20%)" },
-  { bg: "hsl(170 35% 85%)", fg: "hsl(170 30% 18%)" },
-  { bg: "hsl(20 40% 88%)", fg: "hsl(20 35% 20%)" },
-  { bg: "hsl(200 35% 86%)", fg: "hsl(200 30% 18%)" },
-  { bg: "hsl(280 25% 88%)", fg: "hsl(280 25% 18%)" },
-  { bg: "hsl(45 35% 88%)", fg: "hsl(45 30% 20%)" },
-  { bg: "hsl(350 35% 86%)", fg: "hsl(350 30% 18%)" },
-  { bg: "hsl(130 20% 85%)", fg: "hsl(130 20% 18%)" },
+  { bg: "hsl(40 20% 96% / 0.5)", fg: "hsl(30 10% 18%)" },
+  { bg: "hsl(35 25% 95% / 0.5)", fg: "hsl(30 12% 18%)" },
+  { bg: "hsl(45 20% 95% / 0.5)", fg: "hsl(40 10% 18%)" },
+  { bg: "hsl(30 18% 94% / 0.5)", fg: "hsl(25 10% 18%)" },
+  { bg: "hsl(38 22% 96% / 0.5)", fg: "hsl(35 12% 18%)" },
+  { bg: "hsl(42 18% 95% / 0.5)", fg: "hsl(38 10% 18%)" },
+  { bg: "hsl(33 20% 94% / 0.5)", fg: "hsl(30 10% 18%)" },
+  { bg: "hsl(48 22% 96% / 0.5)", fg: "hsl(45 12% 18%)" },
+  { bg: "hsl(36 18% 95% / 0.5)", fg: "hsl(32 10% 18%)" },
+  { bg: "hsl(44 20% 94% / 0.5)", fg: "hsl(40 10% 18%)" },
 ];
 
 const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {
@@ -101,9 +101,10 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
       }}
       style={cardStyle}
       className={cn(
-        "rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden flex flex-col",
+        "rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden flex flex-col backdrop-blur-xl",
         !pixelSize && "h-[140px]",
-        !hasTint && "bg-card border border-border",
+        !hasTint && "bg-card border border-border backdrop-blur-xl",
+        hasTint && "border border-border/50",
         isDragging && "shadow-lg",
         isResizing && "ring-2 ring-primary/30"
       )}
