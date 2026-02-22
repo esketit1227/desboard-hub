@@ -16,7 +16,7 @@ import {
 
 import Sidebar from "@/components/dashboard/Sidebar";
 import WidgetCard from "@/components/dashboard/WidgetCard";
-import WidgetExpandedView from "@/components/dashboard/WidgetExpandedView";
+// WidgetExpandedView no longer used — widgets navigate to full page
 import { ProjectsPreview, ProjectsExpanded } from "@/components/dashboard/ProjectsWidget";
 import { CalendarPreview, CalendarExpanded } from "@/components/dashboard/CalendarWidget";
 import { ClientsPreview, ClientsExpanded } from "@/components/dashboard/ClientPortalWidget";
@@ -154,7 +154,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [activeWidgets, setActiveWidgets] = useState<WidgetId[]>(DEFAULT_WIDGETS);
-  const [expandedWidget, setExpandedWidget] = useState<WidgetId | null>(null);
+  const [_expandedWidget, _setExpandedWidget] = useState<WidgetId | null>(null);
   const [activeNav, setActiveNav] = useState("home");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
@@ -199,11 +199,7 @@ const Index = () => {
   };
 
   const handleExpand = (id: WidgetId) => {
-    if (isMobile) {
-      navigate(`/widget/${id}`);
-    } else {
-      setExpandedWidget(id);
-    }
+    navigate(`/widget/${id}`);
   };
 
   return (
@@ -322,21 +318,6 @@ const Index = () => {
             </div>
           )}
 
-          {/* Expanded widget dialog */}
-          {expandedWidget && (() => {
-            const widget = WIDGETS[expandedWidget];
-            const Expanded = widget.expanded;
-            return (
-              <WidgetExpandedView
-                open={true}
-                onOpenChange={(open) => !open && setExpandedWidget(null)}
-                title={widget.title}
-                icon={widget.icon}
-              >
-                <Expanded />
-              </WidgetExpandedView>
-            );
-          })()}
 
           <WidgetCustomizer
             open={customizerOpen}
