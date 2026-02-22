@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
@@ -23,69 +23,30 @@ const generateDays = () => {
   return { cells, currentDay, daysInMonth };
 };
 
-/** Compact preview */
+/** Compact preview — bold date display like Apple Watch */
 export const CalendarPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const today = new Date();
-  const dayName = today.toLocaleDateString("en-US", { weekday: "short" });
+  const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
   const dayNum = today.getDate();
   const month = today.toLocaleDateString("en-US", { month: "short" });
-  const year = today.getFullYear();
-  const h = pixelSize?.height ?? 140;
-  const w = pixelSize?.width ?? 300;
-
-  const titleSize = h > 300 ? "text-5xl" : h > 200 ? "text-4xl" : "text-3xl";
-  const subSize = h > 300 ? "text-base" : h > 200 ? "text-sm" : "text-xs";
-  const eventTitleSize = w > 400 ? "text-xs" : "text-[11px]";
-  const eventTimeSize = w > 400 ? "text-[11px]" : "text-[10px]";
-
-  const showEvents = h > 180;
-  const showMiniCal = h > 340 && w > 280;
-  const eventCount = h > 300 ? events.length : 2;
 
   return (
-    <div>
-      <div className="flex items-baseline gap-2">
-        <span className={`${titleSize} font-bold tracking-tight`}>{dayNum}</span>
-        <span className={`${subSize} opacity-60`}>{month} {year}, {dayName}</span>
-      </div>
-      {!showEvents && <p className={`${subSize} opacity-60 mt-1`}>3 events this week</p>}
-      {showEvents && (
-        <div className="mt-2 space-y-1.5">
-          <p className="text-[10px] opacity-50 font-medium uppercase tracking-wider">Upcoming</p>
-          {events.slice(0, eventCount).map((event) => (
-            <div key={event.title} className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${event.color} shrink-0`} />
-              <span className={`${eventTitleSize} font-medium truncate flex-1`}>{event.title}</span>
-              <span className={`${eventTimeSize} opacity-50 shrink-0`}>{event.time}</span>
-            </div>
-          ))}
+    <div className="flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[10px] text-muted-foreground font-medium">{dayName}</p>
+          <p className="text-4xl font-bold tracking-tighter leading-none mt-0.5" style={{ color: "hsl(var(--destructive))" }}>{dayNum}</p>
         </div>
-      )}
-      {showMiniCal && (() => {
-        const { cells, currentDay } = generateDays();
-        const eventDays = events.map(e => e.day);
-        return (
-          <div className="mt-3 pt-2 border-t border-border/20">
-            <div className="grid grid-cols-7 gap-0.5 text-center">
-              {dayLabels.map((d, i) => (
-                <span key={`${d}-${i}`} className="text-[9px] text-muted-foreground font-medium py-0.5">{d}</span>
-              ))}
-              {cells.slice(0, 35).map((day, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    "text-[9px] w-5 h-5 flex items-center justify-center rounded-md mx-auto",
-                    day === currentDay && "bg-primary text-primary-foreground font-bold",
-                    day && eventDays.includes(day) && day !== currentDay && "bg-primary/15 text-primary font-semibold"
-                  )}
-                >
-                  {day}
-                </span>
-              ))}
-            </div>
+        <CalendarDays className="w-4.5 h-4.5 text-muted-foreground/40" />
+      </div>
+      <div className="space-y-1 mt-auto">
+        {events.slice(0, 2).map((event) => (
+          <div key={event.title} className="flex items-center gap-1.5">
+            <span className={`w-1.5 h-1.5 rounded-full ${event.color} shrink-0`} />
+            <span className="text-[10px] font-medium truncate">{event.title}</span>
           </div>
-        );
-      })()}
+        ))}
+      </div>
     </div>
   );
 };

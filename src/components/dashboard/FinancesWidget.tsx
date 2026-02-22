@@ -6,13 +6,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown,
-  CreditCard, Wallet, Receipt, Filter, Download, Search,
+  CreditCard, Wallet, Receipt, Filter, Download, Search, DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 // --- Data ---
-
 const monthlyData = [
   { month: "Jul", income: 4200, expenses: 1800, profit: 2400 },
   { month: "Aug", income: 5800, expenses: 2100, profit: 3700 },
@@ -61,70 +60,34 @@ const weeklySpending = [
   { day: "Sun", amount: 0 },
 ];
 
-// --- Preview ---
-
+// --- Preview --- Bold revenue + sparkline bars
 export const FinancesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
-  const h = pixelSize?.height ?? 140;
-  const w = pixelSize?.width ?? 300;
-
-  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
-  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
-  const statSize = w > 400 ? "text-xs" : "text-[11px]";
-  const barLabelSize = w > 400 ? "text-[11px]" : "text-[10px]";
-
-  const showBreakdown = h > 180;
-  const showChart = h > 260;
-  const showTrend = w > 350;
-
   return (
-    <div>
-      <div className="flex items-baseline gap-2">
-        <p className={`${titleSize} font-bold tracking-tight`}>$7.8k</p>
-        {showTrend && <span className="text-success text-[11px] font-medium">+28%</span>}
+    <div className="flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-3xl font-bold tracking-tight leading-none">$7.8k</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Revenue</p>
+        </div>
+        <div className="flex items-center gap-0.5 text-success">
+          <ArrowUpRight className="w-3 h-3" />
+          <span className="text-[10px] font-semibold">+28%</span>
+        </div>
       </div>
-      <p className={`${labelSize} text-muted-foreground mt-1`}>Revenue this month</p>
-      {showBreakdown && !showChart && (
-        <div className={`mt-2 flex gap-4 ${statSize}`}>
-          <span className="opacity-60">Expenses <span className="font-semibold opacity-100">$2.6k</span></span>
-          <span className="opacity-60">Profit <span className="font-semibold opacity-100">$5.2k</span></span>
-        </div>
-      )}
-      {showChart && (
-        <div className="mt-3 space-y-1.5">
-          {[
-            { label: "Revenue", value: "$7,800", pct: 100 },
-            { label: "Expenses", value: "$2,650", pct: 34 },
-            { label: "Profit", value: "$5,150", pct: 66 },
-          ].map((item) => (
-            <div key={item.label}>
-              <div className={`flex justify-between ${barLabelSize} mb-0.5`}>
-                <span className="opacity-60">{item.label}</span>
-                <span className="font-medium">{item.value}</span>
-              </div>
-              <div className="h-1 bg-black/10 rounded-full overflow-hidden">
-                <div className="h-full bg-current rounded-full opacity-30" style={{ width: `${item.pct}%` }} />
-              </div>
-            </div>
-          ))}
-          {h > 360 && (
-            <div className="mt-2 pt-2 border-t border-border/20">
-              <p className={`${barLabelSize} opacity-50 font-medium mb-1`}>Top Expenses</p>
-              {expenseCategories.slice(0, 3).map(cat => (
-                <div key={cat.name} className={`flex justify-between ${barLabelSize} py-0.5`}>
-                  <span className="opacity-60">{cat.name}</span>
-                  <span className="font-medium">${cat.value.toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="flex items-end gap-[3px] mt-auto h-[28px]">
+        {monthlyData.map((d, i) => (
+          <div
+            key={i}
+            className="flex-1 rounded-sm bg-foreground/15"
+            style={{ height: `${(d.income / 8400) * 100}%` }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
 
 // --- Stat Card ---
-
 const StatCard = ({ label, value, trend, trendUp, icon: Icon }: {
   label: string; value: string; trend: string; trendUp: boolean; icon: React.ElementType;
 }) => (
@@ -142,7 +105,6 @@ const StatCard = ({ label, value, trend, trendUp, icon: Icon }: {
 );
 
 // --- Expanded ---
-
 export const FinancesExpanded = () => {
   const [txFilter, setTxFilter] = useState<"all" | "income" | "expense">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -158,7 +120,6 @@ export const FinancesExpanded = () => {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Revenue" value="$7,800" trend="+28%" trendUp icon={Wallet} />
         <StatCard label="Expenses" value="$2,650" trend="+8%" trendUp={false} icon={CreditCard} />
@@ -193,27 +154,20 @@ export const FinancesExpanded = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }}
-                    formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name === "income" ? "Revenue" : "Profit"]}
-                  />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }} formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name === "income" ? "Revenue" : "Profit"]} />
                   <Area type="monotone" dataKey="income" stroke="hsl(var(--foreground))" strokeWidth={2} fill="url(#incGrad)" />
                   <Area type="monotone" dataKey="profit" stroke="hsl(var(--success))" strokeWidth={2} fill="url(#profGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
-
           <div>
             <h4 className="text-sm font-semibold mb-3">This Week's Spending</h4>
             <div className="h-[100px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={weeklySpending}>
                   <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }}
-                    formatter={(value: number) => [`$${value}`, "Spent"]}
-                  />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }} formatter={(value: number) => [`$${value}`, "Spent"]} />
                   <Bar dataKey="amount" fill="hsl(var(--foreground))" radius={[4, 4, 0, 0]} opacity={0.2} />
                 </BarChart>
               </ResponsiveContainer>
@@ -225,45 +179,21 @@ export const FinancesExpanded = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 flex-1 min-w-[180px] bg-muted/30 border border-border/50 rounded-xl px-3 py-2">
               <Search className="w-3.5 h-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search transactions..."
-                className="bg-transparent text-sm outline-none flex-1 placeholder:text-muted-foreground/60"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <input type="text" placeholder="Search transactions..." className="bg-transparent text-sm outline-none flex-1 placeholder:text-muted-foreground/60" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
             <div className="flex gap-1">
               {(["all", "income", "expense"] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setTxFilter(f)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize",
-                    txFilter === f ? "bg-foreground text-background" : "bg-muted/40 text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {f}
-                </button>
+                <button key={f} onClick={() => setTxFilter(f)} className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize", txFilter === f ? "bg-foreground text-background" : "bg-muted/40 text-muted-foreground hover:text-foreground")}>{f}</button>
               ))}
             </div>
-            <button className="rounded-lg p-2 hover:bg-muted/40 transition-colors">
-              <Download className="w-3.5 h-3.5 text-muted-foreground" />
-            </button>
+            <button className="rounded-lg p-2 hover:bg-muted/40 transition-colors"><Download className="w-3.5 h-3.5 text-muted-foreground" /></button>
           </div>
-
           <div className="space-y-1">
             {filteredTransactions.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between py-3 px-3 rounded-xl hover:bg-muted/20 transition-colors group">
                 <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center",
-                    tx.type === "income" ? "bg-success/10" : "bg-muted/50"
-                  )}>
-                    {tx.type === "income"
-                      ? <ArrowDownRight className="w-3.5 h-3.5 text-success" />
-                      : <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground" />
-                    }
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", tx.type === "income" ? "bg-success/10" : "bg-muted/50")}>
+                    {tx.type === "income" ? <ArrowDownRight className="w-3.5 h-3.5 text-success" /> : <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground" />}
                   </div>
                   <div>
                     <p className="text-sm font-medium">{tx.description}</p>
@@ -275,12 +205,8 @@ export const FinancesExpanded = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="text-[10px] rounded-md font-normal hidden sm:inline-flex">
-                    {tx.category}
-                  </Badge>
-                  <span className={cn("text-sm font-semibold tabular-nums", tx.type === "income" ? "text-success" : "text-foreground")}>
-                    {tx.type === "income" ? "+" : ""}${Math.abs(tx.amount).toLocaleString()}
-                  </span>
+                  <Badge variant="outline" className="text-[10px] rounded-md font-normal hidden sm:inline-flex">{tx.category}</Badge>
+                  <span className={cn("text-sm font-semibold tabular-nums", tx.type === "income" ? "text-success" : "text-foreground")}>{tx.type === "income" ? "+" : ""}${Math.abs(tx.amount).toLocaleString()}</span>
                 </div>
               </div>
             ))}
@@ -294,29 +220,14 @@ export const FinancesExpanded = () => {
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie
-                      data={expenseCategories}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={85}
-                      paddingAngle={3}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {expenseCategories.map((entry, index) => (
-                        <Cell key={index} fill={entry.color} />
-                      ))}
+                    <Pie data={expenseCategories} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value" stroke="none">
+                      {expenseCategories.map((entry, index) => (<Cell key={index} fill={entry.color} />))}
                     </Pie>
-                    <Tooltip
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }}
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, ""]}
-                    />
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }} formatter={(value: number) => [`$${value.toLocaleString()}`, ""]} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </div>
-
             <div>
               <h4 className="text-sm font-semibold mb-3">By Category</h4>
               <div className="space-y-3">
@@ -359,30 +270,12 @@ export const FinancesExpanded = () => {
                     <span className="text-sm font-medium">{source.name}</span>
                     <span className="text-xs text-muted-foreground">{source.percentage}%</span>
                   </div>
-                  <p className="text-xl font-bold tracking-tight">${source.value.toLocaleString()}</p>
+                  <p className="text-lg font-bold">${source.value.toLocaleString()}</p>
                   <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-2">
-                    <div className="h-full bg-foreground/60 rounded-full" style={{ width: `${source.percentage}%` }} />
+                    <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${source.percentage}%` }} />
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold mb-3">Monthly Income Trend</h4>
-            <div className="h-[180px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, "Income"]}
-                  />
-                  <Bar dataKey="income" fill="hsl(var(--foreground))" radius={[6, 6, 0, 0]} opacity={0.7} />
-                </BarChart>
-              </ResponsiveContainer>
             </div>
           </div>
         </TabsContent>

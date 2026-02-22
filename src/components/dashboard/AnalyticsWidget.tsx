@@ -1,4 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from "recharts";
+import { BarChart3, TrendingUp } from "lucide-react";
 
 const revenueData = [
   { month: "Sep", revenue: 8200 },
@@ -32,42 +33,32 @@ const clientRevenue = [
   { client: "Acme Corp", revenue: 6800 },
 ];
 
-/** Compact preview */
+/** Compact preview — growth % + sparkline */
 export const AnalyticsPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
-  const h = pixelSize?.height ?? 140;
-  const w = pixelSize?.width ?? 300;
-
-  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
-  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
-  const statSize = w > 400 ? "text-sm" : "text-[11px]";
-
-  const showStats = h > 160;
-  const showChart = h > 200;
-
   return (
-    <div>
-      <p className={`${titleSize} font-bold tracking-tight`}>+42%</p>
-      <p className={`${labelSize} text-muted-foreground mt-1`}>Revenue growth</p>
-      {showStats && !showChart && (
-        <div className={`flex gap-4 mt-2 ${statSize}`}>
-          <span className="opacity-60">This month <span className="font-semibold opacity-100">$24.5k</span></span>
-          <span className="opacity-60">Clients <span className="font-semibold opacity-100">14</span></span>
+    <div className="flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-3xl font-bold tracking-tight leading-none">+42%</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Growth</p>
         </div>
-      )}
-      {showChart && (
-        <div className="mt-3">
-          <div className={`flex gap-4 mb-2 ${statSize}`}>
-            <span className="opacity-60">Revenue <span className="font-semibold opacity-100">$24.5k</span></span>
-            <span className="opacity-60">Avg. <span className="font-semibold opacity-100">$6.3k</span></span>
-            {w > 350 && <span className="opacity-60">Clients <span className="font-semibold opacity-100">14</span></span>}
-          </div>
-          <ResponsiveContainer width="100%" height={Math.min(h - 120, 160)}>
-            <BarChart data={revenueData}>
-              <Bar dataKey="revenue" fill="currentColor" radius={[3, 3, 0, 0]} opacity={0.25} />
-            </BarChart>
-          </ResponsiveContainer>
+        <TrendingUp className="w-5 h-5 text-muted-foreground/40" />
+      </div>
+      <div className="mt-auto">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[9px] text-muted-foreground">$24.5k this month</span>
+          <span className="text-[9px] text-muted-foreground">14 clients</span>
         </div>
-      )}
+        <div className="flex items-end gap-[3px] h-[24px]">
+          {revenueData.map((d, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-sm bg-foreground/15"
+              style={{ height: `${(d.revenue / 24500) * 100}%` }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
@@ -76,7 +67,6 @@ export const AnalyticsPreview = ({ pixelSize }: { pixelSize?: { width: number; h
 export const AnalyticsExpanded = () => {
   return (
     <div className="space-y-6">
-      {/* Summary cards */}
       <div className="grid grid-cols-4 gap-3">
         {[
           { label: "Total Revenue", value: "$88.7k", sub: "Last 6 months" },
@@ -93,7 +83,6 @@ export const AnalyticsExpanded = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {/* Revenue chart */}
         <div className="p-4 rounded-xl bg-secondary/20">
           <p className="text-sm font-semibold mb-3">Revenue Trend</p>
           <ResponsiveContainer width="100%" height={200}>
@@ -101,30 +90,19 @@ export const AnalyticsExpanded = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "0.75rem",
-                  fontSize: 12,
-                }}
-                formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
-              />
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }} formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]} />
               <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Project status */}
         <div className="p-4 rounded-xl bg-secondary/20">
           <p className="text-sm font-semibold mb-3">Project Status</p>
           <div className="flex items-center gap-4">
             <ResponsiveContainer width={140} height={140}>
               <PieChart>
                 <Pie data={projectStatusData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} paddingAngle={4} dataKey="value">
-                  {projectStatusData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
+                  {projectStatusData.map((entry, i) => (<Cell key={i} fill={entry.color} />))}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
@@ -140,7 +118,6 @@ export const AnalyticsExpanded = () => {
           </div>
         </div>
 
-        {/* Weekly hours */}
         <div className="p-4 rounded-xl bg-secondary/20">
           <p className="text-sm font-semibold mb-3">Weekly Hours</p>
           <ResponsiveContainer width="100%" height={200}>
@@ -148,20 +125,12 @@ export const AnalyticsExpanded = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "0.75rem",
-                  fontSize: 12,
-                }}
-              />
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }} />
               <Bar dataKey="hours" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Revenue by client */}
         <div className="p-4 rounded-xl bg-secondary/20">
           <p className="text-sm font-semibold mb-3">Revenue by Client</p>
           <ResponsiveContainer width="100%" height={200}>
@@ -169,15 +138,7 @@ export const AnalyticsExpanded = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <YAxis dataKey="client" type="category" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={80} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "0.75rem",
-                  fontSize: 12,
-                }}
-                formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
-              />
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }} formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]} />
               <Bar dataKey="revenue" fill="hsl(var(--success))" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
