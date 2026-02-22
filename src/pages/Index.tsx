@@ -1,33 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
+  DndContext, closestCenter, PointerSensor, KeyboardSensor,
+  useSensor, useSensors, type DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
+  arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
-  FolderKanban,
-  CalendarDays,
-  Users,
-  DollarSign,
-  HardDrive,
-  Receipt,
-  Bell,
-  Settings2,
-  ListTodo,
-  MessageSquare,
-  BarChart3,
+  FolderKanban, CalendarDays, Users, DollarSign, HardDrive,
+  Receipt, Bell, Settings2, ListTodo, MessageSquare, BarChart3,
   ArrowUpRight,
 } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
@@ -68,10 +51,9 @@ const WIDGETS: Record<
     preview: ProjectsPreview,
     expanded: ProjectsExpanded,
     cols: 1,
-    accent: true,
     component: ProjectsPreview,
-    bgColor: "hsl(12 80% 65%)",
-    textColor: "hsl(0 0% 5%)",
+    bgColor: "",
+    textColor: "",
   },
   calendar: {
     title: "Calendar",
@@ -80,8 +62,8 @@ const WIDGETS: Record<
     expanded: CalendarExpanded,
     cols: 1,
     component: CalendarPreview,
-    bgColor: "hsl(40 40% 88%)",
-    textColor: "hsl(0 0% 8%)",
+    bgColor: "",
+    textColor: "",
   },
   finances: {
     title: "Finances",
@@ -90,8 +72,8 @@ const WIDGETS: Record<
     expanded: FinancesExpanded,
     cols: 1,
     component: FinancesPreview,
-    bgColor: "hsl(220 55% 55%)",
-    textColor: "hsl(0 0% 100%)",
+    bgColor: "",
+    textColor: "",
   },
   clients: {
     title: "Client Portal",
@@ -100,18 +82,18 @@ const WIDGETS: Record<
     expanded: ClientsExpanded,
     cols: 1,
     component: ClientsPreview,
-    bgColor: "hsl(345 55% 72%)",
-    textColor: "hsl(0 0% 5%)",
+    bgColor: "",
+    textColor: "",
   },
   files: {
-    title: "File Storage",
+    title: "Files",
     icon: <HardDrive className="w-4 h-4" />,
     preview: FilesPreview,
     expanded: FilesExpanded,
     cols: 1,
     component: FilesPreview,
-    bgColor: "hsl(155 50% 48%)",
-    textColor: "hsl(0 0% 100%)",
+    bgColor: "",
+    textColor: "",
   },
   invoices: {
     title: "Invoices",
@@ -120,8 +102,8 @@ const WIDGETS: Record<
     expanded: InvoicesExpanded,
     cols: 1,
     component: InvoicesPreview,
-    bgColor: "hsl(42 35% 82%)",
-    textColor: "hsl(0 0% 8%)",
+    bgColor: "",
+    textColor: "",
   },
   tasks: {
     title: "Tasks",
@@ -130,8 +112,8 @@ const WIDGETS: Record<
     expanded: TasksExpanded,
     cols: 1,
     component: TasksPreview,
-    bgColor: "hsl(185 45% 65%)",
-    textColor: "hsl(0 0% 5%)",
+    bgColor: "",
+    textColor: "",
   },
   messages: {
     title: "Messages",
@@ -140,8 +122,8 @@ const WIDGETS: Record<
     expanded: MessagesExpanded,
     cols: 1,
     component: MessagesPreview,
-    bgColor: "hsl(5 70% 60%)",
-    textColor: "hsl(0 0% 100%)",
+    bgColor: "",
+    textColor: "",
   },
   analytics: {
     title: "Analytics",
@@ -150,8 +132,8 @@ const WIDGETS: Record<
     expanded: AnalyticsExpanded,
     cols: 1,
     component: AnalyticsPreview,
-    bgColor: "hsl(260 35% 45%)",
-    textColor: "hsl(0 0% 100%)",
+    bgColor: "",
+    textColor: "",
   },
 };
 
@@ -161,7 +143,7 @@ const stats = [
   { label: "Active Projects", value: "12", trend: "+3" },
   { label: "Revenue", value: "$24.5k", trend: "+12%" },
   { label: "Pending Tasks", value: "8", trend: "-2" },
-  { label: "Storage Used", value: "64%", trend: "+5%" },
+  { label: "Storage", value: "64%", trend: "+5%" },
 ];
 
 const Index = () => {
@@ -173,9 +155,7 @@ const Index = () => {
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
   const [dark, setDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("theme") === "dark";
-    }
+    if (typeof window !== "undefined") return localStorage.getItem("theme") === "dark";
     return false;
   });
 
@@ -226,55 +206,56 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
 
-      {/* Main content area */}
-      <main className="lg:ml-[220px] p-4 md:p-8">
+      {/* Main content */}
+      <main className="lg:ml-[72px] p-5 md:p-8 lg:p-10">
         {/* Header */}
         <motion.header
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center justify-between mb-8"
+          className="flex items-center justify-between mb-10"
         >
           <div className="lg:pl-0 pl-12">
-            <h2 className="text-2xl font-bold tracking-tight">Good morning, Jordan</h2>
-            <p className="text-sm text-muted-foreground mt-1">{today}</p>
+            <p className="text-sm text-muted-foreground font-medium">{today}</p>
+            <h2 className="text-2xl font-semibold tracking-tight mt-0.5">Good morning, Jordan</h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setDark(!dark)}
-              className="glass rounded-xl p-2.5 hover:scale-105 transition-transform"
+              className="glass-strong rounded-2xl p-2.5 hover:scale-105 transition-transform"
             >
               {dark ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
             </button>
-            <button className="glass rounded-xl p-2.5 hover:scale-105 transition-transform">
+            <button className="glass-strong rounded-2xl p-2.5 hover:scale-105 transition-transform relative">
               <Bell className="w-4 h-4 text-muted-foreground" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-destructive" />
             </button>
             <button
               onClick={() => setCustomizerOpen(true)}
-              className="glass rounded-xl p-2.5 hover:scale-105 transition-transform"
+              className="glass-strong rounded-2xl p-2.5 hover:scale-105 transition-transform"
             >
               <Settings2 className="w-4 h-4 text-muted-foreground" />
             </button>
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
-              JD
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-xs font-semibold ml-1">
+              J
             </div>
           </div>
         </motion.header>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.06 }}
-              className="glass rounded-2xl p-4"
+              transition={{ duration: 0.4, delay: i * 0.05 }}
+              className="glass-strong rounded-3xl p-5"
             >
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
-              <div className="flex items-end justify-between">
-                <span className="text-xl font-bold tracking-tight">{stat.value}</span>
-                <span className="text-[11px] text-success font-semibold">{stat.trend}</span>
+              <p className="text-[11px] text-muted-foreground font-medium tracking-wide uppercase">{stat.label}</p>
+              <div className="flex items-end justify-between mt-2">
+                <span className="text-2xl font-semibold tracking-tight">{stat.value}</span>
+                <span className="text-xs text-success font-medium">{stat.trend}</span>
               </div>
             </motion.div>
           ))}
@@ -291,9 +272,9 @@ const Index = () => {
                   return (
                     <motion.div
                       key={id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, delay: 0.3 + i * 0.06 }}
+                      transition={{ duration: 0.35, delay: 0.25 + i * 0.04 }}
                       className={
                         (widgetSizes[id] === "medium" ? "sm:col-span-2" : "") +
                         (widgetSizes[id] === "large" ? " sm:col-span-2 lg:col-span-3" : "")
@@ -303,10 +284,7 @@ const Index = () => {
                         id={id}
                         title={widget.title}
                         icon={widget.icon}
-                        accent={widget.accent}
                         size={widgetSizes[id] || "small"}
-                        bgColor={widget.bgColor}
-                        textColor={widget.textColor}
                         onExpand={() => handleExpand(id)}
                         onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
                       >
@@ -319,40 +297,29 @@ const Index = () => {
             </SortableContext>
           </DndContext>
         ) : (
-          /* Mobile: Compact stacked scrollable cards */
-          <div className="relative pb-8">
+          /* Mobile: Minimal stacked cards */
+          <div className="space-y-3 pb-8">
             {activeWidgets.map((id, i) => {
               const widget = WIDGETS[id];
-
               return (
-                <div
+                <motion.div
                   key={id}
-                  className="sticky mb-[-40px] last:mb-0"
-                  style={{
-                    top: `${4 + i * 48}px`,
-                    zIndex: i + 1,
-                  }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.03 }}
+                  onClick={() => handleExpand(id)}
+                  className="glass-strong rounded-3xl px-5 py-4 active:scale-[0.98] transition-transform cursor-pointer"
                 >
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: i * 0.03 }}
-                    onClick={() => handleExpand(id)}
-                    className="rounded-2xl px-4 py-3.5 transition-shadow duration-300 overflow-hidden shadow-[0_-2px_16px_-4px_hsl(0_0%_0%/0.1)] active:scale-[0.98] cursor-pointer"
-                    style={{
-                      backgroundColor: widget.bgColor,
-                      color: widget.textColor,
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        {widget.icon && <span>{widget.icon}</span>}
-                        <h3 className="text-sm font-semibold">{widget.title}</h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-2xl bg-muted/50 flex items-center justify-center">
+                        <span className="text-muted-foreground">{widget.icon}</span>
                       </div>
-                      <ArrowUpRight className="w-4 h-4 opacity-50" />
+                      <h3 className="text-sm font-medium text-foreground">{widget.title}</h3>
                     </div>
-                  </motion.div>
-                </div>
+                    <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </motion.div>
               );
             })}
           </div>
