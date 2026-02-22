@@ -23,10 +23,11 @@ const mainNavItems = [
 interface SidebarProps {
   activeNav: string;
   onNavChange: (id: string) => void;
+  collapsed: boolean;
+  onCollapsedChange: (collapsed: boolean) => void;
 }
 
-const Sidebar = ({ activeNav, onNavChange }: SidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
+const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: SidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -56,7 +57,7 @@ const Sidebar = ({ activeNav, onNavChange }: SidebarProps) => {
           </div>
           {!collapsed && (
             <button
-              onClick={() => setCollapsed(true)}
+              onClick={() => onCollapsedChange(true)}
               className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
             >
               <PanelLeft className="w-4 h-4" />
@@ -64,7 +65,7 @@ const Sidebar = ({ activeNav, onNavChange }: SidebarProps) => {
           )}
           {collapsed && (
             <button
-              onClick={() => setCollapsed(false)}
+              onClick={() => onCollapsedChange(false)}
               className="absolute -right-3 top-7 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm"
             >
               <PanelLeft className="w-3 h-3 rotate-180" />

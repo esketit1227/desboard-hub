@@ -163,6 +163,7 @@ const Index = () => {
   const [activeWidgets, setActiveWidgets] = useState<WidgetId[]>(DEFAULT_WIDGETS);
   const [expandedWidget, setExpandedWidget] = useState<WidgetId | null>(null);
   const [activeNav, setActiveNav] = useState("home");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
   const [dark, setDark] = useState(() => {
@@ -215,10 +216,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
+      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} collapsed={sidebarCollapsed} onCollapsedChange={setSidebarCollapsed} />
 
       {/* Main content */}
-      <main className="lg:ml-[240px] p-5 md:p-8 lg:p-10 transition-all duration-300">
+      <main className={`${sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'} p-5 md:p-8 lg:p-10 transition-all duration-300`}>
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -12 }}
