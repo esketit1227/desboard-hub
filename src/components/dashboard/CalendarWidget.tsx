@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
@@ -23,11 +24,14 @@ const generateDays = () => {
 };
 
 /** Compact preview */
-export const CalendarPreview = () => {
+export const CalendarPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const today = new Date();
   const dayName = today.toLocaleDateString("en-US", { weekday: "short" });
   const dayNum = today.getDate();
   const month = today.toLocaleDateString("en-US", { month: "short" });
+  const h = pixelSize?.height ?? 140;
+  const showEvents = h > 200;
+  const eventCount = h > 300 ? events.length : 2;
 
   return (
     <div>
@@ -35,7 +39,18 @@ export const CalendarPreview = () => {
         <span className="text-3xl font-bold tracking-tight">{dayNum}</span>
         <span className="text-sm opacity-60">{month}, {dayName}</span>
       </div>
-      <p className="text-xs opacity-60 mt-1">3 events this week</p>
+      {!showEvents && <p className="text-xs opacity-60 mt-1">3 events this week</p>}
+      {showEvents && (
+        <div className="mt-2 space-y-1.5">
+          {events.slice(0, eventCount).map((event) => (
+            <div key={event.title} className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${event.color} shrink-0`} />
+              <span className="text-[11px] font-medium truncate flex-1">{event.title}</span>
+              <span className="text-[10px] opacity-50 shrink-0">{event.time}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

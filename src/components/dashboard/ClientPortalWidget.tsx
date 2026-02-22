@@ -69,12 +69,34 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 };
 
 /** Compact preview */
-export const ClientsPreview = () => (
-  <div>
-    <p className="text-3xl font-bold tracking-tight">3</p>
-    <p className="text-xs text-muted-foreground mt-1">Active Hand-offs</p>
-  </div>
-);
+export const ClientsPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const showList = h > 200;
+  const itemCount = h > 300 ? initialHandoffs.length : 2;
+
+  if (!showList) {
+    return (
+      <div>
+        <p className="text-3xl font-bold tracking-tight">{initialHandoffs.length}</p>
+        <p className="text-xs text-muted-foreground mt-1">Active Hand-offs</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-muted-foreground font-medium">{initialHandoffs.length} Hand-offs</p>
+      {initialHandoffs.slice(0, itemCount).map((item) => (
+        <div key={item.id} className="flex items-center gap-2 py-0.5">
+          <span className="text-[11px] font-medium truncate flex-1">{item.project}</span>
+          <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${statusConfig[item.status].className}`}>
+            {statusConfig[item.status].label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 /** Full expanded view */
 export const ClientsExpanded = () => {

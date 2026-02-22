@@ -33,12 +33,26 @@ const clientRevenue = [
 ];
 
 /** Compact preview */
-export const AnalyticsPreview = () => (
-  <div>
-    <p className="text-3xl font-bold tracking-tight">+42%</p>
-    <p className="text-xs text-muted-foreground mt-1">Revenue growth</p>
-  </div>
-);
+export const AnalyticsPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const showChart = h > 220;
+
+  return (
+    <div>
+      <p className="text-3xl font-bold tracking-tight">+42%</p>
+      <p className="text-xs text-muted-foreground mt-1">Revenue growth</p>
+      {showChart && (
+        <div className="mt-3">
+          <ResponsiveContainer width="100%" height={Math.min(h - 120, 160)}>
+            <BarChart data={revenueData}>
+              <Bar dataKey="revenue" fill="currentColor" radius={[3, 3, 0, 0]} opacity={0.25} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+};
 
 /** Full expanded view */
 export const AnalyticsExpanded = () => {

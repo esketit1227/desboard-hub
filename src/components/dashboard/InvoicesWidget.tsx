@@ -72,12 +72,39 @@ const statusConfig: Record<string, { label: string; className: string; icon: typ
 };
 
 /** Compact preview */
-export const InvoicesPreview = () => (
-  <div>
-    <p className="text-3xl font-bold tracking-tight">$10,000</p>
-    <p className="text-xs text-muted-foreground mt-1">Outstanding</p>
-  </div>
-);
+export const InvoicesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const showList = h > 200;
+  const itemCount = h > 300 ? initialInvoices.length : 2;
+
+  if (!showList) {
+    return (
+      <div>
+        <p className="text-3xl font-bold tracking-tight">$10,000</p>
+        <p className="text-xs text-muted-foreground mt-1">Outstanding</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-muted-foreground font-medium">$10,000 Outstanding</p>
+      {initialInvoices.slice(0, itemCount).map((inv) => {
+        const config = statusConfig[inv.status];
+        return (
+          <div key={inv.id} className="flex items-center gap-2 py-0.5">
+            <span className="text-[11px] font-medium">{inv.number}</span>
+            <span className="text-[10px] opacity-50 truncate flex-1">{inv.client}</span>
+            <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${config.className}`}>
+              {config.label}
+            </span>
+            <span className="text-[11px] font-semibold">${inv.amount.toLocaleString()}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 /** Full expanded view */
 export const InvoicesExpanded = () => {

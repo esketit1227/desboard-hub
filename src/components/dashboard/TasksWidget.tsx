@@ -30,12 +30,33 @@ const priorityConfig = {
 };
 
 /** Compact preview */
-export const TasksPreview = () => (
-  <div>
-    <p className="text-3xl font-bold tracking-tight">4</p>
-    <p className="text-xs text-muted-foreground mt-1">Pending tasks</p>
-  </div>
-);
+export const TasksPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const pending = initialTasks.filter(t => !t.completed);
+  const showList = h > 200;
+  const itemCount = h > 320 ? pending.length : h > 240 ? 3 : 2;
+
+  if (!showList) {
+    return (
+      <div>
+        <p className="text-3xl font-bold tracking-tight">{pending.length}</p>
+        <p className="text-xs text-muted-foreground mt-1">Pending tasks</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-muted-foreground font-medium">{pending.length} Pending</p>
+      {pending.slice(0, itemCount).map((task) => (
+        <div key={task.id} className="flex items-center gap-2 py-0.5">
+          <Flag className={cn("w-3 h-3 shrink-0", priorityConfig[task.priority].className)} />
+          <span className="text-[11px] font-medium truncate flex-1">{task.title}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 /** Full expanded view */
 export const TasksExpanded = () => {
@@ -76,7 +97,6 @@ export const TasksExpanded = () => {
 
   return (
     <div className="space-y-4">
-      {/* Add task */}
       <div className="flex gap-2">
         <Input
           value={newTitle}
@@ -100,7 +120,6 @@ export const TasksExpanded = () => {
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="flex gap-2">
         {(["all", "pending", "completed"] as const).map((f) => (
           <button
@@ -116,7 +135,6 @@ export const TasksExpanded = () => {
         ))}
       </div>
 
-      {/* Task list */}
       <div className="space-y-2">
         {filtered.map((task) => (
           <div

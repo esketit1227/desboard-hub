@@ -63,12 +63,43 @@ const weeklySpending = [
 
 // --- Preview ---
 
-export const FinancesPreview = () => (
-  <div>
-    <p className="text-3xl font-bold tracking-tight">$7.8k</p>
-    <p className="text-xs text-muted-foreground mt-1">Revenue this month</p>
-  </div>
-);
+export const FinancesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const showBreakdown = h > 200;
+  const showChart = h > 300;
+
+  return (
+    <div>
+      <p className="text-3xl font-bold tracking-tight">$7.8k</p>
+      <p className="text-xs text-muted-foreground mt-1">Revenue this month</p>
+      {showBreakdown && !showChart && (
+        <div className="mt-2 flex gap-4 text-[11px]">
+          <span className="opacity-60">Expenses <span className="font-semibold opacity-100">$2.6k</span></span>
+          <span className="opacity-60">Profit <span className="font-semibold opacity-100">$5.2k</span></span>
+        </div>
+      )}
+      {showChart && (
+        <div className="mt-3 space-y-1.5">
+          {[
+            { label: "Revenue", value: "$7,800", pct: 100 },
+            { label: "Expenses", value: "$2,650", pct: 34 },
+            { label: "Profit", value: "$5,150", pct: 66 },
+          ].map((item) => (
+            <div key={item.label}>
+              <div className="flex justify-between text-[10px] mb-0.5">
+                <span className="opacity-60">{item.label}</span>
+                <span className="font-medium">{item.value}</span>
+              </div>
+              <div className="h-1 bg-black/10 rounded-full overflow-hidden">
+                <div className="h-full bg-current rounded-full opacity-30" style={{ width: `${item.pct}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // --- Stat Card ---
 
@@ -121,7 +152,6 @@ export const FinancesExpanded = () => {
           <TabsTrigger value="income" className="rounded-lg text-xs">Income</TabsTrigger>
         </TabsList>
 
-        {/* Overview Tab */}
         <TabsContent value="overview" className="mt-4 space-y-5">
           <div>
             <h4 className="text-sm font-semibold mb-3">Revenue vs Profit</h4>
@@ -152,7 +182,6 @@ export const FinancesExpanded = () => {
             </div>
           </div>
 
-          {/* Weekly spending mini chart */}
           <div>
             <h4 className="text-sm font-semibold mb-3">This Week's Spending</h4>
             <div className="h-[100px]">
@@ -170,9 +199,7 @@ export const FinancesExpanded = () => {
           </div>
         </TabsContent>
 
-        {/* Transactions Tab */}
         <TabsContent value="transactions" className="mt-4 space-y-4">
-          {/* Filters */}
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 flex-1 min-w-[180px] bg-muted/30 border border-border/50 rounded-xl px-3 py-2">
               <Search className="w-3.5 h-3.5 text-muted-foreground" />
@@ -203,7 +230,6 @@ export const FinancesExpanded = () => {
             </button>
           </div>
 
-          {/* Transaction List */}
           <div className="space-y-1">
             {filteredTransactions.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between py-3 px-3 rounded-xl hover:bg-muted/20 transition-colors group">
@@ -239,10 +265,8 @@ export const FinancesExpanded = () => {
           </div>
         </TabsContent>
 
-        {/* Expenses Tab */}
         <TabsContent value="expenses" className="mt-4 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Pie chart */}
             <div>
               <h4 className="text-sm font-semibold mb-3">Breakdown</h4>
               <div className="h-[200px]">
@@ -271,7 +295,6 @@ export const FinancesExpanded = () => {
               </div>
             </div>
 
-            {/* Category list */}
             <div>
               <h4 className="text-sm font-semibold mb-3">By Category</h4>
               <div className="space-y-3">
@@ -304,7 +327,6 @@ export const FinancesExpanded = () => {
           </div>
         </TabsContent>
 
-        {/* Income Tab */}
         <TabsContent value="income" className="mt-4 space-y-5">
           <div>
             <h4 className="text-sm font-semibold mb-3">Revenue Sources</h4>
@@ -324,7 +346,6 @@ export const FinancesExpanded = () => {
             </div>
           </div>
 
-          {/* Monthly income trend */}
           <div>
             <h4 className="text-sm font-semibold mb-3">Monthly Income Trend</h4>
             <div className="h-[180px]">

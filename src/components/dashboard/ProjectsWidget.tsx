@@ -17,13 +17,48 @@ const statusLabels: Record<string, string> = {
   started: "Just Started",
 };
 
-/** Compact preview for dashboard */
-export const ProjectsPreview = () => (
-  <div>
-    <p className="text-3xl font-bold tracking-tight">4</p>
-    <p className="text-xs opacity-60 mt-1">Active Projects</p>
-  </div>
-);
+/** Compact preview — reveals more at larger sizes */
+export const ProjectsPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const showList = h > 200;
+  const showProgress = h > 280;
+  const itemCount = h > 360 ? projects.length : h > 280 ? 3 : 2;
+
+  if (!showList) {
+    return (
+      <div>
+        <p className="text-3xl font-bold tracking-tight">4</p>
+        <p className="text-xs opacity-60 mt-1">Active Projects</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs opacity-60 font-medium">{projects.length} Active Projects</p>
+      {projects.slice(0, itemCount).map((project) => (
+        <div key={project.name} className="flex items-center gap-3 py-1">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium truncate">{project.name}</p>
+            <p className="text-[10px] opacity-50">{project.client}</p>
+          </div>
+          {showProgress ? (
+            <div className="w-16 shrink-0">
+              <div className="h-1.5 bg-black/10 rounded-full overflow-hidden">
+                <div className="h-full bg-current rounded-full opacity-40" style={{ width: `${project.progress}%` }} />
+              </div>
+              <p className="text-[9px] opacity-50 mt-0.5 text-right">{project.progress}%</p>
+            </div>
+          ) : (
+            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${statusStyles[project.status]}`}>
+              {statusLabels[project.status]}
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 /** Full expanded view */
 export const ProjectsExpanded = () => (

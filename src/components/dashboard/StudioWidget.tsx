@@ -38,12 +38,33 @@ interface Proposal { id: string; title: string; status: ProposalStatus; value: s
 interface Contact { id: string; name: string; company: string; email: string; phone: string; type: ContactType; }
 
 /* ─── Preview ─── */
-export const StudioPreview = () => (
-  <div>
-    <p className="text-3xl font-semibold tracking-tight">Studio</p>
-    <p className="text-xs text-muted-foreground mt-1">Business Hub</p>
-  </div>
-);
+export const StudioPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const showTeam = h > 200;
+  const itemCount = h > 300 ? 4 : 2;
+
+  if (!showTeam) {
+    return (
+      <div>
+        <p className="text-3xl font-semibold tracking-tight">Studio</p>
+        <p className="text-xs text-muted-foreground mt-1">Business Hub</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-muted-foreground font-medium">Team · {initialFreelancers.length} members</p>
+      {initialFreelancers.slice(0, itemCount).map((f) => (
+        <div key={f.id} className="flex items-center gap-2 py-0.5">
+          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusColors[f.status]}`} />
+          <span className="text-[11px] font-medium truncate flex-1">{f.name}</span>
+          <span className="text-[10px] opacity-50">{f.role}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 /* ─── Initial Data ─── */
 const initialFreelancers: Freelancer[] = [

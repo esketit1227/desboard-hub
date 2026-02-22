@@ -37,7 +37,7 @@ const WIDGETS: Record<
   {
     title: string;
     icon: React.ReactNode;
-    preview: React.ComponentType;
+    preview: React.ComponentType<{ pixelSize?: { width: number; height: number } }>;
     expanded: React.ComponentType;
     cols: number;
     accent?: boolean;
@@ -276,7 +276,7 @@ const Index = () => {
                           onPixelResize={(size) => setPixelSizes((prev) => ({ ...prev, [id]: size }))}
                           onResetSize={() => setPixelSizes((prev) => { const next = { ...prev }; delete next[id]; return next; })}
                         >
-                          <Preview />
+                          <Preview pixelSize={pixelSizes[id]} />
                         </WidgetCard>
                       </motion.div>
                     );
