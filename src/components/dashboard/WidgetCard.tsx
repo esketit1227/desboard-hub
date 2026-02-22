@@ -18,9 +18,9 @@ interface WidgetCardProps {
   textColor?: string;
   onExpand: () => void;
   onResize?: (size: WidgetSize) => void;
-  /** Free-form pixel dimensions set by drag */
   pixelSize?: { width: number; height: number };
   onPixelResize?: (size: { width: number; height: number }) => void;
+  onResetSize?: () => void;
   children: React.ReactNode;
 }
 
@@ -37,7 +37,7 @@ const TINT_COLORS = [
   { bg: "hsl(130 20% 85%)", fg: "hsl(130 20% 18%)" },
 ];
 
-const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, children }: WidgetCardProps) => {
+const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {
   const {
     attributes,
     listeners,
@@ -137,8 +137,9 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
       {onPixelResize && (
         <div
           onMouseDown={handleResizeStart}
+          onDoubleClick={(e) => { e.stopPropagation(); onResetSize?.(); }}
           className="absolute bottom-0 right-0 w-5 h-5 cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity"
-          title="Drag to resize"
+          title="Drag to resize · Double-click to reset"
         >
           <svg viewBox="0 0 20 20" className="w-full h-full opacity-30">
             <path d="M14 20L20 14" stroke="currentColor" strokeWidth="1.5" fill="none" />

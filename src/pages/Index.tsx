@@ -159,7 +159,16 @@ const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
-  const [pixelSizes, setPixelSizes] = useState<Record<string, { width: number; height: number }>>({});
+  const [pixelSizes, setPixelSizes] = useState<Record<string, { width: number; height: number }>>(() => {
+    try {
+      const saved = localStorage.getItem("widget-pixel-sizes");
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("widget-pixel-sizes", JSON.stringify(pixelSizes));
+  }, [pixelSizes]);
   // Dark mode is default — no toggle needed
   useEffect(() => {
     document.documentElement.classList.remove("light");
@@ -265,6 +274,7 @@ const Index = () => {
                           onExpand={() => handleExpand(id)}
                           pixelSize={pixelSizes[id]}
                           onPixelResize={(size) => setPixelSizes((prev) => ({ ...prev, [id]: size }))}
+                          onResetSize={() => setPixelSizes((prev) => { const next = { ...prev }; delete next[id]; return next; })}
                         >
                           <Preview />
                         </WidgetCard>
