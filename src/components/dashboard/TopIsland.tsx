@@ -42,7 +42,7 @@ const TopIsland = () => {
       <div
         className="inline-flex items-center gap-4 px-4 py-1.5 rounded-xl border border-border/30"
         style={{
-          background: "hsl(0 0% 100%)",
+          background: "hsl(var(--card))",
           boxShadow:
             "0 1px 4px hsl(var(--foreground) / 0.05), 0 4px 12px hsl(var(--foreground) / 0.03)",
         }}

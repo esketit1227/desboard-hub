@@ -130,8 +130,8 @@ const WidgetCard = ({ id, title, icon, accentColor, size = "small", tintIndex, o
         )}
         style={{
           background: tier !== "compact" && accentColor
-            ? `linear-gradient(160deg, ${accentColor}08 0%, hsl(0 0% 100%) 40%, hsl(0 0% 99%) 100%)`
-            : "hsl(0 0% 100%)",
+            ? `linear-gradient(160deg, ${accentColor}08 0%, hsl(var(--card)) 40%, hsl(var(--card)) 100%)`
+            : "hsl(var(--card))",
           boxShadow: "0 2px 8px hsl(var(--foreground) / 0.08), 0 8px 24px hsl(var(--foreground) / 0.06), 0 1px 2px hsl(var(--foreground) / 0.04)",
         }}
       >
