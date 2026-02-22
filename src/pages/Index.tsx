@@ -146,6 +146,7 @@ const Index = () => {
   const [expandedWidget, setExpandedWidget] = useState<WidgetId | null>(null);
   const [activeNav, setActiveNav] = useState("home");
   const [customizerOpen, setCustomizerOpen] = useState(false);
+  const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
   const [dark, setDark] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("theme") === "dark";
@@ -259,14 +260,19 @@ const Index = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35, delay: 0.3 + i * 0.06 }}
+                    className={
+                      (widgetSizes[id] === "medium" ? "sm:col-span-2" : "") +
+                      (widgetSizes[id] === "large" ? " sm:col-span-2 lg:col-span-3" : "")
+                    }
                   >
                     <WidgetCard
                       id={id}
                       title={widget.title}
                       icon={widget.icon}
                       accent={widget.accent}
-                      cols={widget.cols}
+                      size={widgetSizes[id] || "small"}
                       onExpand={() => setExpandedWidget(id)}
+                      onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
                     >
                       <Preview />
                     </WidgetCard>
