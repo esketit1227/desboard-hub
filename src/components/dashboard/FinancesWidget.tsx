@@ -63,47 +63,12 @@ const weeklySpending = [
 
 // --- Preview ---
 
-export const FinancesPreview = () => {
-  const totalIncome = 7800;
-  const totalExpenses = 2650;
-  const profit = totalIncome - totalExpenses;
-
-  return (
-    <div>
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-3xl font-bold tracking-tight">${(totalIncome / 1000).toFixed(1)}k</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Revenue this month</p>
-        </div>
-        <div className="flex items-center gap-1 text-success text-xs font-medium">
-          <TrendingUp className="w-3 h-3" />
-          +28%
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3 mt-3">
-        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-foreground rounded-full"
-            style={{ width: `${(profit / totalIncome) * 100}%` }}
-          />
-        </div>
-        <span className="text-[10px] text-muted-foreground font-medium">
-          ${(profit / 1000).toFixed(1)}k profit
-        </span>
-      </div>
-
-      <div className="h-[48px] mt-3 -mx-1">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={monthlyData}>
-            <Bar dataKey="income" fill="hsl(var(--foreground))" radius={[3, 3, 0, 0]} opacity={0.15} />
-            <Bar dataKey="profit" fill="hsl(var(--foreground))" radius={[3, 3, 0, 0]} opacity={0.6} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
+export const FinancesPreview = () => (
+  <div>
+    <p className="text-3xl font-bold tracking-tight">$7.8k</p>
+    <p className="text-xs text-muted-foreground mt-1">Revenue this month</p>
+  </div>
+);
 
 // --- Stat Card ---
 

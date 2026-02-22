@@ -21,25 +21,7 @@ const statusLabels: Record<string, string> = {
 export const ProjectsPreview = () => (
   <div>
     <p className="text-3xl font-bold tracking-tight">4</p>
-    <p className="text-xs opacity-70 mt-1">Active Projects</p>
-    <div className="flex gap-1.5 mt-3">
-      {projects.map((p) => (
-        <div
-          key={p.name}
-          className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden"
-        >
-          <div
-            className="h-full bg-primary/70 rounded-full"
-            style={{ width: `${p.progress}%` }}
-          />
-        </div>
-      ))}
-    </div>
-    <div className="flex items-center gap-3 mt-3">
-      <span className="text-[10px] opacity-60">2 In Progress</span>
-      <span className="text-[10px] opacity-60">1 Just Started</span>
-      <span className="text-[10px] opacity-60">1 Done</span>
-    </div>
+    <p className="text-xs opacity-60 mt-1">Active Projects</p>
   </div>
 );
 

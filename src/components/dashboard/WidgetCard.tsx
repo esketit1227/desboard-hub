@@ -1,13 +1,8 @@
-import { ArrowUpRight, GripVertical, Maximize2, RectangleHorizontal, Square } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
+import { ArrowUpRight, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export type WidgetSize = "small" | "medium" | "large";
 
@@ -51,6 +46,46 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
 
   const hasTint = tintIndex !== undefined;
   const tint = hasTint ? TINT_COLORS[tintIndex % TINT_COLORS.length] : null;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!onResize || !cardRef.current) return;
+
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidth = cardRef.current.getBoundingClientRect().width;
+    const parentWidth = cardRef.current.parentElement?.getBoundingClientRect().width || startWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const newWidth = startWidth + deltaX;
+      const ratio = newWidth / parentWidth;
+
+      if (ratio > 0.75) {
+        onResize("large");
+      } else if (ratio > 0.45) {
+        onResize("medium");
+      } else {
+        onResize("small");
+      }
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = "nwse-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, [onResize]);
 
   const cardStyle = {
     transform: CSS.Transform.toString(transform),
@@ -62,16 +97,20 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        (cardRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+      }}
       style={cardStyle}
       className={cn(
-        "rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden",
+        "rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden h-[140px] flex flex-col",
         !hasTint && "bg-card border border-border",
-        isDragging && "shadow-lg"
+        isDragging && "shadow-lg",
+        isResizing && "ring-2 ring-primary/30"
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-auto">
         <div className="flex items-center gap-2.5">
           <button
             {...attributes}
@@ -83,35 +122,6 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
           <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          {onResize && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-black/5 transition-colors">
-                  <Maximize2 className="w-3.5 h-3.5 opacity-50" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl">
-                <DropdownMenuItem
-                  onClick={() => onResize("small")}
-                  className={cn("gap-2 rounded-lg", size === "small" && "bg-muted/50")}
-                >
-                  <Square className="w-3.5 h-3.5" /> Small
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => onResize("medium")}
-                  className={cn("gap-2 rounded-lg", size === "medium" && "bg-muted/50")}
-                >
-                  <RectangleHorizontal className="w-3.5 h-3.5" /> Medium
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => onResize("large")}
-                  className={cn("gap-2 rounded-lg", size === "large" && "bg-muted/50")}
-                >
-                  <Maximize2 className="w-3.5 h-3.5" /> Large
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
           <button
             onClick={onExpand}
             className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-black/5 transition-colors"
@@ -122,7 +132,22 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
       </div>
 
       {/* Content */}
-      {children}
+      <div className="mt-auto">{children}</div>
+
+      {/* Corner resize handle */}
+      {onResize && (
+        <div
+          onMouseDown={handleResizeStart}
+          className="absolute bottom-0 right-0 w-5 h-5 cursor-nwse-resize opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Drag to resize"
+        >
+          <svg viewBox="0 0 20 20" className="w-full h-full opacity-30">
+            <path d="M14 20L20 14" stroke="currentColor" strokeWidth="1.5" fill="none" />
+            <path d="M10 20L20 10" stroke="currentColor" strokeWidth="1.5" fill="none" />
+            <path d="M6 20L20 6" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 };

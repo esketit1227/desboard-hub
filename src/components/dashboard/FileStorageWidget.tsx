@@ -140,35 +140,12 @@ const FolderTreeNode = ({
 };
 
 /* ─── Compact Preview ─── */
-export const FilesPreview = () => {
-  const totalSize = "271 MB";
-  const totalFiles = FILES.length;
-  const folderCount = FOLDERS.filter((f) => !f.parent).length;
-
-  return (
-    <div>
-      <p className="text-3xl font-bold tracking-tight">{totalSize}</p>
-      <p className="text-xs text-muted-foreground mt-1">{totalFiles} files · {folderCount} folders</p>
-      <div className="flex items-center gap-2 mt-3 flex-wrap">
-        {FILES.slice(0, 2).map((f) => {
-          const Icon = FILE_ICONS[f.type] || FileText;
-          return (
-            <div key={f.id} className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2 py-1">
-              <Icon className="w-3 h-3 text-muted-foreground" />
-              <span className="text-[10px] font-medium truncate max-w-[70px]">{f.name}</span>
-            </div>
-          );
-        })}
-        <span className="text-[10px] text-muted-foreground">+{totalFiles - 2} more</span>
-      </div>
-      <div className="flex gap-1.5 mt-2">
-        {TAGS.slice(0, 3).map((t) => (
-          <span key={t.label} className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${t.color}`}>{t.label}</span>
-        ))}
-      </div>
-    </div>
-  );
-};
+export const FilesPreview = () => (
+  <div>
+    <p className="text-3xl font-bold tracking-tight">271 MB</p>
+    <p className="text-xs text-muted-foreground mt-1">10 files · 3 folders</p>
+  </div>
+);
 
 /* ─── Full Expanded View ─── */
 export const FilesExpanded = () => {

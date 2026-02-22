@@ -42,20 +42,6 @@ export const StudioPreview = () => (
   <div>
     <p className="text-3xl font-semibold tracking-tight">Studio</p>
     <p className="text-xs text-muted-foreground mt-1">Business Hub</p>
-    <div className="grid grid-cols-3 gap-2 mt-4">
-      <div className="rounded-2xl bg-muted/40 p-2.5 text-center">
-        <p className="text-lg font-semibold">14</p>
-        <p className="text-[10px] text-muted-foreground">Freelancers</p>
-      </div>
-      <div className="rounded-2xl bg-muted/40 p-2.5 text-center">
-        <p className="text-lg font-semibold">$82k</p>
-        <p className="text-[10px] text-muted-foreground">Pipeline</p>
-      </div>
-      <div className="rounded-2xl bg-muted/40 p-2.5 text-center">
-        <p className="text-lg font-semibold">6</p>
-        <p className="text-[10px] text-muted-foreground">Active Deals</p>
-      </div>
-    </div>
   </div>
 );
 
