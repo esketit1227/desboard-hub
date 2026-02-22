@@ -3,16 +3,16 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   DndContext, closestCenter, PointerSensor, KeyboardSensor,
-  useSensor, useSensors, type DragEndEvent,
-} from "@dnd-kit/core";
+  useSensor, useSensors, type DragEndEvent } from
+"@dnd-kit/core";
 import {
-  arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy,
-} from "@dnd-kit/sortable";
+  arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from
+"@dnd-kit/sortable";
 import {
   FolderKanban, CalendarDays, Users, DollarSign, HardDrive,
   Receipt, Bell, Settings2, ListTodo, MessageSquare, BarChart3,
-  ArrowUpRight, Briefcase, Search, SlidersHorizontal, Plus,
-} from "lucide-react";
+  ArrowUpRight, Briefcase, Search, SlidersHorizontal, Plus } from
+"lucide-react";
 
 import Sidebar from "@/components/dashboard/Sidebar";
 import WidgetCard from "@/components/dashboard/WidgetCard";
@@ -37,15 +37,15 @@ const WIDGETS: Record<
   {
     title: string;
     icon: React.ReactNode;
-    preview: React.ComponentType<{ pixelSize?: { width: number; height: number } }>;
+    preview: React.ComponentType<{pixelSize?: {width: number;height: number;};}>;
     expanded: React.ComponentType;
     cols: number;
     accent?: boolean;
     component: React.ComponentType;
     bgColor: string;
     textColor: string;
-  }
-> = {
+  }> =
+{
   projects: {
     title: "Projects",
     icon: <FolderKanban className="w-4 h-4" />,
@@ -54,7 +54,7 @@ const WIDGETS: Record<
     cols: 1,
     component: ProjectsPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   calendar: {
     title: "Calendar",
@@ -64,7 +64,7 @@ const WIDGETS: Record<
     cols: 1,
     component: CalendarPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   finances: {
     title: "Finances",
@@ -74,7 +74,7 @@ const WIDGETS: Record<
     cols: 1,
     component: FinancesPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   clients: {
     title: "Client Portal",
@@ -84,7 +84,7 @@ const WIDGETS: Record<
     cols: 1,
     component: ClientsPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   files: {
     title: "Files",
@@ -94,7 +94,7 @@ const WIDGETS: Record<
     cols: 1,
     component: FilesPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   invoices: {
     title: "Invoices",
@@ -104,7 +104,7 @@ const WIDGETS: Record<
     cols: 1,
     component: InvoicesPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   tasks: {
     title: "Tasks",
@@ -114,7 +114,7 @@ const WIDGETS: Record<
     cols: 1,
     component: TasksPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   messages: {
     title: "Messages",
@@ -124,7 +124,7 @@ const WIDGETS: Record<
     cols: 1,
     component: MessagesPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   analytics: {
     title: "Analytics",
@@ -134,7 +134,7 @@ const WIDGETS: Record<
     cols: 1,
     component: AnalyticsPreview,
     bgColor: "",
-    textColor: "",
+    textColor: ""
   },
   studio: {
     title: "Studio",
@@ -144,8 +144,8 @@ const WIDGETS: Record<
     cols: 1,
     component: StudioPreview,
     bgColor: "",
-    textColor: "",
-  },
+    textColor: ""
+  }
 };
 
 const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "invoices", "tasks", "messages", "analytics", "studio"];
@@ -159,11 +159,11 @@ const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
-  const [pixelSizes, setPixelSizes] = useState<Record<string, { width: number; height: number }>>(() => {
+  const [pixelSizes, setPixelSizes] = useState<Record<string, {width: number;height: number;}>>(() => {
     try {
       const saved = localStorage.getItem("widget-pixel-sizes");
       return saved ? JSON.parse(saved) : {};
-    } catch { return {}; }
+    } catch {return {};}
   });
 
   useEffect(() => {
@@ -181,9 +181,9 @@ const Index = () => {
 
   const toggleWidget = (id: string) => {
     setActiveWidgets((prev) =>
-      prev.includes(id as WidgetId)
-        ? prev.filter((w) => w !== id)
-        : [...prev, id as WidgetId]
+    prev.includes(id as WidgetId) ?
+    prev.filter((w) => w !== id) :
+    [...prev, id as WidgetId]
     );
   };
 
@@ -216,10 +216,10 @@ const Index = () => {
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center justify-between mb-8"
-          >
+            className="flex items-center justify-between mb-8">
+
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+              
             </div>
             <div className="flex items-center gap-2">
               <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors">
@@ -228,19 +228,19 @@ const Index = () => {
               <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors">
                 <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
               </button>
-              {Object.keys(pixelSizes).length > 0 && (
-                <button
-                  onClick={() => setPixelSizes({})}
-                  className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors text-muted-foreground"
-                >
+              {Object.keys(pixelSizes).length > 0 &&
+              <button
+                onClick={() => setPixelSizes({})}
+                className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors text-muted-foreground">
+
                   <SlidersHorizontal className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Reset Sizes</span>
                 </button>
-              )}
+              }
               <button
                 onClick={() => setCustomizerOpen(true)}
-                className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
-              >
+                className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors">
+
                 <Plus className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Add Widget</span>
               </button>
@@ -255,54 +255,54 @@ const Index = () => {
           </motion.header>
 
           {/* Widget grid - Desktop */}
-          {!isMobile ? (
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          {!isMobile ?
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={activeWidgets} strategy={rectSortingStrategy}>
                 <div className="flex flex-wrap gap-4">
                   {activeWidgets.map((id, i) => {
-                    const widget = WIDGETS[id];
-                    const Preview = widget.preview;
-                    return (
-                      <motion.div
-                        key={id}
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.35, delay: 0.15 + i * 0.04 }}
-                        style={pixelSizes[id] ? { width: pixelSizes[id].width } : { width: "calc(33.333% - 11px)" }}
-                      >
+                  const widget = WIDGETS[id];
+                  const Preview = widget.preview;
+                  return (
+                    <motion.div
+                      key={id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, delay: 0.15 + i * 0.04 }}
+                      style={pixelSizes[id] ? { width: pixelSizes[id].width } : { width: "calc(33.333% - 11px)" }}>
+
                         <WidgetCard
-                          id={id}
-                          title={widget.title}
-                          icon={widget.icon}
-                          size={widgetSizes[id] || "small"}
-                          tintIndex={i}
-                          onExpand={() => handleExpand(id)}
-                          pixelSize={pixelSizes[id]}
-                          onPixelResize={(size) => setPixelSizes((prev) => ({ ...prev, [id]: size }))}
-                          onResetSize={() => setPixelSizes((prev) => { const next = { ...prev }; delete next[id]; return next; })}
-                        >
+                        id={id}
+                        title={widget.title}
+                        icon={widget.icon}
+                        size={widgetSizes[id] || "small"}
+                        tintIndex={i}
+                        onExpand={() => handleExpand(id)}
+                        pixelSize={pixelSizes[id]}
+                        onPixelResize={(size) => setPixelSizes((prev) => ({ ...prev, [id]: size }))}
+                        onResetSize={() => setPixelSizes((prev) => {const next = { ...prev };delete next[id];return next;})}>
+
                           <Preview pixelSize={pixelSizes[id]} />
                         </WidgetCard>
-                      </motion.div>
-                    );
-                  })}
+                      </motion.div>);
+
+                })}
                 </div>
               </SortableContext>
-            </DndContext>
-          ) : (
-            /* Mobile: Minimal stacked cards */
-            <div className="space-y-3 pb-24">
+            </DndContext> : (
+
+          /* Mobile: Minimal stacked cards */
+          <div className="space-y-3 pb-24">
               {activeWidgets.map((id, i) => {
-                const widget = WIDGETS[id];
-                return (
-                  <motion.div
-                    key={id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: i * 0.03 }}
-                    onClick={() => handleExpand(id)}
-                    className="glass-strong rounded-2xl px-5 py-4 active:scale-[0.98] transition-transform cursor-pointer"
-                  >
+              const widget = WIDGETS[id];
+              return (
+                <motion.div
+                  key={id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.03 }}
+                  onClick={() => handleExpand(id)}
+                  className="glass-strong rounded-2xl px-5 py-4 active:scale-[0.98] transition-transform cursor-pointer">
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-muted/50 flex items-center justify-center">
@@ -312,11 +312,11 @@ const Index = () => {
                       </div>
                       <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
                     </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
+                  </motion.div>);
+
+            })}
+            </div>)
+          }
 
 
           <WidgetCustomizer
@@ -324,12 +324,12 @@ const Index = () => {
             onOpenChange={setCustomizerOpen}
             widgets={WIDGETS}
             activeWidgets={activeWidgets}
-            onToggle={toggleWidget}
-          />
+            onToggle={toggleWidget} />
+
         </main>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;
