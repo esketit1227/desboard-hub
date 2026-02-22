@@ -122,19 +122,17 @@ const WidgetCard = ({ id, title, icon, accentColor, size = "small", tintIndex, o
         </div>
       </div>
 
-      {/* Front panel — bright glassy with accent tint when expanded */}
+      {/* Front panel — solid white with accent tint when expanded */}
       <div
         className={cn(
           "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden",
-          "backdrop-blur-2xl border border-white/40 dark:border-white/15"
+          "border border-border/30 dark:border-border/20"
         )}
         style={{
           background: tier !== "compact" && accentColor
-            ? `linear-gradient(160deg, ${accentColor}12 0%, hsl(0 0% 100% / 0.75) 40%, hsl(0 0% 100% / 0.6) 100%)`
-            : "linear-gradient(160deg, hsl(0 0% 100% / 0.8), hsl(0 0% 100% / 0.6))",
-          boxShadow: tier !== "compact" && accentColor
-            ? `0 8px 32px -8px ${accentColor}15, inset 0 1px 0 hsl(0 0% 100% / 0.7), inset 0 -1px 0 hsl(0 0% 0% / 0.02)`
-            : "0 8px 32px -8px hsl(var(--foreground) / 0.04), inset 0 1px 0 hsl(0 0% 100% / 0.7), inset 0 -1px 0 hsl(0 0% 0% / 0.02)",
+            ? `linear-gradient(160deg, ${accentColor}08 0%, hsl(0 0% 100%) 40%, hsl(0 0% 99%) 100%)`
+            : "hsl(0 0% 100%)",
+          boxShadow: "0 1px 3px hsl(var(--foreground) / 0.04), 0 4px 12px hsl(var(--foreground) / 0.03)",
         }}
       >
         {/* Accent gradient strip at top when expanded */}
@@ -144,9 +142,8 @@ const WidgetCard = ({ id, title, icon, accentColor, size = "small", tintIndex, o
             style={{ background: `linear-gradient(90deg, ${accentColor}80, ${accentColor}20, transparent)` }}
           />
         )}
-        {/* Header */}
-        <div className="flex items-center justify-between px-3.5 pt-2.5 pb-0">
-          <h3 className="text-[10px] font-semibold tracking-wide uppercase text-foreground/40">{title}</h3>
+        {/* Header — actions only, no duplicate title */}
+        <div className="flex items-center justify-end px-3.5 pt-2.5 pb-0">
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               {...attributes}
