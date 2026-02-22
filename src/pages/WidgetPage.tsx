@@ -2,14 +2,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import {
   FolderKanban, CalendarDays, Users, DollarSign, HardDrive,
-  Receipt, ListTodo, MessageSquare, BarChart3, Briefcase,
+  ListTodo, MessageSquare, BarChart3, Briefcase,
 } from "lucide-react";
 import { ProjectsExpanded } from "@/components/dashboard/ProjectsWidget";
 import { CalendarExpanded } from "@/components/dashboard/CalendarWidget";
 import { ClientsExpanded } from "@/components/dashboard/ClientPortalWidget";
 import { FinancesExpanded } from "@/components/dashboard/FinancesWidget";
 import { FilesExpanded } from "@/components/dashboard/FileStorageWidget";
-import { InvoicesExpanded } from "@/components/dashboard/InvoicesWidget";
 import { TasksExpanded } from "@/components/dashboard/TasksWidget";
 import { MessagesExpanded } from "@/components/dashboard/MessagesWidget";
 import { AnalyticsExpanded } from "@/components/dashboard/AnalyticsWidget";
@@ -21,7 +20,6 @@ const WIDGET_MAP: Record<string, { title: string; icon: React.ReactNode; expande
   finances: { title: "Finances", icon: <DollarSign className="w-5 h-5" />, expanded: FinancesExpanded },
   clients: { title: "Client Portal", icon: <Users className="w-5 h-5" />, expanded: ClientsExpanded },
   files: { title: "File Storage", icon: <HardDrive className="w-5 h-5" />, expanded: FilesExpanded },
-  invoices: { title: "Invoices", icon: <Receipt className="w-5 h-5" />, expanded: InvoicesExpanded },
   tasks: { title: "Tasks", icon: <ListTodo className="w-5 h-5" />, expanded: TasksExpanded },
   messages: { title: "Messages", icon: <MessageSquare className="w-5 h-5" />, expanded: MessagesExpanded },
   analytics: { title: "Analytics", icon: <BarChart3 className="w-5 h-5" />, expanded: AnalyticsExpanded },

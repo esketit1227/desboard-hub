@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown,
   CreditCard, Wallet, Receipt, Filter, Download, Search, DollarSign,
-  Plus, Trash2, X, Clock, Building2, Banknote,
+  Plus, Trash2, X, Clock, Building2, Banknote, Check, AlertCircle, FileText, Eye, Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +77,28 @@ const weeklySpending = [
 const METHODS = ["Bank Transfer", "Credit Card", "Stripe", "PayPal", "Cash"];
 const CATEGORIES_EXPENSE = ["Software & Tools", "Marketing", "Contractors", "Office", "Other"];
 const CATEGORIES_INCOME = ["Client Projects", "Retainers", "Consulting", "Other"];
+
+// ── Invoice Data ──
+
+interface Invoice {
+  id: string; number: string; client: string; project: string; amount: number;
+  status: "paid" | "pending" | "overdue" | "draft"; date: string; dueDate: string;
+  items: { description: string; hours: number; rate: number }[];
+}
+
+const initialInvoices: Invoice[] = [
+  { id: "1", number: "INV-001", client: "Flux Labs", project: "Brand Identity", amount: 4500, status: "paid", date: "2026-01-15", dueDate: "2026-02-15", items: [{ description: "Logo Design", hours: 12, rate: 150 }, { description: "Brand Guidelines", hours: 18, rate: 150 }] },
+  { id: "2", number: "INV-002", client: "Mono Studio", project: "Website V2", amount: 6200, status: "pending", date: "2026-02-01", dueDate: "2026-03-01", items: [{ description: "UI Design", hours: 24, rate: 150 }, { description: "Prototyping", hours: 16, rate: 150 }, { description: "Design System", hours: 8, rate: 125 }] },
+  { id: "3", number: "INV-003", client: "Nextwave", project: "Mobile App UI", amount: 3800, status: "overdue", date: "2026-01-01", dueDate: "2026-02-01", items: [{ description: "App Screen Design", hours: 20, rate: 150 }, { description: "Icon Set", hours: 6, rate: 130 }] },
+  { id: "4", number: "INV-004", client: "Acme Corp", project: "Dashboard Redesign", amount: 2400, status: "draft", date: "2026-02-10", dueDate: "2026-03-10", items: [{ description: "Wireframes", hours: 10, rate: 140 }, { description: "UI Components", hours: 8, rate: 140 }] },
+];
+
+const invoiceStatusConfig: Record<string, { label: string; className: string; icon: typeof Check }> = {
+  paid: { label: "Paid", className: "bg-foreground/10 text-foreground/70", icon: Check },
+  pending: { label: "Pending", className: "bg-foreground/5 text-muted-foreground", icon: Clock },
+  overdue: { label: "Overdue", className: "bg-foreground/10 text-foreground", icon: AlertCircle },
+  draft: { label: "Draft", className: "bg-muted text-muted-foreground", icon: FileText },
+};
 
 function formatCurrency(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 }).format(n);
@@ -218,6 +240,7 @@ export const FinancesExpanded = () => {
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
           <TabsTrigger value="income">Income</TabsTrigger>
+          <TabsTrigger value="invoices">Invoices</TabsTrigger>
         </TabsList>
         <Button size="sm" onClick={() => setShowAddForm(!showAddForm)} className="rounded-xl">
           {showAddForm ? <X className="w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
@@ -648,6 +671,157 @@ export const FinancesExpanded = () => {
           </div>
         </div>
       </TabsContent>
+
+      {/* ── Invoices Tab ── */}
+      <TabsContent value="invoices" className="space-y-6">
+        <InvoicesSection />
+      </TabsContent>
     </Tabs>
+  );
+};
+
+// ── Invoices Section (used inside Finances) ──
+
+const InvoicesSection = () => {
+  const [invoices, setInvoices] = useState(initialInvoices);
+  const [selected, setSelected] = useState<Invoice | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+
+  const totalOutstanding = invoices.filter(i => i.status !== "paid").reduce((s, i) => s + i.amount, 0);
+  const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + i.amount, 0);
+  const overdue = invoices.filter(i => i.status === "overdue");
+
+  const filtered = filterStatus === "all" ? invoices : invoices.filter(i => i.status === filterStatus);
+
+  if (selected) {
+    const cfg = invoiceStatusConfig[selected.status];
+    return (
+      <div className="space-y-5">
+        <button onClick={() => setSelected(null)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Back to invoices</button>
+        <div className="rounded-2xl bg-card/60 backdrop-blur-xl border border-border/30 p-6 shadow-sm space-y-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="text-xl font-bold">{selected.number}</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">{selected.client} · {selected.project}</p>
+            </div>
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${cfg.className}`}>{cfg.label}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-xs">
+            <div><span className="text-muted-foreground">Issue Date</span><p className="font-medium mt-0.5">{selected.date}</p></div>
+            <div><span className="text-muted-foreground">Due Date</span><p className="font-medium mt-0.5">{selected.dueDate}</p></div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground/50 font-semibold px-2">
+              <span className="flex-1">Description</span><span className="w-16 text-right">Hours</span><span className="w-16 text-right">Rate</span><span className="w-20 text-right">Total</span>
+            </div>
+            {selected.items.map((item, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/10">
+                <span className="flex-1 text-sm font-medium">{item.description}</span>
+                <span className="w-16 text-right text-xs text-muted-foreground">{item.hours}h</span>
+                <span className="w-16 text-right text-xs text-muted-foreground">${item.rate}</span>
+                <span className="w-20 text-right text-sm font-semibold">{formatCurrency(item.hours * item.rate)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between items-center pt-3 border-t border-border/20">
+            <span className="text-sm font-medium">Total</span>
+            <span className="text-xl font-bold">{formatCurrency(selected.amount)}</span>
+          </div>
+          <div className="flex gap-2">
+            {selected.status === "draft" && (
+              <Button size="sm" className="rounded-xl gap-1.5" onClick={() => { setInvoices(prev => prev.map(i => i.id === selected.id ? { ...i, status: "pending" } : i)); setSelected({ ...selected, status: "pending" }); }}>
+                <Send className="w-3.5 h-3.5" /> Send Invoice
+              </Button>
+            )}
+            {selected.status === "pending" && (
+              <Button size="sm" className="rounded-xl gap-1.5" onClick={() => { setInvoices(prev => prev.map(i => i.id === selected.id ? { ...i, status: "paid" } : i)); setSelected({ ...selected, status: "paid" }); }}>
+                <Check className="w-3.5 h-3.5" /> Mark as Paid
+              </Button>
+            )}
+            {selected.status === "overdue" && (
+              <Button size="sm" className="rounded-xl gap-1.5" onClick={() => { setInvoices(prev => prev.map(i => i.id === selected.id ? { ...i, status: "paid" } : i)); setSelected({ ...selected, status: "paid" }); }}>
+                <Check className="w-3.5 h-3.5" /> Mark as Paid
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="rounded-xl gap-1.5 border-foreground/10">
+              <Download className="w-3.5 h-3.5" /> Download PDF
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Invoice KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="rounded-2xl bg-card/60 backdrop-blur-xl border border-border/30 p-4 shadow-sm">
+          <span className="text-xs text-muted-foreground font-medium">Outstanding</span>
+          <p className="text-2xl font-bold tracking-tight mt-1">{formatCurrency(totalOutstanding)}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">{invoices.filter(i => i.status !== "paid").length} invoices</p>
+        </div>
+        <div className="rounded-2xl bg-card/60 backdrop-blur-xl border border-border/30 p-4 shadow-sm">
+          <span className="text-xs text-muted-foreground font-medium">Paid</span>
+          <p className="text-2xl font-bold tracking-tight mt-1">{formatCurrency(totalPaid)}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">{invoices.filter(i => i.status === "paid").length} invoices</p>
+        </div>
+        <div className="rounded-2xl bg-card/60 backdrop-blur-xl border border-border/30 p-4 shadow-sm">
+          <span className="text-xs text-muted-foreground font-medium">Overdue</span>
+          <p className="text-2xl font-bold tracking-tight mt-1">{formatCurrency(overdue.reduce((s, i) => s + i.amount, 0))}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">{overdue.length} invoices</p>
+        </div>
+      </div>
+
+      {/* Status filter */}
+      <div className="flex items-center gap-1 rounded-full bg-muted/40 p-1 w-fit">
+        {["all", "paid", "pending", "overdue", "draft"].map(s => (
+          <button
+            key={s}
+            onClick={() => setFilterStatus(s)}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-xs font-medium transition-all capitalize",
+              filterStatus === s ? "bg-foreground text-background shadow-md" : "text-muted-foreground hover:text-foreground/70"
+            )}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+
+      {/* Invoice list */}
+      <div className="rounded-2xl bg-card/60 backdrop-blur-xl border border-border/30 shadow-sm overflow-hidden">
+        <div className="divide-y divide-border/20">
+          {filtered.map(inv => {
+            const cfg = invoiceStatusConfig[inv.status];
+            return (
+              <button
+                key={inv.id}
+                onClick={() => setSelected(inv)}
+                className="w-full text-left flex items-center gap-4 px-5 py-4 hover:bg-muted/10 transition-colors"
+              >
+                <div className="w-9 h-9 rounded-xl bg-foreground/5 flex items-center justify-center shrink-0">
+                  <Receipt className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold">{inv.number}</span>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${cfg.className}`}>{cfg.label}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">{inv.client} · {inv.project}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-bold">{formatCurrency(inv.amount)}</p>
+                  <p className="text-[10px] text-muted-foreground">Due {inv.dueDate}</p>
+                </div>
+              </button>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="py-12 text-center text-sm text-muted-foreground">No invoices found</div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
