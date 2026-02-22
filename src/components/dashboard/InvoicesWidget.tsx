@@ -72,31 +72,12 @@ const statusConfig: Record<string, { label: string; className: string; icon: typ
 };
 
 /** Compact preview */
-export const InvoicesPreview = () => {
-  const totalPending = initialInvoices
-    .filter((i) => i.status === "pending" || i.status === "overdue")
-    .reduce((sum, i) => sum + i.amount, 0);
-
-  return (
-    <div>
-      <p className="text-3xl font-bold tracking-tight">
-        ${totalPending.toLocaleString()}
-      </p>
-      <p className="text-xs text-muted-foreground mt-1">Outstanding</p>
-      <div className="flex items-center gap-2 mt-3">
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-success/10 text-success">
-          1 Paid
-        </span>
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-warning/10 text-warning">
-          1 Pending
-        </span>
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-destructive/10 text-destructive">
-          1 Overdue
-        </span>
-      </div>
-    </div>
-  );
-};
+export const InvoicesPreview = () => (
+  <div>
+    <p className="text-3xl font-bold tracking-tight">$10,000</p>
+    <p className="text-xs text-muted-foreground mt-1">Outstanding</p>
+  </div>
+);
 
 /** Full expanded view */
 export const InvoicesExpanded = () => {

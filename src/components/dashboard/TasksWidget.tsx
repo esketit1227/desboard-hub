@@ -30,27 +30,12 @@ const priorityConfig = {
 };
 
 /** Compact preview */
-export const TasksPreview = () => {
-  const pending = initialTasks.filter((t) => !t.completed).length;
-  const overdue = initialTasks.filter((t) => !t.completed && t.dueDate && new Date(t.dueDate) < new Date()).length;
-
-  return (
-    <div>
-      <p className="text-3xl font-bold tracking-tight">{pending}</p>
-      <p className="text-xs text-muted-foreground mt-1">Pending tasks</p>
-      <div className="flex items-center gap-2 mt-3">
-        {overdue > 0 && (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-destructive/10 text-destructive">
-            {overdue} Overdue
-          </span>
-        )}
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-success/10 text-success">
-          {initialTasks.filter((t) => t.completed).length} Done
-        </span>
-      </div>
-    </div>
-  );
-};
+export const TasksPreview = () => (
+  <div>
+    <p className="text-3xl font-bold tracking-tight">4</p>
+    <p className="text-xs text-muted-foreground mt-1">Pending tasks</p>
+  </div>
+);
 
 /** Full expanded view */
 export const TasksExpanded = () => {

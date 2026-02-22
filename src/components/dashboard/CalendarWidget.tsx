@@ -33,17 +33,9 @@ export const CalendarPreview = () => {
     <div>
       <div className="flex items-baseline gap-2">
         <span className="text-3xl font-bold tracking-tight">{dayNum}</span>
-        <span className="text-sm opacity-70">{month}, {dayName}</span>
+        <span className="text-sm opacity-60">{month}, {dayName}</span>
       </div>
       <p className="text-xs opacity-60 mt-1">3 events this week</p>
-      <div className="flex gap-1.5 mt-3">
-        {events.map((e) => (
-          <div key={e.title} className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2 py-1">
-            <span className={`w-1.5 h-1.5 rounded-full ${e.color}`} />
-            <span className="text-[10px] font-medium truncate max-w-[60px]">{e.title.split("—")[0].trim()}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

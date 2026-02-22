@@ -33,21 +33,12 @@ const clientRevenue = [
 ];
 
 /** Compact preview */
-export const AnalyticsPreview = () => {
-  return (
-    <div>
-      <p className="text-3xl font-bold tracking-tight">+42%</p>
-      <p className="text-xs text-muted-foreground mt-1">Revenue growth</p>
-      <div className="mt-3 h-12">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={revenueData}>
-            <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
+export const AnalyticsPreview = () => (
+  <div>
+    <p className="text-3xl font-bold tracking-tight">+42%</p>
+    <p className="text-xs text-muted-foreground mt-1">Revenue growth</p>
+  </div>
+);
 
 /** Full expanded view */
 export const AnalyticsExpanded = () => {
