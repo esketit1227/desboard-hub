@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Check, Circle, Clock, Flag, X, Trash2 } from "lucide-react";
+import { Plus, Check, Circle, Clock, Flag, X, Trash2, ListTodo, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -29,55 +29,31 @@ const priorityConfig = {
   low: { label: "Low", className: "text-muted-foreground", color: "hsl(var(--muted-foreground))" },
 };
 
-/** Compact preview */
+/** Compact preview — bold count + mini task list */
 export const TasksPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
-  const h = pixelSize?.height ?? 140;
-  const w = pixelSize?.width ?? 300;
   const pending = initialTasks.filter(t => !t.completed);
   const completed = initialTasks.filter(t => t.completed);
 
-  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
-  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
-  const itemSize = w > 400 ? "text-sm" : h > 240 ? "text-xs" : "text-[11px]";
-  const subSize = w > 400 ? "text-xs" : "text-[10px]";
-
-  const showList = h > 180;
-  const showProject = w > 300;
-  const showDue = h > 280;
-  const itemCount = h > 400 ? pending.length : h > 320 ? 4 : h > 240 ? 3 : 2;
-
-  if (!showList) {
-    return (
-      <div>
-        <p className={`${titleSize} font-bold tracking-tight`}>{pending.length}</p>
-        <p className={`${labelSize} text-muted-foreground mt-1`}>Pending tasks</p>
-        {h > 160 && (
-          <p className={`${subSize} opacity-40 mt-1`}>{completed.length} completed</p>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <p className={`${labelSize} text-muted-foreground font-medium`}>{pending.length} Pending</p>
-        <p className={`${subSize} opacity-40`}>{completed.length} done</p>
-      </div>
-      {pending.slice(0, itemCount).map((task) => (
-        <div key={task.id} className="flex items-center gap-2 py-0.5">
-          <Flag className={cn("w-3 h-3 shrink-0", priorityConfig[task.priority].className)} />
-          <span className={`${itemSize} font-medium truncate flex-1`}>{task.title}</span>
-          {showProject && task.project && (
-            <span className={`${subSize} opacity-40 shrink-0`}>{task.project}</span>
-          )}
-          {showDue && task.dueDate && (
-            <span className={`${subSize} opacity-40 shrink-0`}>
-              {new Date(task.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-            </span>
-          )}
+    <div className="flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-3xl font-bold tracking-tight leading-none">{pending.length}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Pending</p>
         </div>
-      ))}
+        <div className="flex items-center gap-1">
+          <CheckCircle2 className="w-3.5 h-3.5 text-success/60" />
+          <span className="text-[10px] text-muted-foreground font-medium">{completed.length}</span>
+        </div>
+      </div>
+      <div className="space-y-1 mt-auto">
+        {pending.slice(0, 2).map((task) => (
+          <div key={task.id} className="flex items-center gap-1.5">
+            <div className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: priorityConfig[task.priority].color }} />
+            <span className="text-[10px] font-medium truncate">{task.title}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

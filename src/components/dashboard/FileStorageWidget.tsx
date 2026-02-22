@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   FileText, Image, FolderOpen, Film, Search, Plus, Tag, Users,
   ChevronRight, ChevronDown, Folder, MoreHorizontal, Grid3X3, List,
-  Upload, Filter, X, File, Music, Archive,
+  Upload, Filter, X, File, Music, Archive, HardDrive,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-/* ─── Types ─── */
+// ── Types ──
+
 type FileTag = { label: string; color: string };
 type ClientTag = { name: string; avatar: string };
 type FileItem = {
@@ -20,7 +21,6 @@ type FileItem = {
 };
 type FolderItem = { id: string; name: string; parent: string | null; fileCount: number; };
 
-/* ─── Mock Data ─── */
 const TAGS: FileTag[] = [
   { label: "Final", color: "bg-success/15 text-success" },
   { label: "Draft", color: "bg-warning/15 text-warning" },
@@ -62,54 +62,36 @@ const FILES: FileItem[] = [
   { id: "10", name: "assets-bundle.zip", type: "archive", folder: "design", size: "120 MB", addedBy: "jordan@mail.com", date: "Feb 8, 2026", tags: [TAGS[3]] },
 ];
 
-/* ─── Icon Map ─── */
 const FILE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   pdf: FileText, design: FolderOpen, image: Image, video: Film, audio: Music, archive: Archive, doc: File,
 };
 
-/* ─── Compact Preview ─── */
+/** Compact preview — storage usage visual */
 export const FilesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
-  const h = pixelSize?.height ?? 140;
-  const w = pixelSize?.width ?? 300;
-
-  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
-  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
-  const itemSize = w > 400 ? "text-xs" : "text-[11px]";
-  const subSize = w > 400 ? "text-[11px]" : "text-[9px]";
-
-  const showList = h > 180;
-  const showDate = w > 350;
-  const showTag = w > 300 && h > 240;
-  const itemCount = h > 400 ? 5 : h > 300 ? 4 : h > 220 ? 3 : 2;
-
   const rootFolderCount = FOLDERS.filter(f => !f.parent).length;
-
-  if (!showList) {
-    return (
-      <div>
-        <p className={`${titleSize} font-bold tracking-tight`}>271 MB</p>
-        <p className={`${labelSize} text-muted-foreground mt-1`}>{FILES.length} files · {rootFolderCount} folders</p>
-      </div>
-    );
-  }
+  const totalSize = 271; // MB
+  const usedPct = 54; // simulated usage
 
   return (
-    <div className="space-y-1.5">
-      <p className={`${labelSize} text-muted-foreground font-medium`}>271 MB · {FILES.length} files</p>
-      {FILES.slice(0, itemCount).map((file) => {
-        const Icon = FILE_ICONS[file.type] || FileText;
-        return (
-          <div key={file.id} className="flex items-center gap-2 py-0.5">
-            <Icon className="w-3.5 h-3.5 opacity-50 shrink-0" />
-            <span className={`${itemSize} font-medium truncate flex-1`}>{file.name}</span>
-            {showTag && file.tags[0] && (
-              <span className={`${subSize} font-medium px-1 py-0.5 rounded-full ${file.tags[0].color}`}>{file.tags[0].label}</span>
-            )}
-            {showDate && <span className={`${subSize} opacity-40 shrink-0`}>{file.date}</span>}
-            <span className={`${subSize} opacity-40 shrink-0`}>{file.size}</span>
-          </div>
-        );
-      })}
+    <div className="flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-3xl font-bold tracking-tight leading-none">{FILES.length}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Files</p>
+        </div>
+        <HardDrive className="w-5 h-5 text-muted-foreground/40" />
+      </div>
+      <div className="mt-auto space-y-1">
+        <div className="flex items-end gap-[2px] h-[16px]">
+          {[40, 65, 80, 30, 55, 70, 25].map((h, i) => (
+            <div key={i} className="flex-1 rounded-sm bg-foreground/12" style={{ height: `${h}%` }} />
+          ))}
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] text-muted-foreground">{totalSize} MB</span>
+          <span className="text-[9px] text-muted-foreground">{rootFolderCount} folders</span>
+        </div>
+      </div>
     </div>
   );
 };
@@ -128,16 +110,10 @@ const FolderTreeNode = ({
     <div>
       <button
         onClick={() => { onSelect(folder.id); if (children.length) setExpanded(!expanded); }}
-        className={`w-full flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${
-          isSelected ? "bg-secondary text-foreground font-medium" : "text-muted-foreground"
-        }`}
+        className={`w-full flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${isSelected ? "bg-secondary text-foreground font-medium" : "text-muted-foreground"}`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
-        {children.length > 0 ? (
-          expanded ? <ChevronDown className="w-3.5 h-3.5 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-        ) : (
-          <span className="w-3.5 shrink-0" />
-        )}
+        {children.length > 0 ? (expanded ? <ChevronDown className="w-3.5 h-3.5 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 shrink-0" />) : <span className="w-3.5 shrink-0" />}
         <Folder className="w-4 h-4 shrink-0" />
         <span className="truncate flex-1 text-left">{folder.name}</span>
         <span className="text-[10px] bg-secondary rounded-full px-1.5 py-0.5 font-medium">{folder.fileCount}</span>
@@ -166,14 +142,8 @@ export const FilesExpanded = () => {
   };
 
   const filteredFiles = FILES.filter((f) => {
-    if (selectedFolder) {
-      const validFolders = getDescendants(selectedFolder);
-      if (!validFolders.includes(f.folder)) return false;
-    }
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      if (!f.name.toLowerCase().includes(q) && !f.addedBy.toLowerCase().includes(q) && !f.client?.name.toLowerCase().includes(q)) return false;
-    }
+    if (selectedFolder) { const validFolders = getDescendants(selectedFolder); if (!validFolders.includes(f.folder)) return false; }
+    if (searchQuery) { const q = searchQuery.toLowerCase(); if (!f.name.toLowerCase().includes(q) && !f.addedBy.toLowerCase().includes(q) && !f.client?.name.toLowerCase().includes(q)) return false; }
     if (activeTagFilter && !f.tags.some((t) => t.label === activeTagFilter)) return false;
     if (activeClientFilter && f.client?.name !== activeClientFilter) return false;
     return true;
@@ -184,7 +154,6 @@ export const FilesExpanded = () => {
 
   return (
     <div className="flex gap-0 -mx-6 -mb-6 -mt-4 h-[70vh]">
-      {/* Left Sidebar */}
       <div className="w-[260px] border-r border-border/40 flex flex-col shrink-0">
         <div className="p-3 border-b border-border/30">
           <div className="relative">
@@ -192,33 +161,21 @@ export const FilesExpanded = () => {
             <Input placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-8 h-8 text-xs bg-secondary/30 border-border/30" />
           </div>
         </div>
-
         <Tabs value={sidebarTab} onValueChange={(v) => setSidebarTab(v as any)} className="flex-1 flex flex-col min-h-0">
           <TabsList className="mx-3 mt-2 h-8 bg-secondary/40">
             <TabsTrigger value="folders" className="text-xs h-6 gap-1"><Folder className="w-3 h-3" />Folders</TabsTrigger>
             <TabsTrigger value="tags" className="text-xs h-6 gap-1"><Tag className="w-3 h-3" />Tags</TabsTrigger>
           </TabsList>
-
           <TabsContent value="folders" className="flex-1 min-h-0 mt-0">
             <ScrollArea className="h-full">
               <div className="p-2">
-                <button
-                  onClick={() => setSelectedFolder(null)}
-                  className={`w-full flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 mb-1 ${
-                    !selectedFolder ? "bg-secondary text-foreground font-medium" : "text-muted-foreground"
-                  }`}
-                >
-                  <FolderOpen className="w-4 h-4 shrink-0" />
-                  <span className="flex-1 text-left">All Files</span>
-                  <span className="text-[10px] bg-secondary rounded-full px-1.5 py-0.5 font-medium">{FILES.length}</span>
+                <button onClick={() => setSelectedFolder(null)} className={`w-full flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 mb-1 ${!selectedFolder ? "bg-secondary text-foreground font-medium" : "text-muted-foreground"}`}>
+                  <FolderOpen className="w-4 h-4 shrink-0" /><span className="flex-1 text-left">All Files</span><span className="text-[10px] bg-secondary rounded-full px-1.5 py-0.5 font-medium">{FILES.length}</span>
                 </button>
-                {rootFolders.map((folder) => (
-                  <FolderTreeNode key={folder.id} folder={folder} allFolders={FOLDERS} selectedFolder={selectedFolder} onSelect={setSelectedFolder} />
-                ))}
+                {rootFolders.map((folder) => (<FolderTreeNode key={folder.id} folder={folder} allFolders={FOLDERS} selectedFolder={selectedFolder} onSelect={setSelectedFolder} />))}
               </div>
             </ScrollArea>
           </TabsContent>
-
           <TabsContent value="tags" className="flex-1 min-h-0 mt-0">
             <ScrollArea className="h-full">
               <div className="p-3 space-y-1">
@@ -226,11 +183,8 @@ export const FilesExpanded = () => {
                   const count = FILES.filter((f) => f.tags.some((t) => t.label === tag.label)).length;
                   const isActive = activeTagFilter === tag.label;
                   return (
-                    <button key={tag.label} onClick={() => setActiveTagFilter(isActive ? null : tag.label)}
-                      className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${isActive ? "bg-secondary font-medium" : ""}`}>
-                      <span className={`w-2.5 h-2.5 rounded-full ${tag.color.split(" ")[0]}`} />
-                      <span className="flex-1 text-left">{tag.label}</span>
-                      <span className="text-[10px] text-muted-foreground">{count}</span>
+                    <button key={tag.label} onClick={() => setActiveTagFilter(isActive ? null : tag.label)} className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${isActive ? "bg-secondary font-medium" : ""}`}>
+                      <span className={`w-2.5 h-2.5 rounded-full ${tag.color.split(" ")[0]}`} /><span className="flex-1 text-left">{tag.label}</span><span className="text-[10px] text-muted-foreground">{count}</span>
                     </button>
                   );
                 })}
@@ -240,11 +194,9 @@ export const FilesExpanded = () => {
                     const count = FILES.filter((f) => f.client?.name === client.name).length;
                     const isActive = activeClientFilter === client.name;
                     return (
-                      <button key={client.name} onClick={() => setActiveClientFilter(isActive ? null : client.name)}
-                        className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${isActive ? "bg-secondary font-medium" : ""}`}>
+                      <button key={client.name} onClick={() => setActiveClientFilter(isActive ? null : client.name)} className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${isActive ? "bg-secondary font-medium" : ""}`}>
                         <div className="w-5 h-5 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[9px] font-bold shrink-0">{client.avatar}</div>
-                        <span className="flex-1 text-left truncate">{client.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{count}</span>
+                        <span className="flex-1 text-left truncate">{client.name}</span><span className="text-[10px] text-muted-foreground">{count}</span>
                       </button>
                     );
                   })}
@@ -254,107 +206,54 @@ export const FilesExpanded = () => {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between px-5 py-3 border-b border-border/30">
           <div className="flex items-center gap-2 min-w-0">
             <h3 className="text-sm font-semibold truncate">{currentFolderName}</h3>
             {(activeTagFilter || activeClientFilter) && (
               <div className="flex items-center gap-1.5">
-                {activeTagFilter && (
-                  <Badge variant="secondary" className="text-[10px] gap-1 h-5 cursor-pointer" onClick={() => setActiveTagFilter(null)}>
-                    {activeTagFilter} <X className="w-2.5 h-2.5" />
-                  </Badge>
-                )}
-                {activeClientFilter && (
-                  <Badge variant="secondary" className="text-[10px] gap-1 h-5 cursor-pointer" onClick={() => setActiveClientFilter(null)}>
-                    {activeClientFilter} <X className="w-2.5 h-2.5" />
-                  </Badge>
-                )}
+                {activeTagFilter && <Badge variant="secondary" className="text-[10px] gap-1 h-5 cursor-pointer" onClick={() => setActiveTagFilter(null)}>{activeTagFilter} <X className="w-2.5 h-2.5" /></Badge>}
+                {activeClientFilter && <Badge variant="secondary" className="text-[10px] gap-1 h-5 cursor-pointer" onClick={() => setActiveClientFilter(null)}>{activeClientFilter} <X className="w-2.5 h-2.5" /></Badge>}
               </div>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewMode("list")}>
-              <List className={`w-3.5 h-3.5 ${viewMode === "list" ? "text-foreground" : "text-muted-foreground"}`} />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewMode("grid")}>
-              <Grid3X3 className={`w-3.5 h-3.5 ${viewMode === "grid" ? "text-foreground" : "text-muted-foreground"}`} />
-            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewMode("list")}><List className={`w-3.5 h-3.5 ${viewMode === "list" ? "text-foreground" : "text-muted-foreground"}`} /></Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewMode("grid")}><Grid3X3 className={`w-3.5 h-3.5 ${viewMode === "grid" ? "text-foreground" : "text-muted-foreground"}`} /></Button>
             <Button size="sm" className="h-7 text-xs gap-1 ml-2"><Upload className="w-3 h-3" /> Upload</Button>
           </div>
         </div>
-
         {subFolders.length > 0 && (
           <div className="px-5 py-3 border-b border-border/20">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">Folders</p>
             <div className="flex gap-2 flex-wrap">
               {subFolders.map((sf) => (
-                <button key={sf.id} onClick={() => setSelectedFolder(sf.id)}
-                  className="flex items-center gap-2 bg-secondary/40 hover:bg-secondary/60 rounded-xl px-3 py-2 transition-colors group">
+                <button key={sf.id} onClick={() => setSelectedFolder(sf.id)} className="flex items-center gap-2 bg-secondary/40 hover:bg-secondary/60 rounded-xl px-3 py-2 transition-colors group">
                   <Folder className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  <div className="text-left">
-                    <p className="text-xs font-medium">{sf.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{sf.fileCount} Files</p>
-                  </div>
+                  <div className="text-left"><p className="text-xs font-medium">{sf.name}</p><p className="text-[10px] text-muted-foreground">{sf.fileCount} Files</p></div>
                 </button>
               ))}
             </div>
           </div>
         )}
-
         <ScrollArea className="flex-1">
           {viewMode === "list" ? (
             <div className="px-5 py-2">
-              <div className="grid grid-cols-[1fr_120px_100px_80px_80px_32px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                <span>Name</span><span>Client</span><span>Added By</span><span>Size</span><span>Tags</span><span />
-              </div>
-              {filteredFiles.length === 0 && (
-                <div className="text-center py-12 text-sm text-muted-foreground">No files found</div>
-              )}
+              <div className="grid grid-cols-[1fr_120px_100px_80px_80px_32px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium"><span>Name</span><span>Client</span><span>Added By</span><span>Size</span><span>Tags</span><span /></div>
+              {filteredFiles.length === 0 && <div className="text-center py-12 text-sm text-muted-foreground">No files found</div>}
               {filteredFiles.map((file) => {
                 const Icon = FILE_ICONS[file.type] || FileText;
                 return (
                   <div key={file.id} className="grid grid-cols-[1fr_120px_100px_80px_80px_32px] gap-2 items-center px-3 py-2.5 rounded-xl hover:bg-secondary/30 transition-colors group cursor-pointer">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg bg-secondary/60 flex items-center justify-center shrink-0">
-                        <Icon className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{file.date}</p>
-                      </div>
+                      <div className="w-8 h-8 rounded-lg bg-secondary/60 flex items-center justify-center shrink-0"><Icon className="w-4 h-4 text-muted-foreground" /></div>
+                      <div className="min-w-0"><p className="text-sm font-medium truncate">{file.name}</p><p className="text-[10px] text-muted-foreground">{file.date}</p></div>
                     </div>
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      {file.client ? (
-                        <>
-                          <div className="w-5 h-5 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[8px] font-bold shrink-0">{file.client.avatar}</div>
-                          <span className="text-xs truncate">{file.client.name}</span>
-                        </>
-                      ) : <span className="text-xs text-muted-foreground">—</span>}
-                    </div>
+                    <div>{file.client && <div className="flex items-center gap-1.5"><div className="w-5 h-5 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[8px] font-bold">{file.client.avatar}</div><span className="text-xs truncate">{file.client.name}</span></div>}</div>
                     <span className="text-xs text-muted-foreground truncate">{file.addedBy.split("@")[0]}</span>
                     <span className="text-xs text-muted-foreground">{file.size}</span>
-                    <div className="flex gap-1">
-                      {file.tags.map((tag) => (
-                        <span key={tag.label} className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${tag.color}`}>{tag.label}</span>
-                      ))}
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="rounded-md p-1 hover:bg-secondary opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-xl">
-                        <DropdownMenuItem className="text-xs">Open</DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs">Download</DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs">Share</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-xs text-destructive">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex gap-1">{file.tags.map(t => <span key={t.label} className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${t.color}`}>{t.label}</span>)}</div>
+                    <DropdownMenu><DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:bg-secondary"><MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" /></DropdownMenuTrigger><DropdownMenuContent align="end" className="rounded-xl"><DropdownMenuItem className="text-xs">Preview</DropdownMenuItem><DropdownMenuItem className="text-xs">Download</DropdownMenuItem><DropdownMenuSeparator /><DropdownMenuItem className="text-xs text-destructive">Delete</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
                   </div>
                 );
               })}
@@ -364,17 +263,11 @@ export const FilesExpanded = () => {
               {filteredFiles.map((file) => {
                 const Icon = FILE_ICONS[file.type] || FileText;
                 return (
-                  <div key={file.id} className="rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors p-4 cursor-pointer group">
-                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-3">
-                      <Icon className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-medium truncate">{file.name}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">{file.size} · {file.date}</p>
-                    <div className="flex gap-1 mt-2">
-                      {file.tags.map((tag) => (
-                        <span key={tag.label} className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${tag.color}`}>{tag.label}</span>
-                      ))}
-                    </div>
+                  <div key={file.id} className="p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer group">
+                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-2"><Icon className="w-5 h-5 text-muted-foreground" /></div>
+                    <p className="text-xs font-medium truncate">{file.name}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{file.size}</p>
+                    <div className="flex gap-1 mt-1.5">{file.tags.map(t => <span key={t.label} className={`text-[8px] px-1 py-0.5 rounded-full font-medium ${t.color}`}>{t.label}</span>)}</div>
                   </div>
                 );
               })}

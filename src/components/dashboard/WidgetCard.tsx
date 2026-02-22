@@ -133,30 +133,28 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
           boxShadow: "0 4px 24px -4px hsl(228 12% 30% / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.5)",
         }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 pb-1">
-          <div className="flex items-center gap-2.5">
+        {/* Header — neat top-left title */}
+        <div className="flex items-center justify-between px-3.5 pt-3 pb-0">
+          <h3 className="text-[11px] font-semibold tracking-wide uppercase text-foreground/50">{title}</h3>
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               {...attributes}
               {...listeners}
-              className="rounded-lg p-1 transition-colors cursor-grab active:cursor-grabbing touch-none hover:bg-foreground/5 opacity-0 group-hover:opacity-100"
+              className="rounded-md p-1 transition-colors cursor-grab active:cursor-grabbing touch-none hover:bg-foreground/5"
             >
-              <GripVertical className="w-3.5 h-3.5 text-foreground/40" />
+              <GripVertical className="w-3 h-3 text-foreground/30" />
             </button>
-            <h3 className="text-sm font-semibold tracking-tight text-foreground">{title}</h3>
-          </div>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               onClick={onExpand}
-              className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-foreground/5 transition-colors"
+              className="rounded-md w-6 h-6 flex items-center justify-center hover:bg-foreground/5 transition-colors"
             >
-              <ArrowUpRight className="w-3.5 h-3.5 text-foreground/50" />
+              <ArrowUpRight className="w-3 h-3 text-foreground/40" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden px-4 pb-4 text-foreground">{children}</div>
+        <div className="flex-1 overflow-hidden px-3.5 pb-3 text-foreground">{children}</div>
       </div>
 
       {/* Corner resize handle */}
