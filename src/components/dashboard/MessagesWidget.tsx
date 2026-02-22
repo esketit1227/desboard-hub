@@ -66,12 +66,41 @@ const initialMessages: Message[] = [
 ];
 
 /** Compact preview */
-export const MessagesPreview = () => (
-  <div>
-    <p className="text-3xl font-bold tracking-tight">2</p>
-    <p className="text-xs text-muted-foreground mt-1">Unread messages</p>
-  </div>
-);
+export const MessagesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const unread = initialMessages.filter(m => !m.read);
+  const showList = h > 200;
+  const itemCount = h > 320 ? 4 : h > 240 ? 3 : 2;
+
+  if (!showList) {
+    return (
+      <div>
+        <p className="text-3xl font-bold tracking-tight">{unread.length}</p>
+        <p className="text-xs text-muted-foreground mt-1">Unread messages</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-muted-foreground font-medium">{unread.length} Unread</p>
+      {initialMessages.slice(0, itemCount).map((msg) => (
+        <div key={msg.id} className="flex items-center gap-2 py-0.5">
+          <div className={cn(
+            "w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0",
+            !msg.read ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+          )}>
+            {msg.avatar}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={cn("text-[11px] truncate", !msg.read ? "font-semibold" : "font-medium opacity-70")}>{msg.from}</p>
+          </div>
+          <span className="text-[9px] opacity-40 shrink-0">{msg.time}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 /** Full expanded view */
 export const MessagesExpanded = () => {

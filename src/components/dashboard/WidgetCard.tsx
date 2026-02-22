@@ -131,7 +131,7 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
       </div>
 
       {/* Content */}
-      <div className="mt-auto">{children}</div>
+      <div className="mt-auto overflow-hidden flex-1">{children}</div>
 
       {/* Corner resize handle */}
       {onPixelResize && (

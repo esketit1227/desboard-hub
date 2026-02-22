@@ -140,12 +140,36 @@ const FolderTreeNode = ({
 };
 
 /* ─── Compact Preview ─── */
-export const FilesPreview = () => (
-  <div>
-    <p className="text-3xl font-bold tracking-tight">271 MB</p>
-    <p className="text-xs text-muted-foreground mt-1">10 files · 3 folders</p>
-  </div>
-);
+export const FilesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const showList = h > 200;
+  const itemCount = h > 300 ? 4 : 2;
+
+  if (!showList) {
+    return (
+      <div>
+        <p className="text-3xl font-bold tracking-tight">271 MB</p>
+        <p className="text-xs text-muted-foreground mt-1">10 files · 3 folders</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-muted-foreground font-medium">271 MB · 10 files</p>
+      {FILES.slice(0, itemCount).map((file) => {
+        const Icon = FILE_ICONS[file.type] || FileText;
+        return (
+          <div key={file.id} className="flex items-center gap-2 py-0.5">
+            <Icon className="w-3.5 h-3.5 opacity-50 shrink-0" />
+            <span className="text-[11px] font-medium truncate flex-1">{file.name}</span>
+            <span className="text-[9px] opacity-40 shrink-0">{file.size}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 /* ─── Full Expanded View ─── */
 export const FilesExpanded = () => {
