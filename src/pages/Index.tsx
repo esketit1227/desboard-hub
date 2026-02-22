@@ -218,7 +218,7 @@ const Index = () => {
       <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
 
       {/* Main content */}
-      <main className="lg:ml-[72px] p-5 md:p-8 lg:p-10">
+      <main className="lg:ml-[240px] p-5 md:p-8 lg:p-10 transition-all duration-300">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -12 }}
