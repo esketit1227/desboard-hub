@@ -111,12 +111,12 @@ const WidgetCard = ({ id, title, icon, accentColor, size = "small", tintIndex, o
       {/* Back tab — light neutral */}
       <div
         className="absolute inset-0 rounded-2xl overflow-visible"
-        style={{ background: "hsl(var(--foreground) / 0.18)" }}
+        style={{ background: "#d1d5db" }}
       >
         {/* Tab bump */}
         <div
           className="absolute -top-3 left-4 h-5 rounded-t-xl flex items-center px-2.5 gap-1"
-          style={{ background: "hsl(var(--foreground) / 0.18)" }}
+          style={{ background: "#d1d5db" }}
         >
           <span className="text-[8px] font-bold text-foreground/50 uppercase tracking-widest">{title}</span>
         </div>
