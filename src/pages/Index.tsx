@@ -247,7 +247,7 @@ const Index = () => {
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={activeWidgets} strategy={rectSortingStrategy}>
                 <div className="flex flex-wrap gap-4">
-                  {activeWidgets.map((id, i) => {
+                  {activeWidgets.filter(id => WIDGETS[id]).map((id, i) => {
                   const widget = WIDGETS[id];
                   const Preview = widget.preview;
                   return (
@@ -280,7 +280,7 @@ const Index = () => {
 
           /* Mobile: Minimal stacked cards */
           <div className="space-y-3 pb-24">
-              {activeWidgets.map((id, i) => {
+              {activeWidgets.filter(id => WIDGETS[id]).map((id, i) => {
               const widget = WIDGETS[id];
               return (
                 <motion.div
