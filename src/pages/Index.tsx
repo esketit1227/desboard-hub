@@ -21,6 +21,7 @@ import {
   Users,
   DollarSign,
   HardDrive,
+  Receipt,
   Bell,
   Settings2,
 } from "lucide-react";
@@ -32,9 +33,10 @@ import { CalendarPreview, CalendarExpanded } from "@/components/dashboard/Calend
 import { ClientsPreview, ClientsExpanded } from "@/components/dashboard/ClientPortalWidget";
 import { FinancesPreview, FinancesExpanded } from "@/components/dashboard/FinancesWidget";
 import { FilesPreview, FilesExpanded } from "@/components/dashboard/FileStorageWidget";
+import { InvoicesPreview, InvoicesExpanded } from "@/components/dashboard/InvoicesWidget";
 import WidgetCustomizer from "@/components/dashboard/WidgetCustomizer";
 
-type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files";
+type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "invoices";
 
 const WIDGETS: Record<
   WidgetId,
@@ -89,9 +91,17 @@ const WIDGETS: Record<
     cols: 1,
     component: FilesPreview,
   },
+  invoices: {
+    title: "Invoices",
+    icon: <Receipt className="w-4 h-4" />,
+    preview: InvoicesPreview,
+    expanded: InvoicesExpanded,
+    cols: 1,
+    component: InvoicesPreview,
+  },
 };
 
-const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files"];
+const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "invoices"];
 
 const stats = [
   { label: "Active Projects", value: "12", trend: "+3" },
