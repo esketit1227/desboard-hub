@@ -3,7 +3,7 @@ import {
   Users, Briefcase, TrendingUp, FileText, DollarSign, UserPlus,
   ChevronRight, Star, Clock, CheckCircle2, Circle, ArrowUpRight,
   Building2, Phone, Mail, MapPin, Filter, Plus, MoreHorizontal,
-  Pencil, Trash2,
+  Pencil, Trash2, Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -321,6 +321,12 @@ const RowActions = ({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => 
 /* ─── Expanded View ─── */
 export const StudioExpanded = () => {
   const [activeTab, setActiveTab] = useState<Tab>("freelancers");
+  const [search, setSearch] = useState("");
+
+  // Filters
+  const [freelancerStatusFilter, setFreelancerStatusFilter] = useState<string>("all");
+  const [dealStageFilter, setDealStageFilter] = useState<string>("all");
+  const [contactTypeFilter, setContactTypeFilter] = useState<string>("all");
 
   // State
   const [freelancerList, setFreelancerList] = useState<Freelancer[]>(initialFreelancers);
@@ -342,6 +348,24 @@ export const StudioExpanded = () => {
   const saveContact = (c: Contact) => setContactList(prev => prev.find(x => x.id === c.id) ? prev.map(x => x.id === c.id ? c : x) : [...prev, c]);
 
   const confirmDelete = (label: string, onConfirm: () => void) => setDeleteDialog({ open: true, label, onConfirm });
+
+  // Filtered lists
+  const q = search.toLowerCase();
+  const filteredFreelancers = freelancerList.filter(f =>
+    (freelancerStatusFilter === "all" || f.status === freelancerStatusFilter) &&
+    (!q || f.name.toLowerCase().includes(q) || f.role.toLowerCase().includes(q))
+  );
+  const filteredDeals = dealList.filter(d =>
+    (dealStageFilter === "all" || d.stage === dealStageFilter) &&
+    (!q || d.name.toLowerCase().includes(q) || d.contact.toLowerCase().includes(q))
+  );
+  const filteredProposals = proposalList.filter(p =>
+    (!q || p.title.toLowerCase().includes(q) || p.scope.toLowerCase().includes(q))
+  );
+  const filteredContacts = contactList.filter(c =>
+    (contactTypeFilter === "all" || c.type === contactTypeFilter) &&
+    (!q || c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q))
+  );
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "freelancers", label: "Freelancers", icon: <Users className="w-4 h-4" /> },
@@ -399,10 +423,65 @@ export const StudioExpanded = () => {
         {activeTab === "contacts" && addButton(() => setContactDialog({ open: true, item: null }))}
       </div>
 
+      {/* Search & Filter Bar */}
+      {activeTab !== "budget" && (
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search..."
+              className="rounded-xl pl-9 h-9 text-xs bg-muted/20 border-border/30"
+            />
+          </div>
+          {activeTab === "freelancers" && (
+            <Select value={freelancerStatusFilter} onValueChange={setFreelancerStatusFilter}>
+              <SelectTrigger className="rounded-xl h-9 w-[130px] text-xs border-border/30 bg-muted/20">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="available">Available</SelectItem>
+                <SelectItem value="on-project">On Project</SelectItem>
+                <SelectItem value="unavailable">Unavailable</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          {activeTab === "pipeline" && (
+            <Select value={dealStageFilter} onValueChange={setDealStageFilter}>
+              <SelectTrigger className="rounded-xl h-9 w-[150px] text-xs border-border/30 bg-muted/20">
+                <SelectValue placeholder="Stage" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stages</SelectItem>
+                <SelectItem value="Qualified">Qualified</SelectItem>
+                <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
+                <SelectItem value="Negotiation">Negotiation</SelectItem>
+                <SelectItem value="Closed Won">Closed Won</SelectItem>
+                <SelectItem value="Closed Lost">Closed Lost</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          {activeTab === "contacts" && (
+            <Select value={contactTypeFilter} onValueChange={setContactTypeFilter}>
+              <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="client">Client</SelectItem>
+                <SelectItem value="lead">Lead</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      )}
+
       {/* Tab Content */}
       {activeTab === "freelancers" && (
         <div className="space-y-2">
-          {freelancerList.map(f => (
+          {filteredFreelancers.map(f => (
             <div key={f.id} className="group flex items-center gap-3 p-3 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors">
               <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center text-xs font-semibold shrink-0">
                 {f.avatar}
@@ -424,13 +503,13 @@ export const StudioExpanded = () => {
               <RowActions onEdit={() => setFreelancerDialog({ open: true, item: f })} onDelete={() => confirmDelete(f.name, () => setFreelancerList(prev => prev.filter(x => x.id !== f.id)))} />
             </div>
           ))}
-          {freelancerList.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No freelancers yet</p>}
+          {filteredFreelancers.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No freelancers found</p>}
         </div>
       )}
 
       {activeTab === "pipeline" && (
         <div className="space-y-2">
-          {dealList.map(d => (
+          {filteredDeals.map(d => (
             <div key={d.id} className="group p-4 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1 min-w-0">
@@ -455,13 +534,13 @@ export const StudioExpanded = () => {
               </div>
             </div>
           ))}
-          {dealList.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No deals yet</p>}
+          {filteredDeals.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No deals found</p>}
         </div>
       )}
 
       {activeTab === "proposals" && (
         <div className="space-y-2">
-          {proposalList.map(p => {
+          {filteredProposals.map(p => {
             const statusStyle = {
               sent: "bg-primary/10 text-primary",
               draft: "bg-muted text-muted-foreground",
@@ -489,7 +568,7 @@ export const StudioExpanded = () => {
               </div>
             );
           })}
-          {proposalList.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No proposals yet</p>}
+          {filteredProposals.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No proposals found</p>}
         </div>
       )}
 
@@ -522,7 +601,7 @@ export const StudioExpanded = () => {
 
       {activeTab === "contacts" && (
         <div className="space-y-2">
-          {contactList.map(c => (
+          {filteredContacts.map(c => (
             <div key={c.id} className="group flex items-center gap-3 p-3 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors">
               <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center shrink-0">
                 <Building2 className="w-4 h-4 text-muted-foreground" />
@@ -550,7 +629,7 @@ export const StudioExpanded = () => {
               <RowActions onEdit={() => setContactDialog({ open: true, item: c })} onDelete={() => confirmDelete(c.name, () => setContactList(prev => prev.filter(x => x.id !== c.id)))} />
             </div>
           ))}
-          {contactList.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No contacts yet</p>}
+          {filteredContacts.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No contacts found</p>}
         </div>
       )}
 
