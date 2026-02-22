@@ -3,7 +3,7 @@ import {
   Users, Briefcase, TrendingUp, FileText, DollarSign, UserPlus,
   ChevronRight, Star, Clock, CheckCircle2, Circle, ArrowUpRight,
   Building2, Phone, Mail, MapPin, Filter, Plus, MoreHorizontal,
-  Pencil, Trash2, Search,
+  Pencil, Trash2, Search, ArrowUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -328,6 +328,12 @@ export const StudioExpanded = () => {
   const [dealStageFilter, setDealStageFilter] = useState<string>("all");
   const [contactTypeFilter, setContactTypeFilter] = useState<string>("all");
 
+  // Sort
+  const [freelancerSort, setFreelancerSort] = useState<string>("name");
+  const [dealSort, setDealSort] = useState<string>("name");
+  const [proposalSort, setProposalSort] = useState<string>("title");
+  const [contactSort, setContactSort] = useState<string>("name");
+
   // State
   const [freelancerList, setFreelancerList] = useState<Freelancer[]>(initialFreelancers);
   const [dealList, setDealList] = useState<Deal[]>(initialDeals);
@@ -349,23 +355,40 @@ export const StudioExpanded = () => {
 
   const confirmDelete = (label: string, onConfirm: () => void) => setDeleteDialog({ open: true, label, onConfirm });
 
-  // Filtered lists
+  // Parse currency string to number
+  const parseValue = (v: string) => parseFloat(v.replace(/[^0-9.]/g, "")) || 0;
+
+  // Filtered & sorted lists
   const q = search.toLowerCase();
-  const filteredFreelancers = freelancerList.filter(f =>
-    (freelancerStatusFilter === "all" || f.status === freelancerStatusFilter) &&
-    (!q || f.name.toLowerCase().includes(q) || f.role.toLowerCase().includes(q))
-  );
-  const filteredDeals = dealList.filter(d =>
-    (dealStageFilter === "all" || d.stage === dealStageFilter) &&
-    (!q || d.name.toLowerCase().includes(q) || d.contact.toLowerCase().includes(q))
-  );
-  const filteredProposals = proposalList.filter(p =>
-    (!q || p.title.toLowerCase().includes(q) || p.scope.toLowerCase().includes(q))
-  );
-  const filteredContacts = contactList.filter(c =>
-    (contactTypeFilter === "all" || c.type === contactTypeFilter) &&
-    (!q || c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q))
-  );
+  const filteredFreelancers = freelancerList
+    .filter(f => (freelancerStatusFilter === "all" || f.status === freelancerStatusFilter) && (!q || f.name.toLowerCase().includes(q) || f.role.toLowerCase().includes(q)))
+    .sort((a, b) => {
+      if (freelancerSort === "rating") return b.rating - a.rating;
+      if (freelancerSort === "rate") return parseValue(b.rate) - parseValue(a.rate);
+      return a.name.localeCompare(b.name);
+    });
+  const filteredDeals = dealList
+    .filter(d => (dealStageFilter === "all" || d.stage === dealStageFilter) && (!q || d.name.toLowerCase().includes(q) || d.contact.toLowerCase().includes(q)))
+    .sort((a, b) => {
+      if (dealSort === "value") return parseValue(b.value) - parseValue(a.value);
+      if (dealSort === "probability") return b.probability - a.probability;
+      return a.name.localeCompare(b.name);
+    });
+  const filteredProposals = proposalList
+    .filter(p => (!q || p.title.toLowerCase().includes(q) || p.scope.toLowerCase().includes(q)))
+    .sort((a, b) => {
+      if (proposalSort === "value") return parseValue(b.value) - parseValue(a.value);
+      if (proposalSort === "date") return a.date.localeCompare(b.date);
+      if (proposalSort === "status") return a.status.localeCompare(b.status);
+      return a.title.localeCompare(b.title);
+    });
+  const filteredContacts = contactList
+    .filter(c => (contactTypeFilter === "all" || c.type === contactTypeFilter) && (!q || c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q)))
+    .sort((a, b) => {
+      if (contactSort === "company") return a.company.localeCompare(b.company);
+      if (contactSort === "type") return a.type.localeCompare(b.type);
+      return a.name.localeCompare(b.name);
+    });
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "freelancers", label: "Freelancers", icon: <Users className="w-4 h-4" /> },
@@ -436,44 +459,93 @@ export const StudioExpanded = () => {
             />
           </div>
           {activeTab === "freelancers" && (
-            <Select value={freelancerStatusFilter} onValueChange={setFreelancerStatusFilter}>
-              <SelectTrigger className="rounded-xl h-9 w-[130px] text-xs border-border/30 bg-muted/20">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="available">Available</SelectItem>
-                <SelectItem value="on-project">On Project</SelectItem>
-                <SelectItem value="unavailable">Unavailable</SelectItem>
-              </SelectContent>
-            </Select>
+            <>
+              <Select value={freelancerStatusFilter} onValueChange={setFreelancerStatusFilter}>
+                <SelectTrigger className="rounded-xl h-9 w-[130px] text-xs border-border/30 bg-muted/20">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="on-project">On Project</SelectItem>
+                  <SelectItem value="unavailable">Unavailable</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={freelancerSort} onValueChange={setFreelancerSort}>
+                <SelectTrigger className="rounded-xl h-9 w-[110px] text-xs border-border/30 bg-muted/20">
+                  <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="rating">Rating</SelectItem>
+                  <SelectItem value="rate">Rate</SelectItem>
+                </SelectContent>
+              </Select>
+            </>
           )}
           {activeTab === "pipeline" && (
-            <Select value={dealStageFilter} onValueChange={setDealStageFilter}>
-              <SelectTrigger className="rounded-xl h-9 w-[150px] text-xs border-border/30 bg-muted/20">
-                <SelectValue placeholder="Stage" />
+            <>
+              <Select value={dealStageFilter} onValueChange={setDealStageFilter}>
+                <SelectTrigger className="rounded-xl h-9 w-[150px] text-xs border-border/30 bg-muted/20">
+                  <SelectValue placeholder="Stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stages</SelectItem>
+                  <SelectItem value="Qualified">Qualified</SelectItem>
+                  <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
+                  <SelectItem value="Negotiation">Negotiation</SelectItem>
+                  <SelectItem value="Closed Won">Closed Won</SelectItem>
+                  <SelectItem value="Closed Lost">Closed Lost</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={dealSort} onValueChange={setDealSort}>
+                <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
+                  <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="value">Value</SelectItem>
+                  <SelectItem value="probability">Probability</SelectItem>
+                </SelectContent>
+              </Select>
+            </>
+          )}
+          {activeTab === "proposals" && (
+            <Select value={proposalSort} onValueChange={setProposalSort}>
+              <SelectTrigger className="rounded-xl h-9 w-[110px] text-xs border-border/30 bg-muted/20">
+                <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Stages</SelectItem>
-                <SelectItem value="Qualified">Qualified</SelectItem>
-                <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
-                <SelectItem value="Negotiation">Negotiation</SelectItem>
-                <SelectItem value="Closed Won">Closed Won</SelectItem>
-                <SelectItem value="Closed Lost">Closed Lost</SelectItem>
+                <SelectItem value="title">Title</SelectItem>
+                <SelectItem value="value">Value</SelectItem>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="status">Status</SelectItem>
               </SelectContent>
             </Select>
           )}
           {activeTab === "contacts" && (
-            <Select value={contactTypeFilter} onValueChange={setContactTypeFilter}>
-              <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="client">Client</SelectItem>
-                <SelectItem value="lead">Lead</SelectItem>
-              </SelectContent>
-            </Select>
+            <>
+              <Select value={contactTypeFilter} onValueChange={setContactTypeFilter}>
+                <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                  <SelectItem value="lead">Lead</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={contactSort} onValueChange={setContactSort}>
+                <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
+                  <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="company">Company</SelectItem>
+                  <SelectItem value="type">Type</SelectItem>
+                </SelectContent>
+              </Select>
+            </>
           )}
         </div>
       )}
