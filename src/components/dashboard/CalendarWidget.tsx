@@ -83,14 +83,17 @@ export const CalendarPreview = ({ pixelSize }: { pixelSize?: { width: number; he
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-1.5 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">{dayNum}</p>
-          <p className="text-[10px] text-muted-foreground">{dayName}</p>
+        <div className="flex items-center gap-2">
+          <CalendarDays className="w-4 h-4" style={{ color: "#f59e0b" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">{dayNum}</p>
+            <p className="text-[10px] text-muted-foreground">{dayName}</p>
+          </div>
         </div>
         <div className="flex-1 space-y-1 overflow-hidden">
           {INITIAL_EVENTS.slice(0, 3).map((event) => (
             <div key={event.id} className="flex items-center gap-1.5">
-              <div className="w-1 h-1 rounded-full bg-foreground/30 shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: event.color }} />
               <span className="text-[10px] font-medium truncate flex-1">{event.title}</span>
               <span className="text-[8px] text-muted-foreground shrink-0">{formatTime(event.time)}</span>
             </div>

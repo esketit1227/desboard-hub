@@ -229,14 +229,17 @@ export const ClientsPreview = ({ pixelSize }: { pixelSize?: { width: number; hei
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-1.5 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">{CLIENTS.length}</p>
-          <p className="text-[10px] text-muted-foreground">clients</p>
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4" style={{ color: "#8b5cf6" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">{CLIENTS.length}</p>
+            <p className="text-[10px] text-muted-foreground">clients</p>
+          </div>
         </div>
         <div className="flex-1 space-y-1 overflow-hidden">
           {CLIENTS.slice(0, 3).map((h) => (
             <div key={h.id} className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-foreground/25 shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#8b5cf680" }} />
               <span className="text-[10px] font-medium truncate">{h.client}</span>
             </div>
           ))}

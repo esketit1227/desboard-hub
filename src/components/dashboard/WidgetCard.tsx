@@ -12,6 +12,7 @@ interface WidgetCardProps {
   cols?: number;
   icon?: React.ReactNode;
   accent?: boolean;
+  accentColor?: string;
   size?: WidgetSize;
   tintIndex?: number;
   bgColor?: string;
@@ -33,7 +34,7 @@ export function getSizeTier(pixelSize?: { width: number; height: number }): "com
   return "compact";
 }
 
-const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {
+const WidgetCard = ({ id, title, icon, accentColor, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {
   const {
     attributes,
     listeners,
@@ -121,17 +122,28 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
         </div>
       </div>
 
-      {/* Front panel — glassy transparent */}
+      {/* Front panel — glassy transparent with accent tint when expanded */}
       <div
         className={cn(
           "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden",
           "backdrop-blur-2xl border border-white/20 dark:border-white/10"
         )}
         style={{
-          background: "linear-gradient(160deg, hsl(0 0% 100% / 0.45), hsl(0 0% 100% / 0.2))",
-          boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.5), inset 0 -1px 0 hsl(0 0% 0% / 0.03)",
+          background: tier !== "compact" && accentColor
+            ? `linear-gradient(160deg, ${accentColor}18 0%, hsl(0 0% 100% / 0.35) 40%, hsl(0 0% 100% / 0.15) 100%)`
+            : "linear-gradient(160deg, hsl(0 0% 100% / 0.45), hsl(0 0% 100% / 0.2))",
+          boxShadow: tier !== "compact" && accentColor
+            ? `0 8px 32px -8px ${accentColor}20, inset 0 1px 0 hsl(0 0% 100% / 0.5), inset 0 -1px 0 hsl(0 0% 0% / 0.03)`
+            : "0 8px 32px -8px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.5), inset 0 -1px 0 hsl(0 0% 0% / 0.03)",
         }}
       >
+        {/* Accent gradient strip at top when expanded */}
+        {tier !== "compact" && accentColor && (
+          <div
+            className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl"
+            style={{ background: `linear-gradient(90deg, ${accentColor}80, ${accentColor}20, transparent)` }}
+          />
+        )}
         {/* Header */}
         <div className="flex items-center justify-between px-3.5 pt-2.5 pb-0">
           <h3 className="text-[10px] font-semibold tracking-wide uppercase text-foreground/40">{title}</h3>

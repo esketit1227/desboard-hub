@@ -37,6 +37,7 @@ const WIDGETS: Record<
   {
     title: string;
     icon: React.ReactNode;
+    accentColor: string;
     preview: React.ComponentType<{pixelSize?: {width: number;height: number;};}>;
     expanded: React.ComponentType;
     cols: number;
@@ -49,6 +50,7 @@ const WIDGETS: Record<
   projects: {
     title: "Projects",
     icon: <FolderKanban className="w-4 h-4" />,
+    accentColor: "#6366f1",
     preview: ProjectsPreview,
     expanded: ProjectsExpanded,
     cols: 1,
@@ -59,6 +61,7 @@ const WIDGETS: Record<
   calendar: {
     title: "Calendar",
     icon: <CalendarDays className="w-4 h-4" />,
+    accentColor: "#f59e0b",
     preview: CalendarPreview,
     expanded: CalendarExpanded,
     cols: 1,
@@ -69,6 +72,7 @@ const WIDGETS: Record<
   finances: {
     title: "Finances",
     icon: <DollarSign className="w-4 h-4" />,
+    accentColor: "#10b981",
     preview: FinancesPreview,
     expanded: FinancesExpanded,
     cols: 1,
@@ -79,6 +83,7 @@ const WIDGETS: Record<
   clients: {
     title: "Client Portal",
     icon: <Users className="w-4 h-4" />,
+    accentColor: "#8b5cf6",
     preview: ClientsPreview,
     expanded: ClientsExpanded,
     cols: 1,
@@ -89,6 +94,7 @@ const WIDGETS: Record<
   files: {
     title: "Files",
     icon: <HardDrive className="w-4 h-4" />,
+    accentColor: "#3b82f6",
     preview: FilesPreview,
     expanded: FilesExpanded,
     cols: 1,
@@ -99,6 +105,7 @@ const WIDGETS: Record<
   tasks: {
     title: "Tasks",
     icon: <ListTodo className="w-4 h-4" />,
+    accentColor: "#ef4444",
     preview: TasksPreview,
     expanded: TasksExpanded,
     cols: 1,
@@ -109,6 +116,7 @@ const WIDGETS: Record<
   messages: {
     title: "Messages",
     icon: <MessageSquare className="w-4 h-4" />,
+    accentColor: "#06b6d4",
     preview: MessagesPreview,
     expanded: MessagesExpanded,
     cols: 1,
@@ -119,6 +127,7 @@ const WIDGETS: Record<
   analytics: {
     title: "Analytics",
     icon: <BarChart3 className="w-4 h-4" />,
+    accentColor: "#f97316",
     preview: AnalyticsPreview,
     expanded: AnalyticsExpanded,
     cols: 1,
@@ -129,6 +138,7 @@ const WIDGETS: Record<
   studio: {
     title: "Studio",
     icon: <Briefcase className="w-4 h-4" />,
+    accentColor: "#ec4899",
     preview: StudioPreview,
     expanded: StudioExpanded,
     cols: 1,
@@ -262,6 +272,7 @@ const Index = () => {
                         id={id}
                         title={widget.title}
                         icon={widget.icon}
+                        accentColor={widget.accentColor}
                         size={widgetSizes[id] || "small"}
                         tintIndex={i}
                         onExpand={() => handleExpand(id)}

@@ -26,14 +26,17 @@ export const MessagesPreview = ({ pixelSize }: { pixelSize?: { width: number; he
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-1.5 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">{unread.length}</p>
-          <p className="text-[10px] text-muted-foreground">unread</p>
+        <div className="flex items-center gap-2">
+          <MessageSquare className="w-4 h-4" style={{ color: "#06b6d4" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">{unread.length}</p>
+            <p className="text-[10px] text-muted-foreground">unread</p>
+          </div>
         </div>
         <div className="flex-1 space-y-1.5 overflow-hidden">
           {initialMessages.slice(0, 3).map((msg) => (
             <div key={msg.id} className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-foreground/10 flex items-center justify-center text-[7px] font-bold shrink-0">{msg.avatar}</div>
+              <div className="w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold shrink-0" style={{ background: "#06b6d420", color: "#06b6d4" }}>{msg.avatar}</div>
               <span className="text-[10px] truncate flex-1">{msg.preview}</span>
             </div>
           ))}

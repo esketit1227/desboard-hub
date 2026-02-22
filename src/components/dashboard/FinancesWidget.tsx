@@ -114,18 +114,21 @@ export const FinancesPreview = ({ pixelSize }: { pixelSize?: { width: number; he
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-1.5 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">$7.8k</p>
-          <p className="text-[10px] text-muted-foreground">revenue</p>
+        <div className="flex items-center gap-2">
+          <DollarSign className="w-4 h-4" style={{ color: "#10b981" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">$7.8k</p>
+            <p className="text-[10px] text-muted-foreground">revenue</p>
+          </div>
         </div>
         <div className="flex items-end gap-[3px] flex-1 h-[28px]">
           {monthlyData.map((d, i) => (
-            <div key={i} className="flex-1 rounded-sm bg-foreground/15" style={{ height: `${(d.income / 8400) * 100}%` }} />
+            <div key={i} className="flex-1 rounded-sm" style={{ height: `${(d.income / 8400) * 100}%`, background: "#10b98140" }} />
           ))}
         </div>
         <div className="flex items-center justify-between text-[9px] text-muted-foreground mt-auto">
           <span>$2.7k expenses</span>
-          <span>+28%</span>
+          <span className="font-medium" style={{ color: "#10b981" }}>+28%</span>
         </div>
       </div>
     );

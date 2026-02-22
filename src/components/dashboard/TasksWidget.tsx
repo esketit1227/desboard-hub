@@ -36,21 +36,24 @@ export const TasksPreview = ({ pixelSize }: { pixelSize?: { width: number; heigh
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-1.5 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">{pending.length}</p>
-          <p className="text-[10px] text-muted-foreground">pending</p>
+        <div className="flex items-center gap-2">
+          <ListTodo className="w-4 h-4" style={{ color: "#ef4444" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">{pending.length}</p>
+            <p className="text-[10px] text-muted-foreground">pending</p>
+          </div>
         </div>
         <div className="flex-1 space-y-1 overflow-hidden">
           {pending.slice(0, 3).map((task) => (
             <div key={task.id} className="flex items-center gap-1.5">
-              <div className="w-1 h-1 rounded-full bg-foreground/30 shrink-0" />
+              <Circle className="w-2.5 h-2.5 shrink-0" style={{ color: "#ef444480" }} />
               <span className="text-[10px] font-medium truncate">{task.title}</span>
             </div>
           ))}
         </div>
         <div className="flex items-center gap-2 mt-auto">
-          <div className="flex-1 h-1 bg-foreground/8 rounded-full overflow-hidden">
-            <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${Math.round((completed.length / initialTasks.length) * 100)}%` }} />
+          <div className="flex-1 h-1.5 bg-foreground/8 rounded-full overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${Math.round((completed.length / initialTasks.length) * 100)}%`, background: "#ef4444" }} />
           </div>
           <span className="text-[9px] text-muted-foreground">{completed.length}/{initialTasks.length}</span>
         </div>
