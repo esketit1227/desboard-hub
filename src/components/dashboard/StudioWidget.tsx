@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Users, Briefcase, TrendingUp, FileText, DollarSign, UserPlus,
   ChevronRight, Star, Clock, CheckCircle2, Circle, ArrowUpRight,
   Building2, Phone, Mail, MapPin, Filter, Plus, MoreHorizontal,
-  Pencil, Trash2, Search, ArrowUpDown,
+  Pencil, Trash2, Search, ArrowUpDown, LayoutGrid, List,
+  GripVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 
 /* ─── Types ─── */
 type FreelancerStatus = "available" | "on-project" | "unavailable";
@@ -318,10 +331,133 @@ const RowActions = ({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => 
   </div>
 );
 
+/* ─── Kanban Components ─── */
+const KANBAN_STAGES = ["Qualified", "Proposal Sent", "Negotiation", "Closed Won", "Closed Lost"];
+
+const KanbanCard = ({ deal, onEdit, onDelete }: { deal: Deal; onEdit: () => void; onDelete: () => void }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: deal.id, data: { deal } });
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="group p-3 rounded-xl bg-background/60 border border-border/20 hover:border-border/40 transition-all cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
+      <div className="flex items-start justify-between mb-1.5">
+        <p className="text-xs font-medium leading-tight">{deal.name}</p>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 -mt-0.5 -mr-1">
+          <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="w-5 h-5 rounded-md hover:bg-muted/50 flex items-center justify-center">
+            <Pencil className="w-2.5 h-2.5 text-muted-foreground" />
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="w-5 h-5 rounded-md hover:bg-destructive/10 flex items-center justify-center">
+            <Trash2 className="w-2.5 h-2.5 text-destructive/70" />
+          </button>
+        </div>
+      </div>
+      <p className="text-[10px] text-muted-foreground mb-2">{deal.contact}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold">{deal.value}</p>
+        <span className="text-[10px] text-muted-foreground">{deal.probability}%</span>
+      </div>
+    </div>
+  );
+};
+
+const KanbanColumn = ({ stage, deals, onEdit, onDelete }: { stage: string; deals: Deal[]; onEdit: (d: Deal) => void; onDelete: (d: Deal) => void }) => {
+  const { setNodeRef, isOver } = useDroppable({ id: stage });
+  const stageTotal = deals.reduce((sum, d) => sum + (parseFloat(d.value.replace(/[^0-9.]/g, "")) || 0), 0);
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "flex flex-col min-w-[180px] w-[180px] rounded-2xl bg-muted/15 p-2.5 transition-colors",
+        isOver && "bg-primary/5 ring-1 ring-primary/20"
+      )}
+    >
+      <div className="flex items-center justify-between mb-2 px-1">
+        <div className="flex items-center gap-1.5">
+          <span className={cn("w-2 h-2 rounded-full", stageColors[stage]?.replace(/text-\S+/, "").trim() || "bg-muted")} />
+          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{stage}</p>
+        </div>
+        <span className="text-[10px] text-muted-foreground">{deals.length}</span>
+      </div>
+      <p className="text-[10px] text-muted-foreground px-1 mb-2">
+        ${stageTotal.toLocaleString()}
+      </p>
+      <div className="flex flex-col gap-1.5 flex-1 min-h-[60px]">
+        {deals.map(d => (
+          <KanbanCard key={d.id} deal={d} onEdit={() => onEdit(d)} onDelete={() => onDelete(d)} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const KanbanBoard = ({ deals, onMoveDeal, onEdit, onDelete }: {
+  deals: Deal[];
+  onMoveDeal: (dealId: string, newStage: string) => void;
+  onEdit: (d: Deal) => void;
+  onDelete: (d: Deal) => void;
+}) => {
+  const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const deal = deals.find(d => d.id === event.active.id);
+    if (deal) setActiveDeal(deal);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveDeal(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const overId = String(over.id);
+    // If dropped on a stage column
+    if (KANBAN_STAGES.includes(overId)) {
+      onMoveDeal(String(active.id), overId);
+    } else {
+      // Dropped on another card — move to that card's stage
+      const targetDeal = deals.find(d => d.id === overId);
+      if (targetDeal) {
+        onMoveDeal(String(active.id), targetDeal.stage);
+      }
+    }
+  };
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="flex gap-2.5 overflow-x-auto pb-2">
+        {KANBAN_STAGES.map(stage => (
+          <KanbanColumn
+            key={stage}
+            stage={stage}
+            deals={deals.filter(d => d.stage === stage)}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
+      <DragOverlay>
+        {activeDeal && (
+          <div className="p-3 rounded-xl bg-background border border-border/40 shadow-lg w-[170px] rotate-2">
+            <p className="text-xs font-medium">{activeDeal.name}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{activeDeal.contact}</p>
+            <p className="text-xs font-semibold mt-1.5">{activeDeal.value}</p>
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
+  );
+};
+
 /* ─── Expanded View ─── */
 export const StudioExpanded = () => {
   const [activeTab, setActiveTab] = useState<Tab>("freelancers");
   const [search, setSearch] = useState("");
+  const [pipelineView, setPipelineView] = useState<"list" | "kanban">("kanban");
 
   // Filters
   const [freelancerStatusFilter, setFreelancerStatusFilter] = useState<string>("all");
@@ -485,29 +621,47 @@ export const StudioExpanded = () => {
           )}
           {activeTab === "pipeline" && (
             <>
-              <Select value={dealStageFilter} onValueChange={setDealStageFilter}>
-                <SelectTrigger className="rounded-xl h-9 w-[150px] text-xs border-border/30 bg-muted/20">
-                  <SelectValue placeholder="Stage" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Stages</SelectItem>
-                  <SelectItem value="Qualified">Qualified</SelectItem>
-                  <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
-                  <SelectItem value="Negotiation">Negotiation</SelectItem>
-                  <SelectItem value="Closed Won">Closed Won</SelectItem>
-                  <SelectItem value="Closed Lost">Closed Lost</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={dealSort} onValueChange={setDealSort}>
-                <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
-                  <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="value">Value</SelectItem>
-                  <SelectItem value="probability">Probability</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center rounded-xl border border-border/30 bg-muted/20 h-9 p-0.5">
+                <button
+                  onClick={() => setPipelineView("list")}
+                  className={cn("rounded-lg h-full px-2 transition-colors", pipelineView === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setPipelineView("kanban")}
+                  className={cn("rounded-lg h-full px-2 transition-colors", pipelineView === "kanban" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {pipelineView === "list" && (
+                <>
+                  <Select value={dealStageFilter} onValueChange={setDealStageFilter}>
+                    <SelectTrigger className="rounded-xl h-9 w-[150px] text-xs border-border/30 bg-muted/20">
+                      <SelectValue placeholder="Stage" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Stages</SelectItem>
+                      <SelectItem value="Qualified">Qualified</SelectItem>
+                      <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
+                      <SelectItem value="Negotiation">Negotiation</SelectItem>
+                      <SelectItem value="Closed Won">Closed Won</SelectItem>
+                      <SelectItem value="Closed Lost">Closed Lost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={dealSort} onValueChange={setDealSort}>
+                    <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
+                      <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="value">Value</SelectItem>
+                      <SelectItem value="probability">Probability</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </>
+              )}
             </>
           )}
           {activeTab === "proposals" && (
@@ -579,7 +733,7 @@ export const StudioExpanded = () => {
         </div>
       )}
 
-      {activeTab === "pipeline" && (
+      {activeTab === "pipeline" && pipelineView === "list" && (
         <div className="space-y-2">
           {filteredDeals.map(d => (
             <div key={d.id} className="group p-4 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors">
@@ -608,6 +762,15 @@ export const StudioExpanded = () => {
           ))}
           {filteredDeals.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No deals found</p>}
         </div>
+      )}
+
+      {activeTab === "pipeline" && pipelineView === "kanban" && (
+        <KanbanBoard
+          deals={dealList}
+          onMoveDeal={(dealId, newStage) => setDealList(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d))}
+          onEdit={(d) => setDealDialog({ open: true, item: d })}
+          onDelete={(d) => confirmDelete(d.name, () => setDealList(prev => prev.filter(x => x.id !== d.id)))}
+        />
       )}
 
       {activeTab === "proposals" && (
