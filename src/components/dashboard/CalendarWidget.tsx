@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
 const events = [
   { day: 18, title: "Client Review — Flux", time: "10:00 AM", color: "bg-primary" },
@@ -19,62 +19,28 @@ const generateDays = () => {
   for (let i = 0; i < offset; i++) cells.push(null);
   for (let i = 1; i <= daysInMonth; i++) cells.push(i);
 
-  return { cells, currentDay };
+  return { cells, currentDay, daysInMonth };
 };
 
-const CalendarWidget = () => {
-  const { cells, currentDay } = generateDays();
-  const monthName = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
-  const eventDays = events.map((e) => e.day);
+/** Compact preview */
+export const CalendarPreview = () => {
+  const today = new Date();
+  const dayName = today.toLocaleDateString("en-US", { weekday: "short" });
+  const dayNum = today.getDate();
+  const month = today.toLocaleDateString("en-US", { month: "short" });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">{monthName}</span>
-        <div className="flex gap-1">
-          <button className="rounded-lg p-1 hover:bg-secondary transition-colors">
-            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button className="rounded-lg p-1 hover:bg-secondary transition-colors">
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
+    <div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-3xl font-bold tracking-tight">{dayNum}</span>
+        <span className="text-sm opacity-70">{month}, {dayName}</span>
       </div>
-
-      <div className="grid grid-cols-7 gap-1 text-center">
-        {dayLabels.map((d) => (
-          <span key={d} className="text-[10px] text-muted-foreground font-medium py-1">
-            {d}
-          </span>
-        ))}
-        {cells.map((day, i) => (
-          <div key={i} className="relative flex items-center justify-center">
-            {day !== null && (
-              <span
-                className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs transition-colors ${
-                  day === currentDay
-                    ? "bg-primary text-primary-foreground font-semibold"
-                    : "hover:bg-secondary"
-                }`}
-              >
-                {day}
-                {eventDays.includes(day) && (
-                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-accent" />
-                )}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="space-y-2 pt-2 border-t border-border/50">
-        {events.map((event) => (
-          <div key={event.title} className="flex items-center gap-3">
-            <span className={`w-2 h-2 rounded-full ${event.color} shrink-0`} />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">{event.title}</p>
-              <p className="text-[10px] text-muted-foreground">{event.time}</p>
-            </div>
+      <p className="text-xs opacity-60 mt-1">3 events this week</p>
+      <div className="flex gap-1.5 mt-3">
+        {events.map((e) => (
+          <div key={e.title} className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2 py-1">
+            <span className={`w-1.5 h-1.5 rounded-full ${e.color}`} />
+            <span className="text-[10px] font-medium truncate max-w-[60px]">{e.title.split("—")[0].trim()}</span>
           </div>
         ))}
       </div>
@@ -82,4 +48,66 @@ const CalendarWidget = () => {
   );
 };
 
-export default CalendarWidget;
+/** Full expanded view */
+export const CalendarExpanded = () => {
+  const { cells, currentDay } = generateDays();
+  const monthName = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const eventDays = events.map((e) => e.day);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <span className="text-lg font-semibold">{monthName}</span>
+        <div className="flex gap-1">
+          <button className="rounded-xl p-2 hover:bg-secondary transition-colors">
+            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button className="rounded-xl p-2 hover:bg-secondary transition-colors">
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-2 text-center">
+        {dayLabels.map((d, i) => (
+          <span key={`${d}-${i}`} className="text-xs text-muted-foreground font-medium py-2">
+            {d}
+          </span>
+        ))}
+        {cells.map((day, i) => {
+          const hasEvent = day !== null && eventDays.includes(day);
+          return (
+            <div key={i} className="relative flex items-center justify-center">
+              {day !== null && (
+                <span
+                  className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-medium transition-colors ${
+                    day === currentDay
+                      ? "bg-primary text-primary-foreground font-bold"
+                      : hasEvent
+                      ? "bg-primary/15 text-primary font-semibold"
+                      : "hover:bg-secondary"
+                  }`}
+                >
+                  {day}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="space-y-3 pt-4 border-t border-border/50">
+        <h4 className="text-sm font-semibold">Upcoming Events</h4>
+        {events.map((event) => (
+          <div key={event.title} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30">
+            <span className={`w-3 h-3 rounded-full ${event.color} shrink-0`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium">{event.title}</p>
+              <p className="text-xs text-muted-foreground">{event.time}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
