@@ -29,28 +29,63 @@ export const CalendarPreview = ({ pixelSize }: { pixelSize?: { width: number; he
   const dayName = today.toLocaleDateString("en-US", { weekday: "short" });
   const dayNum = today.getDate();
   const month = today.toLocaleDateString("en-US", { month: "short" });
+  const year = today.getFullYear();
   const h = pixelSize?.height ?? 140;
-  const showEvents = h > 200;
+  const w = pixelSize?.width ?? 300;
+
+  const titleSize = h > 300 ? "text-5xl" : h > 200 ? "text-4xl" : "text-3xl";
+  const subSize = h > 300 ? "text-base" : h > 200 ? "text-sm" : "text-xs";
+  const eventTitleSize = w > 400 ? "text-xs" : "text-[11px]";
+  const eventTimeSize = w > 400 ? "text-[11px]" : "text-[10px]";
+
+  const showEvents = h > 180;
+  const showMiniCal = h > 340 && w > 280;
   const eventCount = h > 300 ? events.length : 2;
 
   return (
     <div>
       <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-bold tracking-tight">{dayNum}</span>
-        <span className="text-sm opacity-60">{month}, {dayName}</span>
+        <span className={`${titleSize} font-bold tracking-tight`}>{dayNum}</span>
+        <span className={`${subSize} opacity-60`}>{month} {year}, {dayName}</span>
       </div>
-      {!showEvents && <p className="text-xs opacity-60 mt-1">3 events this week</p>}
+      {!showEvents && <p className={`${subSize} opacity-60 mt-1`}>3 events this week</p>}
       {showEvents && (
         <div className="mt-2 space-y-1.5">
+          <p className="text-[10px] opacity-50 font-medium uppercase tracking-wider">Upcoming</p>
           {events.slice(0, eventCount).map((event) => (
             <div key={event.title} className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${event.color} shrink-0`} />
-              <span className="text-[11px] font-medium truncate flex-1">{event.title}</span>
-              <span className="text-[10px] opacity-50 shrink-0">{event.time}</span>
+              <span className={`${eventTitleSize} font-medium truncate flex-1`}>{event.title}</span>
+              <span className={`${eventTimeSize} opacity-50 shrink-0`}>{event.time}</span>
             </div>
           ))}
         </div>
       )}
+      {showMiniCal && (() => {
+        const { cells, currentDay } = generateDays();
+        const eventDays = events.map(e => e.day);
+        return (
+          <div className="mt-3 pt-2 border-t border-border/20">
+            <div className="grid grid-cols-7 gap-0.5 text-center">
+              {dayLabels.map((d, i) => (
+                <span key={`${d}-${i}`} className="text-[9px] text-muted-foreground font-medium py-0.5">{d}</span>
+              ))}
+              {cells.slice(0, 35).map((day, i) => (
+                <span
+                  key={i}
+                  className={cn(
+                    "text-[9px] w-5 h-5 flex items-center justify-center rounded-md mx-auto",
+                    day === currentDay && "bg-primary text-primary-foreground font-bold",
+                    day && eventDays.includes(day) && day !== currentDay && "bg-primary/15 text-primary font-semibold"
+                  )}
+                >
+                  {day}
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

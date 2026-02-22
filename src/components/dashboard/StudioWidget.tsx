@@ -37,35 +37,6 @@ interface Deal { id: string; name: string; value: string; stage: string; probabi
 interface Proposal { id: string; title: string; status: ProposalStatus; value: string; date: string; scope: string; }
 interface Contact { id: string; name: string; company: string; email: string; phone: string; type: ContactType; }
 
-/* ─── Preview ─── */
-export const StudioPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
-  const h = pixelSize?.height ?? 140;
-  const showTeam = h > 200;
-  const itemCount = h > 300 ? 4 : 2;
-
-  if (!showTeam) {
-    return (
-      <div>
-        <p className="text-3xl font-semibold tracking-tight">Studio</p>
-        <p className="text-xs text-muted-foreground mt-1">Business Hub</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-1.5">
-      <p className="text-xs text-muted-foreground font-medium">Team · {initialFreelancers.length} members</p>
-      {initialFreelancers.slice(0, itemCount).map((f) => (
-        <div key={f.id} className="flex items-center gap-2 py-0.5">
-          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusColors[f.status]}`} />
-          <span className="text-[11px] font-medium truncate flex-1">{f.name}</span>
-          <span className="text-[10px] opacity-50">{f.role}</span>
-        </div>
-      ))}
-    </div>
-  );
-};
-
 /* ─── Initial Data ─── */
 const initialFreelancers: Freelancer[] = [
   { id: "1", name: "Ava Chen", role: "UI Designer", rate: "$85/hr", rating: 4.9, status: "available", avatar: "AC" },
@@ -117,6 +88,58 @@ const statusColors: Record<string, string> = {
 
 type Tab = "freelancers" | "pipeline" | "proposals" | "budget" | "contacts";
 
+/* ─── Preview ─── */
+export const StudioPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const w = pixelSize?.width ?? 300;
+
+  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
+  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
+  const itemSize = w > 400 ? "text-xs" : "text-[11px]";
+  const subSize = w > 400 ? "text-xs" : "text-[10px]";
+
+  const showTeam = h > 180;
+  const showPipeline = h > 300;
+  const itemCount = h > 340 ? 4 : h > 240 ? 3 : 2;
+
+  if (!showTeam) {
+    const available = initialFreelancers.filter(f => f.status === "available").length;
+    return (
+      <div>
+        <p className={`${titleSize} font-semibold tracking-tight`}>Studio</p>
+        <p className={`${labelSize} text-muted-foreground mt-1`}>Business Hub</p>
+        {h > 160 && (
+          <p className={`${subSize} opacity-40 mt-1`}>{available} available · {initialDeals.length} deals</p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <p className={`${labelSize} text-muted-foreground font-medium`}>Team · {initialFreelancers.length} members</p>
+      {initialFreelancers.slice(0, itemCount).map((f) => (
+        <div key={f.id} className="flex items-center gap-2 py-0.5">
+          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusColors[f.status]}`} />
+          <span className={`${itemSize} font-medium truncate flex-1`}>{f.name}</span>
+          <span className={`${subSize} opacity-50`}>{f.role}</span>
+        </div>
+      ))}
+      {showPipeline && (
+        <div className="pt-2 mt-1 border-t border-border/20">
+          <p className={`${labelSize} text-muted-foreground font-medium mb-1`}>Pipeline</p>
+          {initialDeals.slice(0, 2).map(d => (
+            <div key={d.id} className="flex items-center gap-2 py-0.5">
+              <span className={`${itemSize} font-medium truncate flex-1`}>{d.name}</span>
+              <span className={`${subSize} opacity-50`}>{d.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ─── Helper ─── */
 const genId = () => Math.random().toString(36).slice(2, 9);
 const getInitials = (name: string) => name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
@@ -141,20 +164,12 @@ const DeleteConfirmDialog = ({ open, onOpenChange, onConfirm, label }: { open: b
 const FreelancerDialog = ({ open, onOpenChange, freelancer, onSave }: { open: boolean; onOpenChange: (o: boolean) => void; freelancer: Freelancer | null; onSave: (f: Freelancer) => void }) => {
   const [form, setForm] = useState<Freelancer>(freelancer ?? { id: "", name: "", role: "", rate: "", rating: 5.0, status: "available", avatar: "" });
   const isEdit = !!freelancer;
-
-  const handleSave = () => {
-    const saved = { ...form, id: form.id || genId(), avatar: form.avatar || getInitials(form.name) };
-    onSave(saved);
-    onOpenChange(false);
-  };
+  const handleSave = () => { onSave({ ...form, id: form.id || genId(), avatar: form.avatar || getInitials(form.name) }); onOpenChange(false); };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-strong rounded-3xl border-border/30 max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit" : "Add"} Freelancer</DialogTitle>
-          <DialogDescription>{isEdit ? "Update freelancer details." : "Add a new freelancer to your pool."}</DialogDescription>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? "Edit" : "Add"} Freelancer</DialogTitle><DialogDescription>{isEdit ? "Update freelancer details." : "Add a new freelancer to your pool."}</DialogDescription></DialogHeader>
         <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs">Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="rounded-xl mt-1" /></div>
@@ -167,11 +182,7 @@ const FreelancerDialog = ({ open, onOpenChange, freelancer, onSave }: { open: bo
               <Label className="text-xs">Status</Label>
               <Select value={form.status} onValueChange={v => setForm(p => ({ ...p, status: v as FreelancerStatus }))}>
                 <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="on-project">On Project</SelectItem>
-                  <SelectItem value="unavailable">Unavailable</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="available">Available</SelectItem><SelectItem value="on-project">On Project</SelectItem><SelectItem value="unavailable">Unavailable</SelectItem></SelectContent>
               </Select>
             </div>
           </div>
@@ -189,19 +200,12 @@ const FreelancerDialog = ({ open, onOpenChange, freelancer, onSave }: { open: bo
 const DealDialog = ({ open, onOpenChange, deal, onSave }: { open: boolean; onOpenChange: (o: boolean) => void; deal: Deal | null; onSave: (d: Deal) => void }) => {
   const [form, setForm] = useState<Deal>(deal ?? { id: "", name: "", value: "", stage: "Qualified", probability: 50, contact: "" });
   const isEdit = !!deal;
-
-  const handleSave = () => {
-    onSave({ ...form, id: form.id || genId() });
-    onOpenChange(false);
-  };
+  const handleSave = () => { onSave({ ...form, id: form.id || genId() }); onOpenChange(false); };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-strong rounded-3xl border-border/30 max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit" : "Add"} Deal</DialogTitle>
-          <DialogDescription>{isEdit ? "Update deal details." : "Add a new deal to your pipeline."}</DialogDescription>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? "Edit" : "Add"} Deal</DialogTitle><DialogDescription>{isEdit ? "Update deal details." : "Add a new deal to your pipeline."}</DialogDescription></DialogHeader>
         <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs">Deal Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="rounded-xl mt-1" /></div>
@@ -212,13 +216,7 @@ const DealDialog = ({ open, onOpenChange, deal, onSave }: { open: boolean; onOpe
               <Label className="text-xs">Stage</Label>
               <Select value={form.stage} onValueChange={v => setForm(p => ({ ...p, stage: v }))}>
                 <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Qualified">Qualified</SelectItem>
-                  <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
-                  <SelectItem value="Negotiation">Negotiation</SelectItem>
-                  <SelectItem value="Closed Won">Closed Won</SelectItem>
-                  <SelectItem value="Closed Lost">Closed Lost</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="Qualified">Qualified</SelectItem><SelectItem value="Proposal Sent">Proposal Sent</SelectItem><SelectItem value="Negotiation">Negotiation</SelectItem><SelectItem value="Closed Won">Closed Won</SelectItem><SelectItem value="Closed Lost">Closed Lost</SelectItem></SelectContent>
               </Select>
             </div>
             <div><Label className="text-xs">Probability</Label><Input type="number" min="0" max="100" value={form.probability} onChange={e => setForm(p => ({ ...p, probability: parseInt(e.target.value) || 0 }))} className="rounded-xl mt-1" /></div>
@@ -238,19 +236,12 @@ const DealDialog = ({ open, onOpenChange, deal, onSave }: { open: boolean; onOpe
 const ProposalDialog = ({ open, onOpenChange, proposal, onSave }: { open: boolean; onOpenChange: (o: boolean) => void; proposal: Proposal | null; onSave: (p: Proposal) => void }) => {
   const [form, setForm] = useState<Proposal>(proposal ?? { id: "", title: "", status: "draft", value: "", date: "", scope: "" });
   const isEdit = !!proposal;
-
-  const handleSave = () => {
-    onSave({ ...form, id: form.id || genId() });
-    onOpenChange(false);
-  };
+  const handleSave = () => { onSave({ ...form, id: form.id || genId() }); onOpenChange(false); };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-strong rounded-3xl border-border/30 max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit" : "Add"} Proposal</DialogTitle>
-          <DialogDescription>{isEdit ? "Update proposal details." : "Create a new proposal."}</DialogDescription>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? "Edit" : "Add"} Proposal</DialogTitle><DialogDescription>{isEdit ? "Update proposal details." : "Create a new proposal."}</DialogDescription></DialogHeader>
         <div className="grid gap-3">
           <div><Label className="text-xs">Title</Label><Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="rounded-xl mt-1" /></div>
           <div className="grid grid-cols-3 gap-3">
@@ -260,12 +251,7 @@ const ProposalDialog = ({ open, onOpenChange, proposal, onSave }: { open: boolea
               <Label className="text-xs">Status</Label>
               <Select value={form.status} onValueChange={v => setForm(p => ({ ...p, status: v as ProposalStatus }))}>
                 <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="draft">Draft</SelectItem><SelectItem value="sent">Sent</SelectItem><SelectItem value="accepted">Accepted</SelectItem><SelectItem value="rejected">Rejected</SelectItem></SelectContent>
               </Select>
             </div>
           </div>
@@ -284,19 +270,12 @@ const ProposalDialog = ({ open, onOpenChange, proposal, onSave }: { open: boolea
 const ContactDialog = ({ open, onOpenChange, contact, onSave }: { open: boolean; onOpenChange: (o: boolean) => void; contact: Contact | null; onSave: (c: Contact) => void }) => {
   const [form, setForm] = useState<Contact>(contact ?? { id: "", name: "", company: "", email: "", phone: "", type: "lead" });
   const isEdit = !!contact;
-
-  const handleSave = () => {
-    onSave({ ...form, id: form.id || genId() });
-    onOpenChange(false);
-  };
+  const handleSave = () => { onSave({ ...form, id: form.id || genId() }); onOpenChange(false); };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="glass-strong rounded-3xl border-border/30 max-w-md">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit" : "Add"} Contact</DialogTitle>
-          <DialogDescription>{isEdit ? "Update contact details." : "Add a new contact."}</DialogDescription>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>{isEdit ? "Edit" : "Add"} Contact</DialogTitle><DialogDescription>{isEdit ? "Update contact details." : "Add a new contact."}</DialogDescription></DialogHeader>
         <div className="grid gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs">Name</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="rounded-xl mt-1" /></div>
@@ -310,10 +289,7 @@ const ContactDialog = ({ open, onOpenChange, contact, onSave }: { open: boolean;
             <Label className="text-xs">Type</Label>
             <Select value={form.type} onValueChange={v => setForm(p => ({ ...p, type: v as ContactType }))}>
               <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="client">Client</SelectItem>
-                <SelectItem value="lead">Lead</SelectItem>
-              </SelectContent>
+              <SelectContent><SelectItem value="client">Client</SelectItem><SelectItem value="lead">Lead</SelectItem></SelectContent>
             </Select>
           </div>
         </div>
@@ -329,596 +305,245 @@ const ContactDialog = ({ open, onOpenChange, contact, onSave }: { open: boolean;
 /* ─── Row Action Buttons ─── */
 const RowActions = ({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) => (
   <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-    <button onClick={onEdit} className="w-7 h-7 rounded-lg hover:bg-muted/50 flex items-center justify-center transition-colors">
-      <Pencil className="w-3 h-3 text-muted-foreground" />
-    </button>
-    <button onClick={onDelete} className="w-7 h-7 rounded-lg hover:bg-destructive/10 flex items-center justify-center transition-colors">
-      <Trash2 className="w-3 h-3 text-destructive/70" />
-    </button>
+    <button onClick={onEdit} className="rounded-lg p-1.5 hover:bg-secondary transition-colors"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
+    <button onClick={onDelete} className="rounded-lg p-1.5 hover:bg-destructive/10 transition-colors"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
   </div>
 );
 
-/* ─── Kanban Components ─── */
-const KANBAN_STAGES = ["Qualified", "Proposal Sent", "Negotiation", "Closed Won", "Closed Lost"];
+/* ─── Kanban DnD ─── */
+const STAGES = ["Qualified", "Proposal Sent", "Negotiation", "Closed Won", "Closed Lost"];
 
-const KanbanCard = ({ deal, onEdit, onDelete }: { deal: Deal; onEdit: () => void; onDelete: () => void }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: deal.id, data: { deal } });
-  const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} className="group p-3 rounded-xl bg-background/60 border border-border/20 hover:border-border/40 transition-all cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
-      <div className="flex items-start justify-between mb-1.5">
-        <p className="text-xs font-medium leading-tight">{deal.name}</p>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 -mt-0.5 -mr-1">
-          <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="w-5 h-5 rounded-md hover:bg-muted/50 flex items-center justify-center">
-            <Pencil className="w-2.5 h-2.5 text-muted-foreground" />
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="w-5 h-5 rounded-md hover:bg-destructive/10 flex items-center justify-center">
-            <Trash2 className="w-2.5 h-2.5 text-destructive/70" />
-          </button>
-        </div>
-      </div>
-      <p className="text-[10px] text-muted-foreground mb-2">{deal.contact}</p>
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold">{deal.value}</p>
-        <span className="text-[10px] text-muted-foreground">{deal.probability}%</span>
-      </div>
-    </div>
-  );
-};
-
-const KanbanColumn = ({ stage, deals, onEdit, onDelete, totalPipelineValue }: { stage: string; deals: Deal[]; onEdit: (d: Deal) => void; onDelete: (d: Deal) => void; totalPipelineValue: number }) => {
+const KanbanColumn = ({ stage, children }: { stage: string; children: React.ReactNode }) => {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
-  const stageTotal = deals.reduce((sum, d) => sum + (parseFloat(d.value.replace(/[^0-9.]/g, "")) || 0), 0);
-  const stagePercent = totalPipelineValue > 0 ? Math.round((stageTotal / totalPipelineValue) * 100) : 0;
-
   return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        "flex flex-col min-w-[180px] w-[180px] rounded-2xl bg-muted/15 p-2.5 transition-colors",
-        isOver && "bg-primary/5 ring-1 ring-primary/20"
-      )}
-    >
-      <div className="flex items-center justify-between mb-1 px-1">
-        <div className="flex items-center gap-1.5">
-          <span className={cn("w-2 h-2 rounded-full", stageColors[stage]?.replace(/text-\S+/, "").trim() || "bg-muted")} />
-          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{stage}</p>
-        </div>
-        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 rounded-full font-semibold">
-          {deals.length}
-        </Badge>
+    <div ref={setNodeRef} className={cn("flex-1 min-w-[180px] rounded-xl p-2 transition-colors", isOver ? "bg-primary/5" : "bg-secondary/20")}>
+      <div className="flex items-center gap-2 mb-2 px-1">
+        <span className={`w-2 h-2 rounded-full ${stageColors[stage]?.split(" ")[0] ?? "bg-muted"}`} />
+        <span className="text-xs font-semibold">{stage}</span>
       </div>
-      <div className="px-1 mb-1.5">
-        <p className="text-sm font-semibold">${stageTotal.toLocaleString()}</p>
-      </div>
-      <div className="px-1 mb-2.5">
-        <div className="w-full h-1 rounded-full bg-muted/30 overflow-hidden">
-          <div
-            className={cn("h-full rounded-full transition-all", stage === "Closed Won" ? "bg-success" : stage === "Closed Lost" ? "bg-destructive" : "bg-primary")}
-            style={{ width: `${stagePercent}%` }}
-          />
-        </div>
-        <p className="text-[9px] text-muted-foreground mt-0.5">{stagePercent}% of pipeline</p>
-      </div>
-      <div className="flex flex-col gap-1.5 flex-1 min-h-[60px]">
-        {deals.map(d => (
-          <KanbanCard key={d.id} deal={d} onEdit={() => onEdit(d)} onDelete={() => onDelete(d)} />
-        ))}
+      <div className="space-y-2 min-h-[60px]">{children}</div>
+    </div>
+  );
+};
+
+const KanbanCard = ({ deal }: { deal: Deal }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({ id: deal.id });
+  const style: React.CSSProperties = {
+    transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="p-3 rounded-xl bg-background/80 border border-border/30 cursor-grab active:cursor-grabbing hover:shadow-sm transition-shadow">
+      <p className="text-xs font-semibold">{deal.name}</p>
+      <div className="flex items-center justify-between mt-1.5">
+        <span className="text-[11px] text-muted-foreground">{deal.contact}</span>
+        <span className="text-xs font-bold">{deal.value}</span>
       </div>
     </div>
   );
 };
 
-const KanbanBoard = ({ deals, onMoveDeal, onEdit, onDelete }: {
-  deals: Deal[];
-  onMoveDeal: (dealId: string, newStage: string) => void;
-  onEdit: (d: Deal) => void;
-  onDelete: (d: Deal) => void;
-}) => {
+/* ─── Expanded ─── */
+export const StudioExpanded = () => {
+  const [tab, setTab] = useState<Tab>("freelancers");
+  const [freelancers, setFreelancers] = useState(initialFreelancers);
+  const [deals, setDeals] = useState(initialDeals);
+  const [proposals, setProposals] = useState(initialProposals);
+  const [contacts, setContacts] = useState(initialContacts);
+
+  const [editFreelancer, setEditFreelancer] = useState<Freelancer | null>(null);
+  const [showFreelancerDialog, setShowFreelancerDialog] = useState(false);
+  const [editDeal, setEditDeal] = useState<Deal | null>(null);
+  const [showDealDialog, setShowDealDialog] = useState(false);
+  const [editProposal, setEditProposal] = useState<Proposal | null>(null);
+  const [showProposalDialog, setShowProposalDialog] = useState(false);
+  const [editContact, setEditContact] = useState<Contact | null>(null);
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: string; label: string } | null>(null);
+  const [pipelineView, setPipelineView] = useState<"list" | "kanban">("kanban");
+
   const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const handleDragStart = (event: DragStartEvent) => {
-    const deal = deals.find(d => d.id === event.active.id);
-    if (deal) setActiveDeal(deal);
+    const d = deals.find(x => x.id === event.active.id);
+    if (d) setActiveDeal(d);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveDeal(null);
     const { active, over } = event;
     if (!over) return;
-
     const overId = String(over.id);
-    // If dropped on a stage column
-    if (KANBAN_STAGES.includes(overId)) {
-      onMoveDeal(String(active.id), overId);
-    } else {
-      // Dropped on another card — move to that card's stage
-      const targetDeal = deals.find(d => d.id === overId);
-      if (targetDeal) {
-        onMoveDeal(String(active.id), targetDeal.stage);
-      }
+    if (STAGES.includes(overId)) {
+      setDeals(prev => prev.map(d => d.id === active.id ? { ...d, stage: overId } : d));
     }
   };
 
-  const totalPipelineValue = deals.reduce((sum, d) => sum + (parseFloat(d.value.replace(/[^0-9.]/g, "")) || 0), 0);
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.type === "freelancer") setFreelancers(p => p.filter(x => x.id !== deleteTarget.id));
+    if (deleteTarget.type === "deal") setDeals(p => p.filter(x => x.id !== deleteTarget.id));
+    if (deleteTarget.type === "proposal") setProposals(p => p.filter(x => x.id !== deleteTarget.id));
+    if (deleteTarget.type === "contact") setContacts(p => p.filter(x => x.id !== deleteTarget.id));
+    setDeleteTarget(null);
+  };
 
-  // Stage progression summary
-  const stageSummary = KANBAN_STAGES.map(stage => {
-    const stageDeals = deals.filter(d => d.stage === stage);
-    const stageVal = stageDeals.reduce((s, d) => s + (parseFloat(d.value.replace(/[^0-9.]/g, "")) || 0), 0);
-    return { stage, count: stageDeals.length, value: stageVal };
-  });
-
-  return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      {/* Pipeline progress bar */}
-      <div className="flex items-center gap-0.5 mb-3 px-1">
-        {stageSummary.map((s, i) => (
-          <div key={s.stage} className="flex items-center flex-1">
-            <div className="flex-1">
-              <div
-                className={cn(
-                  "h-2 rounded-full transition-all",
-                  s.stage === "Closed Won" ? "bg-success" : s.stage === "Closed Lost" ? "bg-destructive" : s.count > 0 ? "bg-primary" : "bg-muted/30"
-                )}
-              />
-            </div>
-            {i < stageSummary.length - 1 && <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0 mx-0.5" />}
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-2.5 overflow-x-auto pb-2">
-        {KANBAN_STAGES.map(stage => (
-          <KanbanColumn
-            key={stage}
-            stage={stage}
-            deals={deals.filter(d => d.stage === stage)}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            totalPipelineValue={totalPipelineValue}
-          />
-        ))}
-      </div>
-      <DragOverlay>
-        {activeDeal && (
-          <div className="p-3 rounded-xl bg-background border border-border/40 shadow-lg w-[170px] rotate-2">
-            <p className="text-xs font-medium">{activeDeal.name}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{activeDeal.contact}</p>
-            <p className="text-xs font-semibold mt-1.5">{activeDeal.value}</p>
-          </div>
-        )}
-      </DragOverlay>
-    </DndContext>
-  );
-};
-
-/* ─── Expanded View ─── */
-export const StudioExpanded = () => {
-  const [activeTab, setActiveTab] = useState<Tab>("freelancers");
-  const [search, setSearch] = useState("");
-  const [pipelineView, setPipelineView] = useState<"list" | "kanban">("kanban");
-
-  // Filters
-  const [freelancerStatusFilter, setFreelancerStatusFilter] = useState<string>("all");
-  const [dealStageFilter, setDealStageFilter] = useState<string>("all");
-  const [contactTypeFilter, setContactTypeFilter] = useState<string>("all");
-
-  // Sort
-  const [freelancerSort, setFreelancerSort] = useState<string>("name");
-  const [dealSort, setDealSort] = useState<string>("name");
-  const [proposalSort, setProposalSort] = useState<string>("title");
-  const [contactSort, setContactSort] = useState<string>("name");
-
-  // State
-  const [freelancerList, setFreelancerList] = useState<Freelancer[]>(initialFreelancers);
-  const [dealList, setDealList] = useState<Deal[]>(initialDeals);
-  const [proposalList, setProposalList] = useState<Proposal[]>(initialProposals);
-  const [contactList, setContactList] = useState<Contact[]>(initialContacts);
-
-  // Dialog state
-  const [freelancerDialog, setFreelancerDialog] = useState<{ open: boolean; item: Freelancer | null }>({ open: false, item: null });
-  const [dealDialog, setDealDialog] = useState<{ open: boolean; item: Deal | null }>({ open: false, item: null });
-  const [proposalDialog, setProposalDialog] = useState<{ open: boolean; item: Proposal | null }>({ open: false, item: null });
-  const [contactDialog, setContactDialog] = useState<{ open: boolean; item: Contact | null }>({ open: false, item: null });
-  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; label: string; onConfirm: () => void }>({ open: false, label: "", onConfirm: () => {} });
-
-  // CRUD helpers
-  const saveFreelancer = (f: Freelancer) => setFreelancerList(prev => prev.find(x => x.id === f.id) ? prev.map(x => x.id === f.id ? f : x) : [...prev, f]);
-  const saveDeal = (d: Deal) => setDealList(prev => prev.find(x => x.id === d.id) ? prev.map(x => x.id === d.id ? d : x) : [...prev, d]);
-  const saveProposal = (p: Proposal) => setProposalList(prev => prev.find(x => x.id === p.id) ? prev.map(x => x.id === p.id ? p : x) : [...prev, p]);
-  const saveContact = (c: Contact) => setContactList(prev => prev.find(x => x.id === c.id) ? prev.map(x => x.id === c.id ? c : x) : [...prev, c]);
-
-  const confirmDelete = (label: string, onConfirm: () => void) => setDeleteDialog({ open: true, label, onConfirm });
-
-  // Parse currency string to number
-  const parseValue = (v: string) => parseFloat(v.replace(/[^0-9.]/g, "")) || 0;
-
-  // Filtered & sorted lists
-  const q = search.toLowerCase();
-  const filteredFreelancers = freelancerList
-    .filter(f => (freelancerStatusFilter === "all" || f.status === freelancerStatusFilter) && (!q || f.name.toLowerCase().includes(q) || f.role.toLowerCase().includes(q)))
-    .sort((a, b) => {
-      if (freelancerSort === "rating") return b.rating - a.rating;
-      if (freelancerSort === "rate") return parseValue(b.rate) - parseValue(a.rate);
-      return a.name.localeCompare(b.name);
-    });
-  const filteredDeals = dealList
-    .filter(d => (dealStageFilter === "all" || d.stage === dealStageFilter) && (!q || d.name.toLowerCase().includes(q) || d.contact.toLowerCase().includes(q)))
-    .sort((a, b) => {
-      if (dealSort === "value") return parseValue(b.value) - parseValue(a.value);
-      if (dealSort === "probability") return b.probability - a.probability;
-      return a.name.localeCompare(b.name);
-    });
-  const filteredProposals = proposalList
-    .filter(p => (!q || p.title.toLowerCase().includes(q) || p.scope.toLowerCase().includes(q)))
-    .sort((a, b) => {
-      if (proposalSort === "value") return parseValue(b.value) - parseValue(a.value);
-      if (proposalSort === "date") return a.date.localeCompare(b.date);
-      if (proposalSort === "status") return a.status.localeCompare(b.status);
-      return a.title.localeCompare(b.title);
-    });
-  const filteredContacts = contactList
-    .filter(c => (contactTypeFilter === "all" || c.type === contactTypeFilter) && (!q || c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q)))
-    .sort((a, b) => {
-      if (contactSort === "company") return a.company.localeCompare(b.company);
-      if (contactSort === "type") return a.type.localeCompare(b.type);
-      return a.name.localeCompare(b.name);
-    });
-
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "freelancers", label: "Freelancers", icon: <Users className="w-4 h-4" /> },
-    { id: "pipeline", label: "Pipeline", icon: <TrendingUp className="w-4 h-4" /> },
-    { id: "proposals", label: "Proposals", icon: <FileText className="w-4 h-4" /> },
-    { id: "budget", label: "Budget", icon: <DollarSign className="w-4 h-4" /> },
-    { id: "contacts", label: "Contacts", icon: <UserPlus className="w-4 h-4" /> },
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    { key: "freelancers", label: "Team", icon: <Users className="w-3.5 h-3.5" /> },
+    { key: "pipeline", label: "Pipeline", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+    { key: "proposals", label: "Proposals", icon: <FileText className="w-3.5 h-3.5" /> },
+    { key: "budget", label: "Budget", icon: <DollarSign className="w-3.5 h-3.5" /> },
+    { key: "contacts", label: "Contacts", icon: <Building2 className="w-3.5 h-3.5" /> },
   ];
-
-  const addButton = (onClick: () => void) => (
-    <Button size="sm" variant="ghost" onClick={onClick} className="rounded-xl h-8 gap-1.5 text-xs">
-      <Plus className="w-3.5 h-3.5" /> Add
-    </Button>
-  );
 
   return (
     <div className="space-y-5">
-      {/* Summary stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: "Pipeline Value", value: "$82.5k" },
-          { label: "Active Deals", value: String(dealList.length) },
-          { label: "Freelancers", value: String(freelancerList.length) },
-          { label: "Win Rate", value: "68%" },
-        ].map(s => (
-          <div key={s.label} className="rounded-2xl bg-muted/30 p-3.5">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{s.label}</p>
-            <p className="text-xl font-semibold mt-1">{s.value}</p>
-          </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        {tabs.map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors",
+              tab === t.key ? "bg-foreground text-background" : "bg-secondary/50 text-muted-foreground hover:text-foreground"
+            )}>
+            {t.icon}{t.label}
+          </button>
         ))}
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex gap-1 overflow-x-auto pb-1">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-colors",
-                activeTab === tab.id
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-              )}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-        </div>
-        {activeTab === "freelancers" && addButton(() => setFreelancerDialog({ open: true, item: null }))}
-        {activeTab === "pipeline" && addButton(() => setDealDialog({ open: true, item: null }))}
-        {activeTab === "proposals" && addButton(() => setProposalDialog({ open: true, item: null }))}
-        {activeTab === "contacts" && addButton(() => setContactDialog({ open: true, item: null }))}
-      </div>
-
-      {/* Search & Filter Bar */}
-      {activeTab !== "budget" && (
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search..."
-              className="rounded-xl pl-9 h-9 text-xs bg-muted/20 border-border/30"
-            />
+      {tab === "freelancers" && (
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" className="rounded-xl gap-1 h-8 text-xs" onClick={() => { setEditFreelancer(null); setShowFreelancerDialog(true); }}>
+              <UserPlus className="w-3.5 h-3.5" />Add
+            </Button>
           </div>
-          {activeTab === "freelancers" && (
-            <>
-              <Select value={freelancerStatusFilter} onValueChange={setFreelancerStatusFilter}>
-                <SelectTrigger className="rounded-xl h-9 w-[130px] text-xs border-border/30 bg-muted/20">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="on-project">On Project</SelectItem>
-                  <SelectItem value="unavailable">Unavailable</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={freelancerSort} onValueChange={setFreelancerSort}>
-                <SelectTrigger className="rounded-xl h-9 w-[110px] text-xs border-border/30 bg-muted/20">
-                  <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="rating">Rating</SelectItem>
-                  <SelectItem value="rate">Rate</SelectItem>
-                </SelectContent>
-              </Select>
-            </>
-          )}
-          {activeTab === "pipeline" && (
-            <>
-              <div className="flex items-center rounded-xl border border-border/30 bg-muted/20 h-9 p-0.5">
-                <button
-                  onClick={() => setPipelineView("list")}
-                  className={cn("rounded-lg h-full px-2 transition-colors", pipelineView === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}
-                >
-                  <List className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setPipelineView("kanban")}
-                  className={cn("rounded-lg h-full px-2 transition-colors", pipelineView === "kanban" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              {pipelineView === "list" && (
-                <>
-                  <Select value={dealStageFilter} onValueChange={setDealStageFilter}>
-                    <SelectTrigger className="rounded-xl h-9 w-[150px] text-xs border-border/30 bg-muted/20">
-                      <SelectValue placeholder="Stage" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Stages</SelectItem>
-                      <SelectItem value="Qualified">Qualified</SelectItem>
-                      <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
-                      <SelectItem value="Negotiation">Negotiation</SelectItem>
-                      <SelectItem value="Closed Won">Closed Won</SelectItem>
-                      <SelectItem value="Closed Lost">Closed Lost</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={dealSort} onValueChange={setDealSort}>
-                    <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
-                      <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="value">Value</SelectItem>
-                      <SelectItem value="probability">Probability</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </>
-              )}
-            </>
-          )}
-          {activeTab === "proposals" && (
-            <Select value={proposalSort} onValueChange={setProposalSort}>
-              <SelectTrigger className="rounded-xl h-9 w-[110px] text-xs border-border/30 bg-muted/20">
-                <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="title">Title</SelectItem>
-                <SelectItem value="value">Value</SelectItem>
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="status">Status</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-          {activeTab === "contacts" && (
-            <>
-              <Select value={contactTypeFilter} onValueChange={setContactTypeFilter}>
-                <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="client">Client</SelectItem>
-                  <SelectItem value="lead">Lead</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={contactSort} onValueChange={setContactSort}>
-                <SelectTrigger className="rounded-xl h-9 w-[120px] text-xs border-border/30 bg-muted/20">
-                  <ArrowUpDown className="w-3 h-3 mr-1 shrink-0" /><SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="company">Company</SelectItem>
-                  <SelectItem value="type">Type</SelectItem>
-                </SelectContent>
-              </Select>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Tab Content */}
-      {activeTab === "freelancers" && (
-        <div className="space-y-2">
-          {filteredFreelancers.map(f => (
-            <div key={f.id} className="group flex items-center gap-3 p-3 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors">
-              <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center text-xs font-semibold shrink-0">
-                {f.avatar}
-              </div>
+          {freelancers.map(f => (
+            <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">{f.avatar}</div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{f.name}</p>
-                  <span className={cn("w-2 h-2 rounded-full shrink-0", statusColors[f.status])} />
-                </div>
-                <p className="text-xs text-muted-foreground">{f.role}</p>
+                <div className="flex items-center gap-2"><p className="text-sm font-semibold">{f.name}</p><div className={`w-2 h-2 rounded-full ${statusColors[f.status]}`} /></div>
+                <p className="text-xs text-muted-foreground">{f.role} · {f.rate}</p>
               </div>
-              <div className="text-right shrink-0 mr-1">
-                <p className="text-sm font-medium">{f.rate}</p>
-                <div className="flex items-center gap-1 justify-end">
-                  <Star className="w-3 h-3 fill-warning text-warning" />
-                  <span className="text-[11px] text-muted-foreground">{f.rating}</span>
-                </div>
-              </div>
-              <RowActions onEdit={() => setFreelancerDialog({ open: true, item: f })} onDelete={() => confirmDelete(f.name, () => setFreelancerList(prev => prev.filter(x => x.id !== f.id)))} />
+              <div className="flex items-center gap-1"><Star className="w-3 h-3 fill-warning text-warning" /><span className="text-xs font-medium">{f.rating}</span></div>
+              <RowActions onEdit={() => { setEditFreelancer(f); setShowFreelancerDialog(true); }} onDelete={() => setDeleteTarget({ type: "freelancer", id: f.id, label: f.name })} />
             </div>
           ))}
-          {filteredFreelancers.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No freelancers found</p>}
         </div>
       )}
 
-      {activeTab === "pipeline" && pipelineView === "list" && (
-        <div className="space-y-2">
-          {filteredDeals.map(d => (
-            <div key={d.id} className="group p-4 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{d.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{d.contact}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold">{d.value}</p>
-                  <RowActions onEdit={() => setDealDialog({ open: true, item: d })} onDelete={() => confirmDelete(d.name, () => setDealList(prev => prev.filter(x => x.id !== d.id)))} />
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full", stageColors[d.stage])}>
-                  {d.stage}
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${d.probability}%` }} />
-                  </div>
-                  <span className="text-[11px] text-muted-foreground">{d.probability}%</span>
-                </div>
-              </div>
+      {tab === "pipeline" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex gap-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPipelineView("list")}><List className={`w-3.5 h-3.5 ${pipelineView === "list" ? "text-foreground" : "text-muted-foreground"}`} /></Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPipelineView("kanban")}><LayoutGrid className={`w-3.5 h-3.5 ${pipelineView === "kanban" ? "text-foreground" : "text-muted-foreground"}`} /></Button>
             </div>
-          ))}
-          {filteredDeals.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No deals found</p>}
-        </div>
-      )}
+            <Button size="sm" className="rounded-xl gap-1 h-8 text-xs" onClick={() => { setEditDeal(null); setShowDealDialog(true); }}><Plus className="w-3.5 h-3.5" />Add Deal</Button>
+          </div>
 
-      {activeTab === "pipeline" && pipelineView === "kanban" && (
-        <KanbanBoard
-          deals={dealList}
-          onMoveDeal={(dealId, newStage) => setDealList(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d))}
-          onEdit={(d) => setDealDialog({ open: true, item: d })}
-          onDelete={(d) => confirmDelete(d.name, () => setDealList(prev => prev.filter(x => x.id !== d.id)))}
-        />
-      )}
-
-      {activeTab === "proposals" && (
-        <div className="space-y-2">
-          {filteredProposals.map(p => {
-            const statusStyle = {
-              sent: "bg-primary/10 text-primary",
-              draft: "bg-muted text-muted-foreground",
-              accepted: "bg-success/10 text-success",
-              rejected: "bg-destructive/10 text-destructive",
-            };
-            return (
-              <div key={p.id} className="group p-4 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors">
-                <div className="flex items-start justify-between mb-2">
+          {pipelineView === "kanban" ? (
+            <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {STAGES.map(stage => (
+                  <KanbanColumn key={stage} stage={stage}>
+                    {deals.filter(d => d.stage === stage).map(deal => <KanbanCard key={deal.id} deal={deal} />)}
+                  </KanbanColumn>
+                ))}
+              </div>
+              <DragOverlay>{activeDeal ? <KanbanCard deal={activeDeal} /> : null}</DragOverlay>
+            </DndContext>
+          ) : (
+            <div className="space-y-2">
+              {deals.map(deal => (
+                <div key={deal.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{p.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{p.scope}</p>
+                    <p className="text-sm font-semibold">{deal.name}</p>
+                    <p className="text-xs text-muted-foreground">{deal.contact}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full capitalize", statusStyle[p.status])}>
-                      {p.status}
-                    </span>
-                    <RowActions onEdit={() => setProposalDialog({ open: true, item: p })} onDelete={() => confirmDelete(p.title, () => setProposalList(prev => prev.filter(x => x.id !== p.id)))} />
-                  </div>
+                  <Badge className={`text-[10px] rounded-full ${stageColors[deal.stage]}`}>{deal.stage}</Badge>
+                  <span className="text-sm font-bold">{deal.value}</span>
+                  <RowActions onEdit={() => { setEditDeal(deal); setShowDealDialog(true); }} onDelete={() => setDeleteTarget({ type: "deal", id: deal.id, label: deal.name })} />
                 </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{p.date}</span>
-                  <span className="font-medium text-foreground">{p.value}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "proposals" && (
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" className="rounded-xl gap-1 h-8 text-xs" onClick={() => { setEditProposal(null); setShowProposalDialog(true); }}><Plus className="w-3.5 h-3.5" />New Proposal</Button>
+          </div>
+          {proposals.map(p => {
+            const colors: Record<string, string> = { draft: "bg-muted text-muted-foreground", sent: "bg-primary/10 text-primary", accepted: "bg-success/10 text-success", rejected: "bg-destructive/10 text-destructive" };
+            return (
+              <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">{p.title}</p>
+                  <p className="text-xs text-muted-foreground">{p.scope}</p>
+                </div>
+                <Badge className={`text-[10px] rounded-full capitalize ${colors[p.status]}`}>{p.status}</Badge>
+                <span className="text-sm font-bold">{p.value}</span>
+                <span className="text-xs text-muted-foreground">{p.date}</span>
+                <RowActions onEdit={() => { setEditProposal(p); setShowProposalDialog(true); }} onDelete={() => setDeleteTarget({ type: "proposal", id: p.id, label: p.title })} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {tab === "budget" && (
+        <div className="space-y-4">
+          {budgets.map(b => {
+            const pct = Math.round((b.spent / b.budget) * 100);
+            const isOver = pct > 85;
+            return (
+              <div key={b.project} className="p-4 rounded-xl bg-secondary/30">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold">{b.project}</p>
+                  <span className={cn("text-xs font-medium", isOver ? "text-destructive" : "text-muted-foreground")}>{pct}% used</span>
+                </div>
+                <Progress value={pct} className="h-2 mb-2" />
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>Budget: <span className="font-medium text-foreground">${b.budget.toLocaleString()}</span></span>
+                  <span>Spent: <span className="font-medium text-foreground">${b.spent.toLocaleString()}</span></span>
+                  <span>Remaining: <span className={cn("font-medium", isOver ? "text-destructive" : "text-success")}>${b.remaining.toLocaleString()}</span></span>
                 </div>
               </div>
             );
           })}
-          {filteredProposals.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No proposals found</p>}
         </div>
       )}
 
-      {activeTab === "budget" && (
+      {tab === "contacts" && (
         <div className="space-y-3">
-          {budgets.map(b => (
-            <div key={b.project} className="p-4 rounded-2xl bg-muted/20">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium">{b.project}</p>
-                <p className="text-xs text-muted-foreground">
-                  ${b.spent.toLocaleString()} / ${b.budget.toLocaleString()}
-                </p>
-              </div>
-              <Progress value={(b.spent / b.budget) * 100} className="h-2 rounded-full" />
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-[11px] text-muted-foreground">
-                  {Math.round((b.spent / b.budget) * 100)}% used
-                </span>
-                <span className={cn(
-                  "text-[11px] font-medium",
-                  b.remaining < 5000 ? "text-destructive" : "text-success"
-                )}>
-                  ${b.remaining.toLocaleString()} remaining
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {activeTab === "contacts" && (
-        <div className="space-y-2">
-          {filteredContacts.map(c => (
-            <div key={c.id} className="group flex items-center gap-3 p-3 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors">
-              <div className="w-10 h-10 rounded-2xl bg-muted/50 flex items-center justify-center shrink-0">
-                <Building2 className="w-4 h-4 text-muted-foreground" />
-              </div>
+          <div className="flex justify-end">
+            <Button size="sm" className="rounded-xl gap-1 h-8 text-xs" onClick={() => { setEditContact(null); setShowContactDialog(true); }}><UserPlus className="w-3.5 h-3.5" />Add Contact</Button>
+          </div>
+          {contacts.map(c => (
+            <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">{getInitials(c.name)}</div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{c.name}</p>
-                  <span className={cn(
-                    "text-[10px] font-medium px-1.5 py-0.5 rounded-full capitalize",
-                    c.type === "client" ? "bg-success/10 text-success" : "bg-primary/10 text-primary"
-                  )}>
-                    {c.type}
-                  </span>
-                </div>
+                <div className="flex items-center gap-2"><p className="text-sm font-semibold">{c.name}</p><Badge variant="outline" className="text-[9px] capitalize h-4">{c.type}</Badge></div>
                 <p className="text-xs text-muted-foreground">{c.company}</p>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <button className="w-8 h-8 rounded-xl hover:bg-muted/50 flex items-center justify-center transition-colors">
-                  <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
-                <button className="w-8 h-8 rounded-xl hover:bg-muted/50 flex items-center justify-center transition-colors">
-                  <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
+              <div className="hidden sm:flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span>
+                <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</span>
               </div>
-              <RowActions onEdit={() => setContactDialog({ open: true, item: c })} onDelete={() => confirmDelete(c.name, () => setContactList(prev => prev.filter(x => x.id !== c.id)))} />
+              <RowActions onEdit={() => { setEditContact(c); setShowContactDialog(true); }} onDelete={() => setDeleteTarget({ type: "contact", id: c.id, label: c.name })} />
             </div>
           ))}
-          {filteredContacts.length === 0 && <p className="text-sm text-muted-foreground text-center py-8">No contacts found</p>}
         </div>
       )}
 
-      {/* Dialogs */}
-      <FreelancerDialog open={freelancerDialog.open} onOpenChange={o => setFreelancerDialog(p => ({ ...p, open: o }))} freelancer={freelancerDialog.item} onSave={saveFreelancer} />
-      <DealDialog open={dealDialog.open} onOpenChange={o => setDealDialog(p => ({ ...p, open: o }))} deal={dealDialog.item} onSave={saveDeal} />
-      <ProposalDialog open={proposalDialog.open} onOpenChange={o => setProposalDialog(p => ({ ...p, open: o }))} proposal={proposalDialog.item} onSave={saveProposal} />
-      <ContactDialog open={contactDialog.open} onOpenChange={o => setContactDialog(p => ({ ...p, open: o }))} contact={contactDialog.item} onSave={saveContact} />
-      <DeleteConfirmDialog open={deleteDialog.open} onOpenChange={o => setDeleteDialog(p => ({ ...p, open: o }))} onConfirm={() => { deleteDialog.onConfirm(); setDeleteDialog(p => ({ ...p, open: false })); }} label={deleteDialog.label} />
+      <FreelancerDialog open={showFreelancerDialog} onOpenChange={setShowFreelancerDialog} freelancer={editFreelancer} onSave={f => { setFreelancers(prev => editFreelancer ? prev.map(x => x.id === f.id ? f : x) : [f, ...prev]); }} />
+      <DealDialog open={showDealDialog} onOpenChange={setShowDealDialog} deal={editDeal} onSave={d => { setDeals(prev => editDeal ? prev.map(x => x.id === d.id ? d : x) : [d, ...prev]); }} />
+      <ProposalDialog open={showProposalDialog} onOpenChange={setShowProposalDialog} proposal={editProposal} onSave={p => { setProposals(prev => editProposal ? prev.map(x => x.id === p.id ? p : x) : [p, ...prev]); }} />
+      <ContactDialog open={showContactDialog} onOpenChange={setShowContactDialog} contact={editContact} onSave={c => { setContacts(prev => editContact ? prev.map(x => x.id === c.id ? c : x) : [c, ...prev]); }} />
+      <DeleteConfirmDialog open={!!deleteTarget} onOpenChange={o => !o && setDeleteTarget(null)} onConfirm={confirmDelete} label={deleteTarget?.label ?? ""} />
     </div>
   );
 };
