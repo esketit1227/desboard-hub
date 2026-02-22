@@ -6,6 +6,7 @@ import {
   Users,
   DollarSign,
   HardDrive,
+  Receipt,
   Settings,
   Menu,
   X,
@@ -18,6 +19,7 @@ const navItems = [
   { id: "calendar", label: "Calendar", icon: CalendarDays },
   { id: "clients", label: "Clients", icon: Users },
   { id: "finances", label: "Finances", icon: DollarSign },
+  { id: "invoices", label: "Invoices", icon: Receipt },
   { id: "files", label: "Files", icon: HardDrive },
 ];
 
