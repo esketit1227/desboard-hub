@@ -110,26 +110,26 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
       {/* Back tab — monochrome dark */}
       <div
         className="absolute inset-0 rounded-2xl overflow-visible"
-        style={{ background: "hsl(var(--foreground))" }}
+        style={{ background: "hsl(var(--foreground) / 0.7)" }}
       >
         {/* Tab bump */}
         <div
           className="absolute -top-3 left-4 h-5 rounded-t-xl flex items-center px-2.5 gap-1"
-          style={{ background: "hsl(var(--foreground))" }}
+          style={{ background: "hsl(var(--foreground) / 0.7)" }}
         >
           <span className="text-[8px] font-bold text-primary-foreground/70 uppercase tracking-widest">{title}</span>
         </div>
       </div>
 
-      {/* Front panel — frosted glass */}
+      {/* Front panel — glassy transparent */}
       <div
         className={cn(
           "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden",
-          "backdrop-blur-2xl border border-border/40"
+          "backdrop-blur-2xl border border-white/20 dark:border-white/10"
         )}
         style={{
-          background: "linear-gradient(160deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.6))",
-          boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.08), inset 0 1px 0 hsl(var(--card) / 0.6)",
+          background: "linear-gradient(160deg, hsl(0 0% 100% / 0.45), hsl(0 0% 100% / 0.2))",
+          boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.5), inset 0 -1px 0 hsl(0 0% 0% / 0.03)",
         }}
       >
         {/* Header */}
