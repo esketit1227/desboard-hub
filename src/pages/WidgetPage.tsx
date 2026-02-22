@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import {
   FolderKanban, CalendarDays, Users, DollarSign, HardDrive,
-  Receipt, ListTodo, MessageSquare, BarChart3,
+  Receipt, ListTodo, MessageSquare, BarChart3, Briefcase,
 } from "lucide-react";
 import { ProjectsExpanded } from "@/components/dashboard/ProjectsWidget";
 import { CalendarExpanded } from "@/components/dashboard/CalendarWidget";
@@ -13,6 +13,7 @@ import { InvoicesExpanded } from "@/components/dashboard/InvoicesWidget";
 import { TasksExpanded } from "@/components/dashboard/TasksWidget";
 import { MessagesExpanded } from "@/components/dashboard/MessagesWidget";
 import { AnalyticsExpanded } from "@/components/dashboard/AnalyticsWidget";
+import { StudioExpanded } from "@/components/dashboard/StudioWidget";
 
 const WIDGET_MAP: Record<string, { title: string; icon: React.ReactNode; expanded: React.ComponentType }> = {
   projects: { title: "Projects", icon: <FolderKanban className="w-5 h-5" />, expanded: ProjectsExpanded },
@@ -24,6 +25,7 @@ const WIDGET_MAP: Record<string, { title: string; icon: React.ReactNode; expande
   tasks: { title: "Tasks", icon: <ListTodo className="w-5 h-5" />, expanded: TasksExpanded },
   messages: { title: "Messages", icon: <MessageSquare className="w-5 h-5" />, expanded: MessagesExpanded },
   analytics: { title: "Analytics", icon: <BarChart3 className="w-5 h-5" />, expanded: AnalyticsExpanded },
+  studio: { title: "Studio", icon: <Briefcase className="w-5 h-5" />, expanded: StudioExpanded },
 };
 
 const WidgetPage = () => {
