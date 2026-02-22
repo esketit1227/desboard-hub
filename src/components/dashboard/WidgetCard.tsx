@@ -59,9 +59,15 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
     const startWidth = rect.width;
     const startHeight = rect.height;
 
+    // Find the scrollable container to clamp within
+    const container = cardRef.current.closest("main") || document.documentElement;
+    const containerRect = container.getBoundingClientRect();
+
     const onMouseMove = (moveEvent: MouseEvent) => {
-      const newWidth = Math.max(140, startWidth + (moveEvent.clientX - startX));
-      const newHeight = Math.max(100, startHeight + (moveEvent.clientY - startY));
+      const maxWidth = containerRect.right - rect.left - 16;
+      const maxHeight = containerRect.bottom - rect.top - 16;
+      const newWidth = Math.min(maxWidth, Math.max(140, startWidth + (moveEvent.clientX - startX)));
+      const newHeight = Math.min(maxHeight, Math.max(100, startHeight + (moveEvent.clientY - startY)));
       onPixelResize({ width: Math.round(newWidth), height: Math.round(newHeight) });
     };
 
