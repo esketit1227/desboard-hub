@@ -25,16 +25,16 @@ interface WidgetCardProps {
 }
 
 const TINT_COLORS = [
-  { bg: "hsl(40 30% 99% / 0.5)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 25% 98% / 0.48)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 30% 99% / 0.52)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 20% 97% / 0.46)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 28% 98% / 0.50)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 30% 99% / 0.54)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 22% 98% / 0.49)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 30% 99% / 0.51)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 25% 97% / 0.47)", fg: "hsl(40 10% 15%)" },
-  { bg: "hsl(40 30% 99% / 0.53)", fg: "hsl(40 10% 15%)" },
+  { gradient: "linear-gradient(135deg, hsl(220 85% 62%), hsl(240 75% 58%))", fg: "hsl(0 0% 100%)" },
+  { gradient: "linear-gradient(135deg, hsl(340 75% 58%), hsl(320 70% 52%))", fg: "hsl(0 0% 100%)" },
+  { gradient: "linear-gradient(135deg, hsl(152 55% 48%), hsl(170 60% 42%))", fg: "hsl(0 0% 100%)" },
+  { gradient: "linear-gradient(135deg, hsl(28 85% 58%), hsl(15 80% 52%))", fg: "hsl(0 0% 100%)" },
+  { gradient: "linear-gradient(135deg, hsl(260 70% 62%), hsl(280 65% 55%))", fg: "hsl(0 0% 100%)" },
+  { gradient: "linear-gradient(135deg, hsl(195 80% 50%), hsl(210 75% 48%))", fg: "hsl(0 0% 100%)" },
+  { gradient: "linear-gradient(135deg, hsl(45 85% 55%), hsl(35 80% 50%))", fg: "hsl(0 0% 15%)" },
+  { gradient: "linear-gradient(135deg, hsl(0 70% 58%), hsl(350 65% 50%))", fg: "hsl(0 0% 100%)" },
+  { gradient: "linear-gradient(135deg, hsl(180 50% 48%), hsl(165 55% 42%))", fg: "hsl(0 0% 100%)" },
+  { gradient: "linear-gradient(135deg, hsl(290 60% 55%), hsl(310 55% 50%))", fg: "hsl(0 0% 100%)" },
 ];
 
 const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {
@@ -89,7 +89,7 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
     transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 50 : undefined,
-    ...(tint ? { backgroundColor: tint.bg, color: tint.fg } : {}),
+    ...(tint ? { background: tint.gradient, color: tint.fg } : {}),
     ...(pixelSize ? { width: pixelSize.width, height: pixelSize.height } : {}),
   };
 
