@@ -232,6 +232,15 @@ const Index = () => {
               <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors">
                 <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
               </button>
+              {Object.keys(pixelSizes).length > 0 && (
+                <button
+                  onClick={() => setPixelSizes({})}
+                  className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors text-muted-foreground"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Reset Sizes</span>
+                </button>
+              )}
               <button
                 onClick={() => setCustomizerOpen(true)}
                 className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
