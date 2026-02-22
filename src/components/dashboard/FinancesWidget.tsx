@@ -64,35 +64,37 @@ export const FinancesPreview = () => {
     return months;
   }, [transactions]);
 
-  if (isLoading) return <div className="flex items-center justify-center h-20"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>;
+  if (isLoading) return <div className="h-full flex items-center justify-center"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>;
 
   return (
-    <div>
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-3xl font-bold tracking-tight">
-            ${thisMonthIncome > 1000 ? `${(thisMonthIncome / 1000).toFixed(1)}k` : thisMonthIncome.toFixed(0)}
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">Revenue this month</p>
-        </div>
-        {thisMonthIncome > 0 && (
-          <div className="flex items-center gap-1 text-success text-xs font-medium">
-            <TrendingUp className="w-3 h-3" />
-            ${profit.toFixed(0)} profit
+    <div className="h-full flex flex-col justify-between">
+      <div>
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-3xl font-bold tracking-tight">
+              ${thisMonthIncome > 1000 ? `${(thisMonthIncome / 1000).toFixed(1)}k` : thisMonthIncome.toFixed(0)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">Revenue this month</p>
           </div>
-        )}
+          {thisMonthIncome > 0 && (
+            <div className="flex items-center gap-1 text-success text-xs font-medium">
+              <TrendingUp className="w-3 h-3" />
+              ${profit.toFixed(0)} profit
+            </div>
+          )}
+        </div>
       </div>
 
       {thisMonthIncome === 0 && thisMonthExpenses === 0 ? (
-        <p className="text-xs text-muted-foreground mt-4">No transactions this month yet.</p>
+        <p className="text-xs text-muted-foreground">No transactions yet.</p>
       ) : (
-        <>
-          <div className="flex items-center gap-3 mt-3">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
             <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
               <div className="h-full bg-foreground rounded-full" style={{ width: `${thisMonthIncome > 0 ? (profit / thisMonthIncome) * 100 : 0}%` }} />
             </div>
           </div>
-          <div className="h-[48px] mt-3 -mx-1">
+          <div className="h-[48px] -mx-1">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyBars}>
                 <Bar dataKey="income" fill="hsl(var(--foreground))" radius={[3, 3, 0, 0]} opacity={0.15} />
@@ -100,7 +102,7 @@ export const FinancesPreview = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
