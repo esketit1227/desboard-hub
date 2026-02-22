@@ -200,8 +200,6 @@ const Index = () => {
     <div className="p-5 md:p-8 lg:p-10">
       {/* Top Island */}
       <TopIsland />
-          {/* Top Island */}
-          <TopIsland />
 
           {/* Top bar */}
           <motion.header
