@@ -33,7 +33,7 @@ export function getSizeTier(pixelSize?: { width: number; height: number }): "com
   return "compact";
 }
 
-const WidgetCard = ({ id, title, icon, size = "small", tintIndex, bgColor, textColor, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {
+const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {
   const {
     attributes,
     listeners,
@@ -107,47 +107,54 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, bgColor, textC
         isResizing && "ring-2 ring-foreground/10"
       )}
     >
-      {/* Back tab — uses card color */}
+      {/* Back tab — monochrome dark */}
       <div
         className="absolute inset-0 rounded-2xl overflow-visible"
-        style={{ background: bgColor || "hsl(var(--foreground) / 0.7)" }}
-      />
+        style={{ background: "hsl(var(--foreground) / 0.7)" }}
+      >
+        {/* Tab bump */}
+        <div
+          className="absolute -top-3 left-4 h-5 rounded-t-xl flex items-center px-2.5 gap-1"
+          style={{ background: "hsl(var(--foreground) / 0.7)" }}
+        >
+          <span className="text-[8px] font-bold text-primary-foreground/70 uppercase tracking-widest">{title}</span>
+        </div>
+      </div>
 
-      {/* Front panel — solid color, no transparency */}
+      {/* Front panel — glassy transparent */}
       <div
         className={cn(
           "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden",
-          textColor && "widget-force-color"
+          "backdrop-blur-2xl border border-white/20 dark:border-white/10"
         )}
         style={{
-          background: bgColor || "hsl(var(--card))",
-          color: textColor || "inherit",
+          background: "linear-gradient(160deg, hsl(0 0% 100% / 0.45), hsl(0 0% 100% / 0.2))",
+          boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.5), inset 0 -1px 0 hsl(0 0% 0% / 0.03)",
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-end px-3.5 pt-2.5 pb-0">
+        <div className="flex items-center justify-between px-3.5 pt-2.5 pb-0">
+          <h3 className="text-[10px] font-semibold tracking-wide uppercase text-foreground/40">{title}</h3>
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               {...attributes}
               {...listeners}
-              className="rounded-md p-1 transition-colors cursor-grab active:cursor-grabbing touch-none"
-              style={{ color: textColor ? `${textColor}80` : undefined }}
+              className="rounded-md p-1 transition-colors cursor-grab active:cursor-grabbing touch-none hover:bg-foreground/5"
             >
-              <GripVertical className="w-3 h-3" />
+              <GripVertical className="w-3 h-3 text-foreground/30" />
             </button>
             <button
               onClick={onExpand}
-              className="rounded-md w-6 h-6 flex items-center justify-center transition-colors"
-              style={{ color: textColor ? `${textColor}80` : undefined }}
+              className="rounded-md w-6 h-6 flex items-center justify-center hover:bg-foreground/5 transition-colors"
             >
-              <ArrowUpRight className="w-3 h-3" />
+              <ArrowUpRight className="w-3 h-3 text-foreground/40" />
             </button>
           </div>
         </div>
 
         {/* Content — hidden at compact, visible at standard+ */}
         <div className={cn(
-          "flex-1 overflow-hidden px-3.5 pb-3 transition-opacity duration-300",
+          "flex-1 overflow-hidden px-3.5 pb-3 text-foreground transition-opacity duration-300",
           tier === "compact" ? "opacity-0" : "opacity-100"
         )}>
           {tier !== "compact" && children}

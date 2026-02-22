@@ -182,9 +182,4 @@
     box-shadow: 0 0 0 1px hsl(var(--container-border)),
                 0 4px 24px -4px hsl(30 10% 30% / 0.08);
   }
-
-  .widget-force-color,
-  .widget-force-color * {
-    color: inherit !important;
-  }
 }
