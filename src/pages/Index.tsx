@@ -11,7 +11,7 @@ import {
 import {
   FolderKanban, CalendarDays, Users, DollarSign, HardDrive,
   Receipt, Bell, Settings2, ListTodo, MessageSquare, BarChart3,
-  ArrowUpRight,
+  ArrowUpRight, Briefcase,
 } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import Sidebar from "@/components/dashboard/Sidebar";
@@ -26,10 +26,11 @@ import { InvoicesPreview, InvoicesExpanded } from "@/components/dashboard/Invoic
 import { TasksPreview, TasksExpanded } from "@/components/dashboard/TasksWidget";
 import { MessagesPreview, MessagesExpanded } from "@/components/dashboard/MessagesWidget";
 import { AnalyticsPreview, AnalyticsExpanded } from "@/components/dashboard/AnalyticsWidget";
+import { StudioPreview, StudioExpanded } from "@/components/dashboard/StudioWidget";
 import WidgetCustomizer from "@/components/dashboard/WidgetCustomizer";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "invoices" | "tasks" | "messages" | "analytics";
+type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "invoices" | "tasks" | "messages" | "analytics" | "studio";
 
 const WIDGETS: Record<
   WidgetId,
@@ -135,9 +136,19 @@ const WIDGETS: Record<
     bgColor: "",
     textColor: "",
   },
+  studio: {
+    title: "Studio",
+    icon: <Briefcase className="w-4 h-4" />,
+    preview: StudioPreview,
+    expanded: StudioExpanded,
+    cols: 1,
+    component: StudioPreview,
+    bgColor: "",
+    textColor: "",
+  },
 };
 
-const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "invoices", "tasks", "messages", "analytics"];
+const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "invoices", "tasks", "messages", "analytics", "studio"];
 
 const stats = [
   { label: "Active Projects", value: "12", trend: "+3" },

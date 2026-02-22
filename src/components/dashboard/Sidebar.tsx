@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Home, FolderKanban, CalendarDays, Users, DollarSign,
   HardDrive, Receipt, ListTodo, MessageSquare, BarChart3,
-  Settings, Menu, X,
+  Settings, Menu, X, Briefcase,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,7 @@ const navItems = [
   { id: "tasks", icon: ListTodo },
   { id: "messages", icon: MessageSquare },
   { id: "analytics", icon: BarChart3 },
+  { id: "studio", icon: Briefcase },
 ];
 
 interface SidebarProps {
