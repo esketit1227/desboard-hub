@@ -53,8 +53,8 @@ const WIDGETS: Record<
     expanded: ProjectsExpanded,
     cols: 1,
     component: ProjectsPreview,
-    bgColor: "#151419",
-    textColor: "#FBFBFB"
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   },
   calendar: {
     title: "Calendar",
@@ -63,8 +63,8 @@ const WIDGETS: Record<
     expanded: CalendarExpanded,
     cols: 1,
     component: CalendarPreview,
-    bgColor: "#F56E0F",
-    textColor: "#FBFBFB"
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   },
   finances: {
     title: "Finances",
@@ -73,8 +73,8 @@ const WIDGETS: Record<
     expanded: FinancesExpanded,
     cols: 1,
     component: FinancesPreview,
-    bgColor: "#1B1B1E",
-    textColor: "#FBFBFB"
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   },
   clients: {
     title: "Client Portal",
@@ -83,8 +83,8 @@ const WIDGETS: Record<
     expanded: ClientsExpanded,
     cols: 1,
     component: ClientsPreview,
-    bgColor: "#262626",
-    textColor: "#FBFBFB"
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   },
   files: {
     title: "Files",
@@ -93,8 +93,8 @@ const WIDGETS: Record<
     expanded: FilesExpanded,
     cols: 1,
     component: FilesPreview,
-    bgColor: "#878787",
-    textColor: "#FBFBFB"
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   },
   tasks: {
     title: "Tasks",
@@ -113,8 +113,8 @@ const WIDGETS: Record<
     expanded: MessagesExpanded,
     cols: 1,
     component: MessagesPreview,
-    bgColor: "#F56E0F",
-    textColor: "#FBFBFB"
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   },
   analytics: {
     title: "Analytics",
@@ -123,8 +123,8 @@ const WIDGETS: Record<
     expanded: AnalyticsExpanded,
     cols: 1,
     component: AnalyticsPreview,
-    bgColor: "#151419",
-    textColor: "#FBFBFB"
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   },
   studio: {
     title: "Studio",
@@ -133,8 +133,8 @@ const WIDGETS: Record<
     expanded: StudioExpanded,
     cols: 1,
     component: StudioPreview,
-    bgColor: "#262626",
-    textColor: "#FBFBFB"
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   }
 };
 
