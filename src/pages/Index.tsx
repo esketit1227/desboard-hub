@@ -14,7 +14,6 @@ import {
   ArrowUpRight, Briefcase, Search, SlidersHorizontal, Plus } from
 "lucide-react";
 
-import Sidebar from "@/components/dashboard/Sidebar";
 import TopIsland from "@/components/dashboard/TopIsland";
 import WidgetCard from "@/components/dashboard/WidgetCard";
 // WidgetExpandedView no longer used — widgets navigate to full page
@@ -156,8 +155,6 @@ const Index = () => {
   const navigate = useNavigate();
   const [activeWidgets, setActiveWidgets] = useState<WidgetId[]>(DEFAULT_WIDGETS);
   const [_expandedWidget, _setExpandedWidget] = useState<WidgetId | null>(null);
-  const [activeNav, setActiveNav] = useState("home");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
   const [pixelSizes, setPixelSizes] = useState<Record<string, {width: number;height: number;}>>(() => {
@@ -170,15 +167,6 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem("widget-pixel-sizes", JSON.stringify(pixelSizes));
   }, [pixelSizes]);
-  // Respect saved theme preference
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -209,14 +197,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-3 md:p-5 lg:p-6">
-      {/* Outer container — the "window" */}
-      <div className="dashboard-container min-h-[calc(100vh-3rem)] flex overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar activeNav={activeNav} onNavChange={setActiveNav} collapsed={sidebarCollapsed} onCollapsedChange={setSidebarCollapsed} />
-
-        {/* Main content */}
-        <main className="flex-1 min-w-0 p-5 md:p-8 lg:p-10">
+    <div className="p-5 md:p-8 lg:p-10">
+      {/* Top Island */}
+      <TopIsland />
           {/* Top Island */}
           <TopIsland />
 
@@ -326,8 +309,6 @@ const Index = () => {
             activeWidgets={activeWidgets}
             onToggle={toggleWidget} />
 
-        </main>
-      </div>
     </div>);
 
 };
