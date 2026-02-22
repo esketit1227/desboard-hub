@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   DndContext,
@@ -28,6 +28,7 @@ import {
   MessageSquare,
   BarChart3,
 } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import WidgetCard from "@/components/dashboard/WidgetCard";
 import WidgetExpandedView from "@/components/dashboard/WidgetExpandedView";
@@ -145,6 +146,17 @@ const Index = () => {
   const [expandedWidget, setExpandedWidget] = useState<WidgetId | null>(null);
   const [activeNav, setActiveNav] = useState("home");
   const [customizerOpen, setCustomizerOpen] = useState(false);
+  const [dark, setDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") === "dark";
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -194,6 +206,12 @@ const Index = () => {
             <p className="text-sm text-muted-foreground mt-1">{today}</p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setDark(!dark)}
+              className="glass rounded-xl p-2.5 hover:scale-105 transition-transform"
+            >
+              {dark ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
+            </button>
             <button className="glass rounded-xl p-2.5 hover:scale-105 transition-transform">
               <Bell className="w-4 h-4 text-muted-foreground" />
             </button>
