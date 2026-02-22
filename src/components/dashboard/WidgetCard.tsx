@@ -18,6 +18,7 @@ interface WidgetCardProps {
   icon?: React.ReactNode;
   accent?: boolean;
   size?: WidgetSize;
+  tintIndex?: number;
   bgColor?: string;
   textColor?: string;
   onExpand: () => void;
@@ -25,7 +26,20 @@ interface WidgetCardProps {
   children: React.ReactNode;
 }
 
-const WidgetCard = ({ id, title, icon, size = "small", onExpand, onResize, children }: WidgetCardProps) => {
+const TINT_COLORS = [
+  { bg: "hsl(150 30% 85%)", fg: "hsl(150 25% 20%)" },
+  { bg: "hsl(260 30% 85%)", fg: "hsl(260 25% 20%)" },
+  { bg: "hsl(340 30% 88%)", fg: "hsl(340 25% 20%)" },
+  { bg: "hsl(170 35% 85%)", fg: "hsl(170 30% 18%)" },
+  { bg: "hsl(20 40% 88%)", fg: "hsl(20 35% 20%)" },
+  { bg: "hsl(200 35% 86%)", fg: "hsl(200 30% 18%)" },
+  { bg: "hsl(280 25% 88%)", fg: "hsl(280 25% 18%)" },
+  { bg: "hsl(45 35% 88%)", fg: "hsl(45 30% 20%)" },
+  { bg: "hsl(350 35% 86%)", fg: "hsl(350 30% 18%)" },
+  { bg: "hsl(130 20% 85%)", fg: "hsl(130 20% 18%)" },
+];
+
+const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, children }: WidgetCardProps) => {
   const {
     attributes,
     listeners,
@@ -35,19 +49,24 @@ const WidgetCard = ({ id, title, icon, size = "small", onExpand, onResize, child
     isDragging,
   } = useSortable({ id });
 
-  const style = {
+  const hasTint = tintIndex !== undefined;
+  const tint = hasTint ? TINT_COLORS[tintIndex % TINT_COLORS.length] : null;
+
+  const cardStyle = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 50 : undefined,
+    ...(tint ? { backgroundColor: tint.bg, color: tint.fg } : {}),
   };
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={cardStyle}
       className={cn(
-        "bg-card border border-border rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden",
+        "rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden",
+        !hasTint && "bg-card border border-border",
         isDragging && "shadow-lg"
       )}
     >
@@ -57,18 +76,18 @@ const WidgetCard = ({ id, title, icon, size = "small", onExpand, onResize, child
           <button
             {...attributes}
             {...listeners}
-            className="rounded-lg p-1 transition-colors cursor-grab active:cursor-grabbing touch-none hover:bg-muted/50 opacity-0 group-hover:opacity-100"
+            className="rounded-lg p-1 transition-colors cursor-grab active:cursor-grabbing touch-none hover:bg-black/5 opacity-0 group-hover:opacity-100"
           >
-            <GripVertical className="w-3.5 h-3.5 text-muted-foreground" />
+            <GripVertical className="w-3.5 h-3.5 opacity-40" />
           </button>
-          <h3 className="text-sm font-semibold text-foreground tracking-tight">{title}</h3>
+          <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {onResize && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-muted/50 transition-colors">
-                  <Maximize2 className="w-3.5 h-3.5 text-muted-foreground" />
+                <button className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-black/5 transition-colors">
+                  <Maximize2 className="w-3.5 h-3.5 opacity-50" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl">
@@ -95,9 +114,9 @@ const WidgetCard = ({ id, title, icon, size = "small", onExpand, onResize, child
           )}
           <button
             onClick={onExpand}
-            className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-muted/50 transition-colors"
+            className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-black/5 transition-colors"
           >
-            <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground" />
+            <ArrowUpRight className="w-3.5 h-3.5 opacity-50" />
           </button>
         </div>
       </div>
