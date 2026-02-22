@@ -26,35 +26,52 @@ const statusLabels: Record<string, string> = {
   started: "New",
 };
 
-const FileStorageWidget = () => {
-  return (
-    <div className="space-y-2">
-      {files.map((file) => {
-        const Icon = icons[file.type] || FileText;
+/** Compact preview */
+export const FilesPreview = () => (
+  <div>
+    <p className="text-3xl font-bold tracking-tight">49 MB</p>
+    <p className="text-xs text-muted-foreground mt-1">4 files stored</p>
+    <div className="flex items-center gap-2 mt-3 flex-wrap">
+      {files.slice(0, 3).map((f) => {
+        const Icon = icons[f.type] || FileText;
         return (
-          <div
-            key={file.name}
-            className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/50 transition-colors cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-              <Icon className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">{file.name}</p>
-              <p className="text-[10px] text-muted-foreground">
-                {file.project} · {file.size}
-              </p>
-            </div>
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${statusStyles[file.status]}`}
-            >
-              {statusLabels[file.status]}
-            </span>
+          <div key={f.name} className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2 py-1">
+            <Icon className="w-3 h-3 text-muted-foreground" />
+            <span className="text-[10px] font-medium truncate max-w-[70px]">{f.name}</span>
           </div>
         );
       })}
+      <span className="text-[10px] text-muted-foreground">+1 more</span>
     </div>
-  );
-};
+  </div>
+);
 
-export default FileStorageWidget;
+/** Full expanded view */
+export const FilesExpanded = () => (
+  <div className="space-y-3">
+    {files.map((file) => {
+      const Icon = icons[file.type] || FileText;
+      return (
+        <div
+          key={file.name}
+          className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+            <Icon className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{file.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {file.project} · {file.size}
+            </p>
+          </div>
+          <span
+            className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium shrink-0 ${statusStyles[file.status]}`}
+          >
+            {statusLabels[file.status]}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+);

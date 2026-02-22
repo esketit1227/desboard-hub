@@ -68,7 +68,21 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   changes: { label: "Changes Req.", className: "bg-destructive/10 text-destructive" },
 };
 
-const ClientPortalWidget = () => {
+/** Compact preview */
+export const ClientsPreview = () => (
+  <div>
+    <p className="text-3xl font-bold tracking-tight">3</p>
+    <p className="text-xs text-muted-foreground mt-1">Active Hand-offs</p>
+    <div className="flex items-center gap-2 mt-3">
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-success/10 text-success">1 Approved</span>
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-warning/10 text-warning">1 Pending</span>
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-destructive/10 text-destructive">1 Changes</span>
+    </div>
+  </div>
+);
+
+/** Full expanded view */
+export const ClientsExpanded = () => {
   const [handoffs, setHandoffs] = useState<Handoff[]>(initialHandoffs);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -85,38 +99,38 @@ const ClientPortalWidget = () => {
           <button
             key={item.id}
             onClick={() => setSelectedId(item.id)}
-            className="w-full text-left p-3 rounded-xl bg-secondary/50 space-y-2 hover:bg-secondary/80 transition-colors group"
+            className="w-full text-left p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group"
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium">{item.project}</p>
-                <p className="text-xs text-muted-foreground">{item.client}</p>
+                <p className="text-sm font-semibold">{item.project}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{item.client}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${statusConfig[item.status].className}`}
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium ${statusConfig[item.status].className}`}
                 >
                   {statusConfig[item.status].label}
                 </span>
-                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </div>
-            <div className="flex items-center gap-3 text-muted-foreground">
+            <div className="flex items-center gap-4 text-muted-foreground mt-2">
               <div className="flex items-center gap-1">
                 {item.rating ? (
                   <>
-                    <Star className="w-3 h-3 fill-warning text-warning" />
-                    <span className="text-[11px]">{item.rating}.0</span>
+                    <Star className="w-3.5 h-3.5 fill-warning text-warning" />
+                    <span className="text-xs">{item.rating}.0</span>
                   </>
                 ) : (
-                  <span className="text-[11px]">No rating</span>
+                  <span className="text-xs">No rating</span>
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <MessageSquare className="w-3 h-3" />
-                <span className="text-[11px]">{item.messages.length}</span>
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span className="text-xs">{item.messages.length} messages</span>
               </div>
-              {item.status === "approved" && <Check className="w-3 h-3 text-success" />}
+              {item.status === "approved" && <Check className="w-3.5 h-3.5 text-success" />}
             </div>
           </button>
         ))}
@@ -131,5 +145,3 @@ const ClientPortalWidget = () => {
     </>
   );
 };
-
-export default ClientPortalWidget;

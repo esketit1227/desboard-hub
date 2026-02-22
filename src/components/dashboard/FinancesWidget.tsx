@@ -1,4 +1,4 @@
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 
 const data = [
   { month: "Jul", revenue: 4200 },
@@ -10,63 +10,79 @@ const data = [
   { month: "Jan", revenue: 7800 },
 ];
 
-const FinancesWidget = () => {
-  return (
-    <div className="space-y-4">
-      <div className="flex gap-6">
-        <div>
-          <p className="text-xs text-muted-foreground">Income</p>
-          <p className="text-xl font-semibold tracking-tight">$8,420</p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">Expenses</p>
-          <p className="text-xl font-semibold tracking-tight">$2,150</p>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground">Profit</p>
-          <p className="text-xl font-semibold tracking-tight text-success">$6,270</p>
-        </div>
-      </div>
+/** Compact preview */
+export const FinancesPreview = () => (
+  <div>
+    <p className="text-3xl font-bold tracking-tight">$24.5k</p>
+    <p className="text-xs text-muted-foreground mt-1">Total Revenue</p>
+    <div className="h-[50px] mt-3 -mx-1">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data}>
+          <Bar dataKey="revenue" fill="hsl(72 95% 49%)" radius={[3, 3, 0, 0]} opacity={0.6} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+);
 
-      <div className="h-[140px] -mx-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(228 68% 55%)" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="hsl(228 68% 55%)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis
-              dataKey="month"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 10, fill: "hsl(228 10% 48%)" }}
-            />
-            <YAxis hide />
-            <Tooltip
-              contentStyle={{
-                background: "hsl(0 0% 100% / 0.8)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid hsl(228 15% 90% / 0.5)",
-                borderRadius: "12px",
-                fontSize: "12px",
-                boxShadow: "0 8px 32px -8px hsl(228 25% 8% / 0.1)",
-              }}
-              formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
-            />
-            <Area
-              type="monotone"
-              dataKey="revenue"
-              stroke="hsl(228 68% 55%)"
-              strokeWidth={2}
-              fill="url(#revenueGradient)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+/** Full expanded view */
+export const FinancesExpanded = () => (
+  <div className="space-y-6">
+    <div className="grid grid-cols-3 gap-4">
+      <div className="p-4 rounded-xl bg-secondary/30">
+        <p className="text-xs text-muted-foreground">Income</p>
+        <p className="text-2xl font-bold tracking-tight mt-1">$8,420</p>
+      </div>
+      <div className="p-4 rounded-xl bg-secondary/30">
+        <p className="text-xs text-muted-foreground">Expenses</p>
+        <p className="text-2xl font-bold tracking-tight mt-1">$2,150</p>
+      </div>
+      <div className="p-4 rounded-xl bg-primary/10">
+        <p className="text-xs text-muted-foreground">Profit</p>
+        <p className="text-2xl font-bold tracking-tight text-success mt-1">$6,270</p>
       </div>
     </div>
-  );
-};
 
-export default FinancesWidget;
+    <div className="h-[250px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(72 95% 49%)" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="hsl(72 95% 49%)" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <XAxis
+            dataKey="month"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 12, fill: "hsl(0 0% 38%)" }}
+          />
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 11, fill: "hsl(0 0% 38%)" }}
+            tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
+          />
+          <Tooltip
+            contentStyle={{
+              background: "hsl(0 0% 100% / 0.9)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid hsl(65 10% 75% / 0.5)",
+              borderRadius: "12px",
+              fontSize: "12px",
+            }}
+            formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+          />
+          <Area
+            type="monotone"
+            dataKey="revenue"
+            stroke="hsl(72 95% 49%)"
+            strokeWidth={2}
+            fill="url(#revGrad)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+);
