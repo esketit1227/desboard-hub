@@ -57,6 +57,8 @@ const WIDGETS: Record<
     cols: number;
     accent?: boolean;
     component: React.ComponentType;
+    bgColor: string;
+    textColor: string;
   }
 > = {
   projects: {
@@ -67,6 +69,8 @@ const WIDGETS: Record<
     cols: 1,
     accent: true,
     component: ProjectsPreview,
+    bgColor: "hsl(12 80% 65%)",
+    textColor: "hsl(0 0% 5%)",
   },
   calendar: {
     title: "Calendar",
@@ -75,6 +79,8 @@ const WIDGETS: Record<
     expanded: CalendarExpanded,
     cols: 1,
     component: CalendarPreview,
+    bgColor: "hsl(40 40% 88%)",
+    textColor: "hsl(0 0% 8%)",
   },
   finances: {
     title: "Finances",
@@ -83,6 +89,8 @@ const WIDGETS: Record<
     expanded: FinancesExpanded,
     cols: 1,
     component: FinancesPreview,
+    bgColor: "hsl(220 55% 55%)",
+    textColor: "hsl(0 0% 100%)",
   },
   clients: {
     title: "Client Portal",
@@ -91,6 +99,8 @@ const WIDGETS: Record<
     expanded: ClientsExpanded,
     cols: 1,
     component: ClientsPreview,
+    bgColor: "hsl(345 55% 72%)",
+    textColor: "hsl(0 0% 5%)",
   },
   files: {
     title: "File Storage",
@@ -99,6 +109,8 @@ const WIDGETS: Record<
     expanded: FilesExpanded,
     cols: 1,
     component: FilesPreview,
+    bgColor: "hsl(155 50% 48%)",
+    textColor: "hsl(0 0% 100%)",
   },
   invoices: {
     title: "Invoices",
@@ -107,6 +119,8 @@ const WIDGETS: Record<
     expanded: InvoicesExpanded,
     cols: 1,
     component: InvoicesPreview,
+    bgColor: "hsl(42 35% 82%)",
+    textColor: "hsl(0 0% 8%)",
   },
   tasks: {
     title: "Tasks",
@@ -115,6 +129,8 @@ const WIDGETS: Record<
     expanded: TasksExpanded,
     cols: 1,
     component: TasksPreview,
+    bgColor: "hsl(185 45% 65%)",
+    textColor: "hsl(0 0% 5%)",
   },
   messages: {
     title: "Messages",
@@ -123,6 +139,8 @@ const WIDGETS: Record<
     expanded: MessagesExpanded,
     cols: 1,
     component: MessagesPreview,
+    bgColor: "hsl(5 70% 60%)",
+    textColor: "hsl(0 0% 100%)",
   },
   analytics: {
     title: "Analytics",
@@ -131,6 +149,8 @@ const WIDGETS: Record<
     expanded: AnalyticsExpanded,
     cols: 1,
     component: AnalyticsPreview,
+    bgColor: "hsl(260 35% 45%)",
+    textColor: "hsl(0 0% 100%)",
   },
 };
 
@@ -276,6 +296,8 @@ const Index = () => {
                         icon={widget.icon}
                         accent={widget.accent}
                         size={widgetSizes[id] || "small"}
+                        bgColor={widget.bgColor}
+                        textColor={widget.textColor}
                         onExpand={() => setExpandedWidget(id)}
                         onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
                       >
@@ -307,27 +329,24 @@ const Index = () => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35, delay: i * 0.04 }}
-                    className={`rounded-2xl p-5 transition-shadow duration-300 overflow-hidden ${
-                      widget.accent
-                        ? "bg-primary text-primary-foreground shadow-[0_-4px_24px_-4px_hsl(0_0%_0%/0.15)]"
-                        : "glass shadow-[0_-4px_24px_-4px_hsl(0_0%_0%/0.08)]"
-                    }`}
+                    className="rounded-2xl p-5 transition-shadow duration-300 overflow-hidden shadow-[0_-4px_24px_-4px_hsl(0_0%_0%/0.12)]"
+                    style={{
+                      backgroundColor: widget.bgColor,
+                      color: widget.textColor,
+                    }}
                   >
                     {/* Card header */}
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
                         {widget.icon && <span className="text-sm">{widget.icon}</span>}
-                        <h3 className={`text-sm font-semibold ${!widget.accent ? "text-foreground" : ""}`}>
+                        <h3 className="text-sm font-semibold">
                           {widget.title}
                         </h3>
                       </div>
                       <button
                         onClick={() => setExpandedWidget(id)}
-                        className={`rounded-full w-7 h-7 flex items-center justify-center transition-all ${
-                          widget.accent
-                            ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
-                            : "bg-secondary hover:bg-secondary/80"
-                        }`}
+                        className="rounded-full w-7 h-7 flex items-center justify-center transition-all"
+                        style={{ backgroundColor: "hsla(0,0%,0%,0.12)" }}
                       >
                         <ArrowUpRight className="w-3.5 h-3.5" />
                       </button>

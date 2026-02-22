@@ -18,6 +18,8 @@ interface WidgetCardProps {
   icon?: React.ReactNode;
   accent?: boolean;
   size?: WidgetSize;
+  bgColor?: string;
+  textColor?: string;
   onExpand: () => void;
   onResize?: (size: WidgetSize) => void;
   children: React.ReactNode;
@@ -29,7 +31,7 @@ const sizeClasses: Record<WidgetSize, string> = {
   large: "sm:col-span-2 lg:col-span-3",
 };
 
-const WidgetCard = ({ id, title, icon, accent, size = "small", onExpand, onResize, children }: WidgetCardProps) => {
+const WidgetCard = ({ id, title, icon, accent, size = "small", bgColor, textColor, onExpand, onResize, children }: WidgetCardProps) => {
   const {
     attributes,
     listeners,
@@ -39,11 +41,14 @@ const WidgetCard = ({ id, title, icon, accent, size = "small", onExpand, onResiz
     isDragging,
   } = useSortable({ id });
 
+  const hasCustomColor = !!bgColor;
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 50 : undefined,
+    ...(hasCustomColor ? { backgroundColor: bgColor, color: textColor } : {}),
   };
 
   return (
@@ -52,7 +57,7 @@ const WidgetCard = ({ id, title, icon, accent, size = "small", onExpand, onResiz
       style={style}
       className={cn(
         "rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden",
-        accent ? "bg-primary text-primary-foreground" : "glass",
+        !hasCustomColor && (accent ? "bg-primary text-primary-foreground" : "glass"),
         isDragging && "shadow-[0_24px_64px_-16px_hsl(0_0%_0%/0.2)]"
       )}
     >
@@ -64,7 +69,7 @@ const WidgetCard = ({ id, title, icon, accent, size = "small", onExpand, onResiz
             {...listeners}
             className={cn(
               "rounded-lg p-1 transition-colors cursor-grab active:cursor-grabbing touch-none",
-              accent ? "hover:bg-primary-foreground/10" : "hover:bg-secondary"
+              hasCustomColor ? "hover:bg-black/10" : accent ? "hover:bg-primary-foreground/10" : "hover:bg-secondary"
             )}
           >
             <GripVertical className="w-3.5 h-3.5 opacity-40" />
@@ -72,7 +77,7 @@ const WidgetCard = ({ id, title, icon, accent, size = "small", onExpand, onResiz
           {icon && <span className="text-sm">{icon}</span>}
           <h3 className={cn(
             "text-sm font-semibold",
-            !accent && "text-foreground"
+            !accent && !hasCustomColor && "text-foreground"
           )}>
             {title}
           </h3>
@@ -84,9 +89,11 @@ const WidgetCard = ({ id, title, icon, accent, size = "small", onExpand, onResiz
                 <button
                   className={cn(
                     "rounded-full w-7 h-7 flex items-center justify-center transition-all duration-200",
-                    accent
-                      ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
-                      : "bg-secondary hover:bg-secondary/80 hover:scale-105"
+                    hasCustomColor
+                      ? "bg-black/10 hover:bg-black/20"
+                      : accent
+                        ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
+                        : "bg-secondary hover:bg-secondary/80 hover:scale-105"
                   )}
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
@@ -121,9 +128,11 @@ const WidgetCard = ({ id, title, icon, accent, size = "small", onExpand, onResiz
             onClick={onExpand}
             className={cn(
               "rounded-full w-7 h-7 flex items-center justify-center transition-all duration-200",
-              accent
-                ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
-                : "bg-secondary hover:bg-secondary/80 hover:scale-105"
+              hasCustomColor
+                ? "bg-black/10 hover:bg-black/20"
+                : accent
+                  ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
+                  : "bg-secondary hover:bg-secondary/80 hover:scale-105"
             )}
           >
             <ArrowUpRight className="w-3.5 h-3.5" />
