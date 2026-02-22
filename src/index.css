@@ -6,48 +6,48 @@
 
 @layer base {
   :root {
-    --background: 0 0% 96%;
-    --foreground: 0 0% 13%;
-    --card: 0 0% 100% / 0.45;
-    --card-foreground: 0 0% 13%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
-    --primary: 0 0% 13%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 94%;
-    --secondary-foreground: 0 0% 25%;
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 90%;
-    --accent-foreground: 0 0% 18%;
+    --background: 40 30% 95%;
+    --foreground: 40 10% 15%;
+    --card: 40 30% 99% / 0.55;
+    --card-foreground: 40 10% 15%;
+    --popover: 40 25% 98%;
+    --popover-foreground: 40 10% 15%;
+    --primary: 150 25% 32%;
+    --primary-foreground: 40 30% 97%;
+    --secondary: 40 20% 91%;
+    --secondary-foreground: 40 10% 25%;
+    --muted: 40 18% 90%;
+    --muted-foreground: 40 8% 48%;
+    --accent: 40 22% 88%;
+    --accent-foreground: 40 10% 20%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 85% / 0.5;
-    --input: 0 0% 90%;
-    --ring: 0 0% 50%;
+    --border: 40 15% 82% / 0.5;
+    --input: 40 18% 88%;
+    --ring: 150 20% 40%;
     --radius: 1.25rem;
     --warning: 38 85% 55%;
     --warning-foreground: 0 0% 100%;
     --success: 152 45% 50%;
     --success-foreground: 0 0% 100%;
 
-    --sidebar-background: 0 0% 97% / 0.6;
-    --sidebar-foreground: 0 0% 40%;
-    --sidebar-primary: 0 0% 13%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 93% / 0.5;
-    --sidebar-accent-foreground: 0 0% 25%;
-    --sidebar-border: 0 0% 88% / 0.4;
-    --sidebar-ring: 0 0% 50%;
+    --sidebar-background: 40 25% 96% / 0.6;
+    --sidebar-foreground: 40 8% 42%;
+    --sidebar-primary: 150 25% 32%;
+    --sidebar-primary-foreground: 40 30% 97%;
+    --sidebar-accent: 40 20% 91% / 0.5;
+    --sidebar-accent-foreground: 40 10% 25%;
+    --sidebar-border: 40 15% 85% / 0.4;
+    --sidebar-ring: 150 20% 40%;
 
-    --glass-bg: 0 0% 100% / 0.35;
-    --glass-border: 0 0% 88% / 0.45;
+    --glass-bg: 40 30% 99% / 0.45;
+    --glass-border: 40 15% 85% / 0.45;
     --glass-blur: 28px;
-    --glass-shadow: 0 1px 4px 0 hsl(0 0% 30% / 0.04), 0 1px 2px -1px hsl(0 0% 30% / 0.03);
-    --glass-shadow-hover: 0 10px 30px -8px hsl(0 0% 30% / 0.1), 0 4px 12px -4px hsl(0 0% 30% / 0.05);
+    --glass-shadow: 0 1px 4px 0 hsl(40 15% 30% / 0.04), 0 1px 2px -1px hsl(40 15% 30% / 0.03);
+    --glass-shadow-hover: 0 10px 30px -8px hsl(40 15% 30% / 0.1), 0 4px 12px -4px hsl(40 15% 30% / 0.05);
 
-    --container-bg: 0 0% 100% / 0.4;
-    --container-border: 0 0% 88% / 0.35;
+    --container-bg: 40 30% 99% / 0.5;
+    --container-border: 40 15% 85% / 0.35;
   }
 }
 
@@ -57,7 +57,7 @@
   }
   body {
     @apply text-foreground font-body antialiased;
-    background-color: hsl(0 0% 96%);
+    background-color: hsl(40 30% 95%);
     background-image: url('/images/dot-grid-bg.png');
     background-size: cover;
     background-position: center;

@@ -25,16 +25,16 @@ interface WidgetCardProps {
 }
 
 const TINT_COLORS = [
-  { bg: "hsl(0 0% 100% / 0.38)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.35)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.40)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.33)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.36)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.42)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.37)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.39)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.34)", fg: "hsl(0 0% 15%)" },
-  { bg: "hsl(0 0% 100% / 0.41)", fg: "hsl(0 0% 15%)" },
+  { bg: "hsl(40 30% 99% / 0.5)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 25% 98% / 0.48)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 30% 99% / 0.52)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 20% 97% / 0.46)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 28% 98% / 0.50)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 30% 99% / 0.54)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 22% 98% / 0.49)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 30% 99% / 0.51)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 25% 97% / 0.47)", fg: "hsl(40 10% 15%)" },
+  { bg: "hsl(40 30% 99% / 0.53)", fg: "hsl(40 10% 15%)" },
 ];
 
 const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {

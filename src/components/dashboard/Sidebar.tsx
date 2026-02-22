@@ -57,8 +57,8 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
 
         {/* Logo */}
         <div className={cn("mb-6", collapsed ? "px-0" : "px-4 w-full")}>
-          <div className="w-10 h-10 rounded-2xl bg-foreground flex items-center justify-center mx-auto">
-            <span className="text-background text-xs font-bold">•••</span>
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center mx-auto">
+            <span className="text-primary-foreground text-xs font-bold">•••</span>
           </div>
         </div>
 
@@ -82,7 +82,7 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
                     ? "w-10 h-10 justify-center"
                     : "w-full h-10 px-3",
                   isActive
-                    ? "bg-foreground text-background font-medium shadow-sm"
+                    ? "bg-primary text-primary-foreground font-medium shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 )}
                 title={item.label}
