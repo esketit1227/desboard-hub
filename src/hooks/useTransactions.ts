@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { useTeam } from "./useTeam";
 import { useToast } from "./use-toast";
 
@@ -29,7 +28,6 @@ export interface IncomeSource {
 }
 
 export const useTransactions = () => {
-  const { user } = useAuth();
   const { teamId } = useTeam();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -86,7 +84,7 @@ export const useTransactions = () => {
     }) => {
       const { error } = await supabase.from("transactions").insert({
         team_id: teamId!,
-        created_by: user!.id,
+        created_by: "anonymous",
         description: tx.description,
         amount: tx.type === "expense" ? -Math.abs(tx.amount) : Math.abs(tx.amount),
         type: tx.type,
