@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   DndContext,
   closestCenter,
@@ -165,9 +166,9 @@ const stats = [
 
 const Index = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [activeWidgets, setActiveWidgets] = useState<WidgetId[]>(DEFAULT_WIDGETS);
   const [expandedWidget, setExpandedWidget] = useState<WidgetId | null>(null);
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [activeNav, setActiveNav] = useState("home");
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
@@ -204,6 +205,14 @@ const Index = () => {
         const newIndex = prev.indexOf(over.id as WidgetId);
         return arrayMove(prev, oldIndex, newIndex);
       });
+    }
+  };
+
+  const handleExpand = (id: WidgetId) => {
+    if (isMobile) {
+      navigate(`/widget/${id}`);
+    } else {
+      setExpandedWidget(id);
     }
   };
 
@@ -298,7 +307,7 @@ const Index = () => {
                         size={widgetSizes[id] || "small"}
                         bgColor={widget.bgColor}
                         textColor={widget.textColor}
-                        onExpand={() => setExpandedWidget(id)}
+                        onExpand={() => handleExpand(id)}
                         onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
                       >
                         <Preview />
@@ -310,51 +319,37 @@ const Index = () => {
             </SortableContext>
           </DndContext>
         ) : (
-          /* Mobile: Stacked scrollable cards — each card sticks at a slightly offset top position */
+          /* Mobile: Compact stacked scrollable cards */
           <div className="relative pb-8">
             {activeWidgets.map((id, i) => {
               const widget = WIDGETS[id];
-              const Preview = widget.preview;
 
               return (
                 <div
                   key={id}
-                  className="sticky mb-[-60px] last:mb-0"
+                  className="sticky mb-[-40px] last:mb-0"
                   style={{
-                    top: `${8 + i * 44}px`,
+                    top: `${4 + i * 48}px`,
                     zIndex: i + 1,
                   }}
                 >
                   <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, delay: i * 0.04 }}
-                    className="rounded-2xl p-5 transition-shadow duration-300 overflow-hidden shadow-[0_-4px_24px_-4px_hsl(0_0%_0%/0.12)]"
+                    transition={{ duration: 0.3, delay: i * 0.03 }}
+                    onClick={() => handleExpand(id)}
+                    className="rounded-2xl px-4 py-3.5 transition-shadow duration-300 overflow-hidden shadow-[0_-2px_16px_-4px_hsl(0_0%_0%/0.1)] active:scale-[0.98] cursor-pointer"
                     style={{
                       backgroundColor: widget.bgColor,
                       color: widget.textColor,
                     }}
                   >
-                    {/* Card header */}
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        {widget.icon && <span className="text-sm">{widget.icon}</span>}
-                        <h3 className="text-sm font-semibold">
-                          {widget.title}
-                        </h3>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        {widget.icon && <span>{widget.icon}</span>}
+                        <h3 className="text-sm font-semibold">{widget.title}</h3>
                       </div>
-                      <button
-                        onClick={() => setExpandedWidget(id)}
-                        className="rounded-full w-7 h-7 flex items-center justify-center transition-all"
-                        style={{ backgroundColor: "hsla(0,0%,0%,0.12)" }}
-                      >
-                        <ArrowUpRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {/* Card content */}
-                    <div className="mt-2">
-                      <Preview />
+                      <ArrowUpRight className="w-4 h-4 opacity-50" />
                     </div>
                   </motion.div>
                 </div>
