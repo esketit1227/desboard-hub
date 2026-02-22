@@ -1,7 +1,15 @@
-import { ArrowUpRight, GripVertical } from "lucide-react";
+import { ArrowUpRight, GripVertical, Maximize2, RectangleHorizontal, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export type WidgetSize = "small" | "medium" | "large";
 
 interface WidgetCardProps {
   id: string;
@@ -9,11 +17,19 @@ interface WidgetCardProps {
   cols?: number;
   icon?: React.ReactNode;
   accent?: boolean;
+  size?: WidgetSize;
   onExpand: () => void;
+  onResize?: (size: WidgetSize) => void;
   children: React.ReactNode;
 }
 
-const WidgetCard = ({ id, title, cols = 1, icon, accent, onExpand, children }: WidgetCardProps) => {
+const sizeClasses: Record<WidgetSize, string> = {
+  small: "",
+  medium: "sm:col-span-2",
+  large: "sm:col-span-2 lg:col-span-3",
+};
+
+const WidgetCard = ({ id, title, icon, accent, size = "small", onExpand, onResize, children }: WidgetCardProps) => {
   const {
     attributes,
     listeners,
@@ -37,7 +53,6 @@ const WidgetCard = ({ id, title, cols = 1, icon, accent, onExpand, children }: W
       className={cn(
         "rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden",
         accent ? "bg-primary text-primary-foreground" : "glass",
-        cols === 2 && "md:col-span-2",
         isDragging && "shadow-[0_24px_64px_-16px_hsl(0_0%_0%/0.2)]"
       )}
     >
@@ -62,17 +77,58 @@ const WidgetCard = ({ id, title, cols = 1, icon, accent, onExpand, children }: W
             {title}
           </h3>
         </div>
-        <button
-          onClick={onExpand}
-          className={cn(
-            "rounded-full w-7 h-7 flex items-center justify-center transition-all duration-200",
-            accent
-              ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
-              : "bg-secondary hover:bg-secondary/80 hover:scale-105"
+        <div className="flex items-center gap-1">
+          {onResize && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={cn(
+                    "rounded-full w-7 h-7 flex items-center justify-center transition-all duration-200",
+                    accent
+                      ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
+                      : "bg-secondary hover:bg-secondary/80 hover:scale-105"
+                  )}
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl">
+                <DropdownMenuItem
+                  onClick={() => onResize("small")}
+                  className={cn("gap-2 rounded-lg", size === "small" && "bg-secondary")}
+                >
+                  <Square className="w-3.5 h-3.5" />
+                  Small
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => onResize("medium")}
+                  className={cn("gap-2 rounded-lg", size === "medium" && "bg-secondary")}
+                >
+                  <RectangleHorizontal className="w-3.5 h-3.5" />
+                  Medium
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => onResize("large")}
+                  className={cn("gap-2 rounded-lg", size === "large" && "bg-secondary")}
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  Large
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
-        >
-          <ArrowUpRight className="w-3.5 h-3.5" />
-        </button>
+          <button
+            onClick={onExpand}
+            className={cn(
+              "rounded-full w-7 h-7 flex items-center justify-center transition-all duration-200",
+              accent
+                ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
+                : "bg-secondary hover:bg-secondary/80 hover:scale-105"
+            )}
+          >
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Content preview */}
