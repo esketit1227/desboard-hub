@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { getSizeTier } from "./WidgetCard";
 
-// --- Data ---
 const monthlyData = [
   { month: "Jul", income: 4200, expenses: 1800, profit: 2400 },
   { month: "Aug", income: 5800, expenses: 2100, profit: 3700 },
@@ -24,11 +23,11 @@ const monthlyData = [
 ];
 
 const expenseCategories = [
-  { name: "Software & Tools", value: 1240, color: "hsl(220 13% 18%)" },
-  { name: "Marketing", value: 860, color: "hsl(220 10% 46%)" },
-  { name: "Contractors", value: 1450, color: "hsl(150 40% 50%)" },
-  { name: "Office", value: 420, color: "hsl(220 10% 72%)" },
-  { name: "Other", value: 280, color: "hsl(220 10% 86%)" },
+  { name: "Software & Tools", value: 1240, color: "hsl(220 10% 20%)" },
+  { name: "Marketing", value: 860, color: "hsl(220 10% 40%)" },
+  { name: "Contractors", value: 1450, color: "hsl(220 10% 55%)" },
+  { name: "Office", value: 420, color: "hsl(220 10% 70%)" },
+  { name: "Other", value: 280, color: "hsl(220 10% 85%)" },
 ];
 
 const incomeSources = [
@@ -44,318 +43,121 @@ const transactions = [
   { id: 3, description: "Payment from StartupXYZ", amount: 1800, type: "income" as const, date: "Jan 25", category: "Retainers", method: "Stripe" },
   { id: 4, description: "Google Ads Campaign", amount: -340, type: "expense" as const, date: "Jan 24", category: "Marketing", method: "Credit Card" },
   { id: 5, description: "Contractor - Alex M.", amount: -750, type: "expense" as const, date: "Jan 23", category: "Contractors", method: "Bank Transfer" },
-  { id: 6, description: "Payment from Bright Inc", amount: 2400, type: "income" as const, date: "Jan 22", category: "Client Projects", method: "Stripe" },
-  { id: 7, description: "Adobe Creative Cloud", amount: -55, type: "expense" as const, date: "Jan 21", category: "Software & Tools", method: "Credit Card" },
-  { id: 8, description: "Consulting - Brand Strategy", amount: 540, type: "income" as const, date: "Jan 20", category: "Consulting", method: "Invoice" },
-  { id: 9, description: "Co-working Space", amount: -200, type: "expense" as const, date: "Jan 18", category: "Office", method: "Bank Transfer" },
-  { id: 10, description: "Webflow Hosting", amount: -24, type: "expense" as const, date: "Jan 17", category: "Software & Tools", method: "Credit Card" },
 ];
 
 const weeklySpending = [
-  { day: "Mon", amount: 120 },
-  { day: "Tue", amount: 45 },
-  { day: "Wed", amount: 340 },
-  { day: "Thu", amount: 80 },
-  { day: "Fri", amount: 210 },
-  { day: "Sat", amount: 15 },
-  { day: "Sun", amount: 0 },
+  { day: "Mon", amount: 120 }, { day: "Tue", amount: 45 }, { day: "Wed", amount: 340 },
+  { day: "Thu", amount: 80 }, { day: "Fri", amount: 210 }, { day: "Sat", amount: 15 }, { day: "Sun", amount: 0 },
 ];
 
 export const FinancesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const tier = getSizeTier(pixelSize);
 
-  if (tier === "compact") {
+  if (tier === "compact") return null;
+
+  if (tier === "standard") {
     return (
-      <div className="flex flex-col justify-between h-full">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-3xl font-bold tracking-tight leading-none">$7.8k</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Revenue</p>
-          </div>
-          <div className="flex items-center gap-0.5 text-success">
-            <ArrowUpRight className="w-3 h-3" />
-            <span className="text-[10px] font-semibold">+28%</span>
-          </div>
+      <div className="flex flex-col h-full gap-1.5 mt-1">
+        <div className="flex items-baseline gap-2">
+          <p className="text-2xl font-bold tracking-tight leading-none">$7.8k</p>
+          <p className="text-[10px] text-muted-foreground">revenue</p>
         </div>
-        <div className="flex items-end gap-[3px] mt-auto h-[28px]">
+        <div className="flex items-end gap-[3px] flex-1 h-[28px]">
           {monthlyData.map((d, i) => (
             <div key={i} className="flex-1 rounded-sm bg-foreground/15" style={{ height: `${(d.income / 8400) * 100}%` }} />
           ))}
         </div>
-      </div>
-    );
-  }
-
-  if (tier === "standard") {
-    return (
-      <div className="flex flex-col h-full gap-1.5">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-2xl font-bold tracking-tight leading-none">$7.8k</p>
-            <p className="text-[10px] text-muted-foreground">Revenue this month</p>
-          </div>
-          <div className="flex items-center gap-0.5 text-success">
-            <ArrowUpRight className="w-3 h-3" />
-            <span className="text-[10px] font-semibold">+28%</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 mt-1">
-          <div className="text-center">
-            <p className="text-xs font-bold text-success">$5.1k</p>
-            <p className="text-[8px] text-muted-foreground">Profit</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs font-bold text-destructive">$2.6k</p>
-            <p className="text-[8px] text-muted-foreground">Expenses</p>
-          </div>
-        </div>
-        <div className="flex items-end gap-[3px] mt-auto h-[32px]">
-          {monthlyData.map((d, i) => (
-            <div key={i} className="flex-1 flex flex-col gap-[1px] justify-end" style={{ height: "100%" }}>
-              <div className="rounded-sm bg-foreground/15" style={{ height: `${(d.income / 8400) * 100}%` }} />
-            </div>
-          ))}
+        <div className="flex items-center justify-between text-[9px] text-muted-foreground mt-auto">
+          <span>$2.7k expenses</span>
+          <span>+28%</span>
         </div>
       </div>
     );
   }
 
-  // expanded
   return (
-    <div className="flex flex-col h-full gap-2">
+    <div className="flex flex-col h-full gap-2 mt-1">
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-2xl font-bold tracking-tight leading-none">$7.8k <span className="text-sm font-normal text-muted-foreground">revenue</span></p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-2xl font-bold tracking-tight leading-none">$7.8k</p>
+          <p className="text-xs text-muted-foreground">revenue</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-0.5 text-success">
-            <ArrowUpRight className="w-3 h-3" />
-            <span className="text-[10px] font-semibold">+28%</span>
-          </div>
-        </div>
+        <span className="text-[10px] text-muted-foreground font-medium">+28% ↑</span>
       </div>
-      <div className="grid grid-cols-3 gap-2 mt-1">
-        <div className="bg-muted/30 rounded-lg p-1.5 text-center">
-          <p className="text-xs font-bold">$5.1k</p>
-          <p className="text-[8px] text-muted-foreground">Profit</p>
-        </div>
-        <div className="bg-muted/30 rounded-lg p-1.5 text-center">
-          <p className="text-xs font-bold">$2.6k</p>
-          <p className="text-[8px] text-muted-foreground">Expenses</p>
-        </div>
-        <div className="bg-muted/30 rounded-lg p-1.5 text-center">
-          <p className="text-xs font-bold">$3.4k</p>
-          <p className="text-[8px] text-muted-foreground">Due</p>
-        </div>
-      </div>
-      <div className="flex items-end gap-[3px] flex-1 min-h-[40px]">
+      <div className="flex items-end gap-[3px] h-[32px]">
         {monthlyData.map((d, i) => (
-          <div key={i} className="flex-1 flex flex-col gap-[1px] justify-end h-full">
-            <div className="rounded-sm bg-success/20" style={{ height: `${(d.profit / 8400) * 100}%` }} />
-            <div className="rounded-sm bg-foreground/10" style={{ height: `${(d.expenses / 8400) * 100}%` }} />
+          <div key={i} className="flex-1 rounded-sm bg-foreground/15" style={{ height: `${(d.income / 8400) * 100}%` }} />
+        ))}
+      </div>
+      <div className="space-y-1">
+        {transactions.slice(0, 3).map((t) => (
+          <div key={t.id} className="flex items-center justify-between">
+            <span className="text-[9px] truncate flex-1">{t.description}</span>
+            <span className={cn("text-[9px] font-medium", t.amount > 0 ? "text-foreground" : "text-muted-foreground")}>
+              {t.amount > 0 ? "+" : ""}{t.amount > 0 ? `$${t.amount}` : `-$${Math.abs(t.amount)}`}
+            </span>
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between text-[8px] text-muted-foreground mt-auto">
-        {monthlyData.map((d, i) => <span key={i}>{d.month}</span>)}
+      <div className="flex items-center justify-between text-[9px] text-muted-foreground mt-auto pt-1 border-t border-foreground/8">
+        <span>$5.2k profit</span>
+        <span>$2.7k expenses</span>
       </div>
     </div>
   );
 };
 
-// --- Stat Card ---
-const StatCard = ({ label, value, trend, trendUp, icon: Icon }: {
-  label: string; value: string; trend: string; trendUp: boolean; icon: React.ElementType;
-}) => (
-  <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
-    <div className="flex items-center justify-between mb-2">
-      <Icon className="w-4 h-4 text-muted-foreground" />
-      <div className={cn("flex items-center gap-0.5 text-xs font-medium", trendUp ? "text-success" : "text-destructive")}>
-        {trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-        {trend}
-      </div>
-    </div>
-    <p className="text-2xl font-bold tracking-tight">{value}</p>
-    <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
-  </div>
-);
-
-// --- Expanded ---
 export const FinancesExpanded = () => {
-  const [txFilter, setTxFilter] = useState<"all" | "income" | "expense">("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const totalExpenses = expenseCategories.reduce((s, c) => s + c.value, 0);
-
-  const filteredTransactions = transactions.filter((tx) => {
-    const matchesType = txFilter === "all" || tx.type === txFilter;
-    const matchesSearch = tx.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
-  });
+  const totalIncome = monthlyData[monthlyData.length - 1].income;
+  const totalExpenses = monthlyData[monthlyData.length - 1].expenses;
+  const profit = totalIncome - totalExpenses;
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Revenue" value="$7,800" trend="+28%" trendUp icon={Wallet} />
-        <StatCard label="Expenses" value="$2,650" trend="+8%" trendUp={false} icon={CreditCard} />
-        <StatCard label="Profit" value="$5,150" trend="+34%" trendUp icon={TrendingUp} />
-        <StatCard label="Invoices Due" value="$3,420" trend="3 pending" trendUp icon={Receipt} />
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Revenue", value: `$${(totalIncome / 1000).toFixed(1)}k`, sub: "+28%" },
+          { label: "Expenses", value: `$${(totalExpenses / 1000).toFixed(1)}k`, sub: "+12%" },
+          { label: "Profit", value: `$${(profit / 1000).toFixed(1)}k`, sub: "+34%" },
+        ].map(s => (
+          <div key={s.label} className="bg-secondary/30 rounded-xl p-3 text-center">
+            <p className="text-lg font-bold">{s.value}</p>
+            <p className="text-[10px] text-muted-foreground">{s.label}</p>
+            <p className="text-[9px] text-muted-foreground mt-0.5">{s.sub}</p>
+          </div>
+        ))}
       </div>
-
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-muted/40 p-1 rounded-xl">
-          <TabsTrigger value="overview" className="rounded-lg text-xs">Overview</TabsTrigger>
-          <TabsTrigger value="transactions" className="rounded-lg text-xs">Transactions</TabsTrigger>
-          <TabsTrigger value="expenses" className="rounded-lg text-xs">Expenses</TabsTrigger>
-          <TabsTrigger value="income" className="rounded-lg text-xs">Income</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="mt-4 space-y-5">
-          <div>
-            <h4 className="text-sm font-semibold mb-3">Revenue vs Profit</h4>
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyData}>
-                  <defs>
-                    <linearGradient id="incGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.08} />
-                      <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="profGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.15} />
-                      <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }} formatter={(value: number, name: string) => [`$${value.toLocaleString()}`, name === "income" ? "Revenue" : "Profit"]} />
-                  <Area type="monotone" dataKey="income" stroke="hsl(var(--foreground))" strokeWidth={2} fill="url(#incGrad)" />
-                  <Area type="monotone" dataKey="profit" stroke="hsl(var(--success))" strokeWidth={2} fill="url(#profGrad)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold mb-3">This Week's Spending</h4>
-            <div className="h-[100px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklySpending}>
-                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }} formatter={(value: number) => [`$${value}`, "Spent"]} />
-                  <Bar dataKey="amount" fill="hsl(var(--foreground))" radius={[4, 4, 0, 0]} opacity={0.2} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="transactions" className="mt-4 space-y-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 flex-1 min-w-[180px] bg-muted/30 border border-border/50 rounded-xl px-3 py-2">
-              <Search className="w-3.5 h-3.5 text-muted-foreground" />
-              <input type="text" placeholder="Search transactions..." className="bg-transparent text-sm outline-none flex-1 placeholder:text-muted-foreground/60" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-            </div>
-            <div className="flex gap-1">
-              {(["all", "income", "expense"] as const).map((f) => (
-                <button key={f} onClick={() => setTxFilter(f)} className={cn("px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize", txFilter === f ? "bg-foreground text-background" : "bg-muted/40 text-muted-foreground hover:text-foreground")}>{f}</button>
-              ))}
-            </div>
-            <button className="rounded-lg p-2 hover:bg-muted/40 transition-colors"><Download className="w-3.5 h-3.5 text-muted-foreground" /></button>
-          </div>
-          <div className="space-y-1">
-            {filteredTransactions.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between py-3 px-3 rounded-xl hover:bg-muted/20 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", tx.type === "income" ? "bg-success/10" : "bg-muted/50")}>
-                    {tx.type === "income" ? <ArrowDownRight className="w-3.5 h-3.5 text-success" /> : <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground" />}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{tx.description}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[11px] text-muted-foreground">{tx.date}</span>
-                      <span className="text-[11px] text-muted-foreground">·</span>
-                      <span className="text-[11px] text-muted-foreground">{tx.method}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="text-[10px] rounded-md font-normal hidden sm:inline-flex">{tx.category}</Badge>
-                  <span className={cn("text-sm font-semibold tabular-nums", tx.type === "income" ? "text-success" : "text-foreground")}>{tx.type === "income" ? "+" : ""}${Math.abs(tx.amount).toLocaleString()}</span>
-                </div>
+      <div>
+        <h4 className="text-sm font-medium mb-3">Revenue Trend</h4>
+        <div className="h-[200px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={monthlyData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 10% 90%)" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(220 10% 60%)" />
+              <YAxis tick={{ fontSize: 11 }} stroke="hsl(220 10% 60%)" />
+              <Tooltip />
+              <Area type="monotone" dataKey="income" stroke="hsl(220 10% 30%)" fill="hsl(220 10% 30% / 0.1)" strokeWidth={2} />
+              <Area type="monotone" dataKey="expenses" stroke="hsl(220 10% 60%)" fill="hsl(220 10% 60% / 0.1)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      <div>
+        <h4 className="text-sm font-medium mb-3">Recent Transactions</h4>
+        <div className="space-y-2">
+          {transactions.map(t => (
+            <div key={t.id} className="flex items-center justify-between p-2.5 rounded-xl bg-secondary/20">
+              <div>
+                <p className="text-sm font-medium">{t.description}</p>
+                <p className="text-[10px] text-muted-foreground">{t.date} · {t.category}</p>
               </div>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="expenses" className="mt-4 space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="text-sm font-semibold mb-3">Breakdown</h4>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={expenseCategories} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value" stroke="none">
-                      {expenseCategories.map((entry, index) => (<Cell key={index} fill={entry.color} />))}
-                    </Pie>
-                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }} formatter={(value: number) => [`$${value.toLocaleString()}`, ""]} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              <span className={cn("text-sm font-semibold", t.amount > 0 ? "text-foreground" : "text-muted-foreground")}>
+                {t.amount > 0 ? "+" : ""}{t.amount > 0 ? `$${t.amount}` : `-$${Math.abs(t.amount)}`}
+              </span>
             </div>
-            <div>
-              <h4 className="text-sm font-semibold mb-3">By Category</h4>
-              <div className="space-y-3">
-                {expenseCategories.map((cat) => {
-                  const pct = Math.round((cat.value / totalExpenses) * 100);
-                  return (
-                    <div key={cat.name} className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
-                          <span className="text-sm">{cat.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium tabular-nums">${cat.value.toLocaleString()}</span>
-                          <span className="text-xs text-muted-foreground w-8 text-right">{pct}%</span>
-                        </div>
-                      </div>
-                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: cat.color }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between">
-                <span className="text-sm font-medium">Total</span>
-                <span className="text-sm font-bold">${totalExpenses.toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="income" className="mt-4 space-y-5">
-          <div>
-            <h4 className="text-sm font-semibold mb-3">Revenue Sources</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {incomeSources.map((source) => (
-                <div key={source.name} className="p-4 rounded-xl bg-muted/30 border border-border/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">{source.name}</span>
-                    <span className="text-xs text-muted-foreground">{source.percentage}%</span>
-                  </div>
-                  <p className="text-lg font-bold">${source.value.toLocaleString()}</p>
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-2">
-                    <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${source.percentage}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

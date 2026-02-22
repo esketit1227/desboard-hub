@@ -7,12 +7,8 @@ import { toast } from "sonner";
 import { getSizeTier } from "./WidgetCard";
 
 interface Task {
-  id: string;
-  title: string;
-  completed: boolean;
-  priority: "high" | "medium" | "low";
-  dueDate?: string;
-  project?: string;
+  id: string; title: string; completed: boolean;
+  priority: "high" | "medium" | "low"; dueDate?: string; project?: string;
 }
 
 const initialTasks: Task[] = [
@@ -25,8 +21,8 @@ const initialTasks: Task[] = [
 ];
 
 const priorityConfig = {
-  high: { label: "High", className: "text-destructive", color: "hsl(var(--destructive))" },
-  medium: { label: "Med", className: "text-warning", color: "hsl(var(--warning))" },
+  high: { label: "High", className: "text-foreground", color: "hsl(var(--foreground))" },
+  medium: { label: "Med", className: "text-foreground/50", color: "hsl(var(--foreground) / 0.5)" },
   low: { label: "Low", className: "text-muted-foreground", color: "hsl(var(--muted-foreground))" },
 };
 
@@ -35,91 +31,54 @@ export const TasksPreview = ({ pixelSize }: { pixelSize?: { width: number; heigh
   const pending = initialTasks.filter(t => !t.completed);
   const completed = initialTasks.filter(t => t.completed);
 
-  if (tier === "compact") {
+  if (tier === "compact") return null;
+
+  if (tier === "standard") {
     return (
-      <div className="flex flex-col justify-between h-full">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-3xl font-bold tracking-tight leading-none">{pending.length}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Pending</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-success/60" />
-            <span className="text-[10px] text-muted-foreground font-medium">{completed.length}</span>
-          </div>
+      <div className="flex flex-col h-full gap-1.5 mt-1">
+        <div className="flex items-baseline gap-2">
+          <p className="text-2xl font-bold tracking-tight leading-none">{pending.length}</p>
+          <p className="text-[10px] text-muted-foreground">pending</p>
         </div>
-        <div className="space-y-1 mt-auto">
-          {pending.slice(0, 2).map((task) => (
+        <div className="flex-1 space-y-1 overflow-hidden">
+          {pending.slice(0, 3).map((task) => (
             <div key={task.id} className="flex items-center gap-1.5">
-              <div className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: priorityConfig[task.priority].color }} />
+              <div className="w-1 h-1 rounded-full bg-foreground/30 shrink-0" />
               <span className="text-[10px] font-medium truncate">{task.title}</span>
             </div>
           ))}
         </div>
-      </div>
-    );
-  }
-
-  if (tier === "standard") {
-    return (
-      <div className="flex flex-col h-full gap-1.5">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-2xl font-bold tracking-tight leading-none">{pending.length}</p>
-            <p className="text-[10px] text-muted-foreground">Pending Tasks</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-success/60" />
-            <span className="text-[10px] text-muted-foreground font-medium">{completed.length} done</span>
-          </div>
-        </div>
-        <div className="flex-1 space-y-1 mt-1 overflow-hidden">
-          {pending.slice(0, 4).map((task) => (
-            <div key={task.id} className="flex items-center gap-1.5">
-              <Flag className={cn("w-2.5 h-2.5 shrink-0", priorityConfig[task.priority].className)} />
-              <span className="text-[10px] font-medium truncate flex-1">{task.title}</span>
-              {task.dueDate && <span className="text-[8px] text-muted-foreground shrink-0">{new Date(task.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>}
-            </div>
-          ))}
-        </div>
         <div className="flex items-center gap-2 mt-auto">
-          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-success/40 rounded-full" style={{ width: `${Math.round((completed.length / initialTasks.length) * 100)}%` }} />
+          <div className="flex-1 h-1 bg-foreground/8 rounded-full overflow-hidden">
+            <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${Math.round((completed.length / initialTasks.length) * 100)}%` }} />
           </div>
-          <span className="text-[9px] text-muted-foreground">{Math.round((completed.length / initialTasks.length) * 100)}%</span>
+          <span className="text-[9px] text-muted-foreground">{completed.length}/{initialTasks.length}</span>
         </div>
       </div>
     );
   }
 
-  // expanded
-  const highCount = pending.filter(t => t.priority === "high").length;
   return (
-    <div className="flex flex-col h-full gap-2">
+    <div className="flex flex-col h-full gap-2 mt-1">
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-2xl font-bold tracking-tight leading-none">{pending.length} <span className="text-sm font-normal text-muted-foreground">pending</span></p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-2xl font-bold tracking-tight leading-none">{pending.length}</p>
+          <p className="text-xs text-muted-foreground">pending</p>
         </div>
-        <div className="flex items-center gap-2">
-          {highCount > 0 && (
-            <span className="text-[9px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-medium">{highCount} urgent</span>
-          )}
-          <span className="text-[9px] bg-success/10 text-success px-1.5 py-0.5 rounded-full font-medium">{completed.length} done</span>
-        </div>
+        <span className="text-[10px] text-muted-foreground font-medium">{completed.length} done</span>
       </div>
-      <div className="flex-1 space-y-1.5 overflow-hidden mt-1">
+      <div className="flex-1 space-y-1.5 overflow-hidden">
         {pending.map((task) => (
           <div key={task.id} className="flex items-center gap-2">
-            <Circle className="w-3 h-3 shrink-0 text-muted-foreground/40" />
-            <Flag className={cn("w-2.5 h-2.5 shrink-0", priorityConfig[task.priority].className)} />
+            <Circle className="w-3 h-3 shrink-0 text-foreground/20" />
             <span className="text-[10px] font-medium truncate flex-1">{task.title}</span>
-            {task.project && <span className="text-[8px] text-primary/60 shrink-0">{task.project}</span>}
+            {task.project && <span className="text-[8px] text-muted-foreground shrink-0">{task.project}</span>}
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-2 mt-auto pt-1 border-t border-border/30">
-        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-success/40 rounded-full" style={{ width: `${Math.round((completed.length / initialTasks.length) * 100)}%` }} />
+      <div className="flex items-center gap-2 mt-auto pt-1 border-t border-foreground/8">
+        <div className="flex-1 h-1 bg-foreground/8 rounded-full overflow-hidden">
+          <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${Math.round((completed.length / initialTasks.length) * 100)}%` }} />
         </div>
         <span className="text-[9px] text-muted-foreground">{completed.length}/{initialTasks.length} complete</span>
       </div>
@@ -127,7 +86,6 @@ export const TasksPreview = ({ pixelSize }: { pixelSize?: { width: number; heigh
   );
 };
 
-/** Full expanded view */
 export const TasksExpanded = () => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [newTitle, setNewTitle] = useState("");
@@ -135,9 +93,7 @@ export const TasksExpanded = () => {
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
 
   const toggleTask = (id: string) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
   };
 
   const deleteTask = (id: string) => {
@@ -147,12 +103,7 @@ export const TasksExpanded = () => {
 
   const addTask = () => {
     if (!newTitle.trim()) return;
-    const task: Task = {
-      id: String(Date.now()),
-      title: newTitle.trim(),
-      completed: false,
-      priority: newPriority,
-    };
+    const task: Task = { id: String(Date.now()), title: newTitle.trim(), completed: false, priority: newPriority };
     setTasks((prev) => [task, ...prev]);
     setNewTitle("");
     toast.success("Task added");
@@ -167,82 +118,36 @@ export const TasksExpanded = () => {
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
-        <Input
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addTask()}
-          placeholder="Add a new task…"
-          className="rounded-xl flex-1"
-        />
-        <select
-          value={newPriority}
-          onChange={(e) => setNewPriority(e.target.value as Task["priority"])}
-          className="rounded-xl border border-input bg-background px-3 text-xs"
-        >
+        <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTask()} placeholder="Add a new task…" className="rounded-xl flex-1" />
+        <select value={newPriority} onChange={(e) => setNewPriority(e.target.value as Task["priority"])} className="rounded-xl border border-input bg-background px-3 text-xs">
           <option value="high">High</option>
           <option value="medium">Medium</option>
           <option value="low">Low</option>
         </select>
-        <Button onClick={addTask} size="sm" className="rounded-xl gap-1">
-          <Plus className="w-4 h-4" />
-          Add
-        </Button>
+        <Button onClick={addTask} size="sm" className="rounded-xl gap-1"><Plus className="w-4 h-4" />Add</Button>
       </div>
-
       <div className="flex gap-2">
         {(["all", "pending", "completed"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={cn(
-              "px-3 py-1.5 rounded-xl text-xs font-medium transition-colors capitalize",
-              filter === f ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
-            )}
-          >
+          <button key={f} onClick={() => setFilter(f)} className={cn("px-3 py-1.5 rounded-xl text-xs font-medium transition-colors capitalize", filter === f ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-muted-foreground hover:bg-secondary")}>
             {f} {f === "all" ? `(${tasks.length})` : f === "pending" ? `(${tasks.filter((t) => !t.completed).length})` : `(${tasks.filter((t) => t.completed).length})`}
           </button>
         ))}
       </div>
-
       <div className="space-y-2">
         {filtered.map((task) => (
-          <div
-            key={task.id}
-            className={cn(
-              "flex items-center gap-3 p-3 rounded-xl transition-colors",
-              task.completed ? "bg-secondary/20 opacity-60" : "bg-secondary/30 hover:bg-secondary/50"
-            )}
-          >
+          <div key={task.id} className={cn("flex items-center gap-3 p-3 rounded-xl transition-colors", task.completed ? "bg-secondary/20 opacity-60" : "bg-secondary/30 hover:bg-secondary/50")}>
             <button onClick={() => toggleTask(task.id)} className="shrink-0">
-              {task.completed ? (
-                <Check className="w-5 h-5 text-success" />
-              ) : (
-                <Circle className="w-5 h-5 text-muted-foreground" />
-              )}
+              {task.completed ? <Check className="w-5 h-5 text-foreground/50" /> : <Circle className="w-5 h-5 text-muted-foreground" />}
             </button>
             <div className="flex-1 min-w-0">
-              <p className={cn("text-sm font-medium", task.completed && "line-through text-muted-foreground")}>
-                {task.title}
-              </p>
+              <p className={cn("text-sm font-medium", task.completed && "line-through text-muted-foreground")}>{task.title}</p>
               <div className="flex items-center gap-2 mt-0.5">
-                {task.project && (
-                  <span className="text-[10px] text-muted-foreground">{task.project}</span>
-                )}
-                {task.dueDate && (
-                  <span className={cn(
-                    "text-[10px]",
-                    !task.completed && new Date(task.dueDate) < new Date() ? "text-destructive" : "text-muted-foreground"
-                  )}>
-                    <Clock className="w-3 h-3 inline mr-0.5" />
-                    {task.dueDate}
-                  </span>
-                )}
+                {task.project && <span className="text-[10px] text-muted-foreground">{task.project}</span>}
+                {task.dueDate && <span className={cn("text-[10px]", !task.completed && new Date(task.dueDate) < new Date() ? "text-foreground font-semibold" : "text-muted-foreground")}><Clock className="w-3 h-3 inline mr-0.5" />{task.dueDate}</span>}
               </div>
             </div>
             <Flag className={cn("w-3.5 h-3.5 shrink-0", priorityConfig[task.priority].className)} />
-            <button onClick={() => deleteTask(task.id)} className="rounded-lg p-1.5 hover:bg-secondary transition-colors shrink-0">
-              <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
-            </button>
+            <button onClick={() => deleteTask(task.id)} className="rounded-lg p-1.5 hover:bg-secondary transition-colors shrink-0"><Trash2 className="w-3.5 h-3.5 text-muted-foreground" /></button>
           </div>
         ))}
       </div>

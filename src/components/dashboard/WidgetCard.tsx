@@ -24,19 +24,6 @@ interface WidgetCardProps {
   children: React.ReactNode;
 }
 
-const TINT_COLORS = [
-  { gradient: "linear-gradient(135deg, hsl(220 85% 62%), hsl(240 75% 58%))", light: "hsl(220 85% 62% / 0.12)", accent: "hsl(220 85% 62%)" },
-  { gradient: "linear-gradient(135deg, hsl(340 75% 58%), hsl(320 70% 52%))", light: "hsl(340 75% 58% / 0.12)", accent: "hsl(340 75% 58%)" },
-  { gradient: "linear-gradient(135deg, hsl(152 55% 48%), hsl(170 60% 42%))", light: "hsl(152 55% 48% / 0.12)", accent: "hsl(152 55% 48%)" },
-  { gradient: "linear-gradient(135deg, hsl(28 85% 58%), hsl(15 80% 52%))", light: "hsl(28 85% 58% / 0.12)", accent: "hsl(28 85% 58%)" },
-  { gradient: "linear-gradient(135deg, hsl(260 70% 62%), hsl(280 65% 55%))", light: "hsl(260 70% 62% / 0.12)", accent: "hsl(260 70% 62%)" },
-  { gradient: "linear-gradient(135deg, hsl(195 80% 50%), hsl(210 75% 48%))", light: "hsl(195 80% 50% / 0.12)", accent: "hsl(195 80% 50%)" },
-  { gradient: "linear-gradient(135deg, hsl(45 85% 55%), hsl(35 80% 50%))", light: "hsl(45 85% 55% / 0.12)", accent: "hsl(45 85% 55%)" },
-  { gradient: "linear-gradient(135deg, hsl(0 70% 58%), hsl(350 65% 50%))", light: "hsl(0 70% 58% / 0.12)", accent: "hsl(0 70% 58%)" },
-  { gradient: "linear-gradient(135deg, hsl(180 50% 48%), hsl(165 55% 42%))", light: "hsl(180 50% 48% / 0.12)", accent: "hsl(180 50% 48%)" },
-  { gradient: "linear-gradient(135deg, hsl(290 60% 55%), hsl(310 55% 50%))", light: "hsl(290 60% 55% / 0.12)", accent: "hsl(290 60% 55%)" },
-];
-
 /** Returns a size tier based on pixel dimensions */
 export function getSizeTier(pixelSize?: { width: number; height: number }): "compact" | "standard" | "expanded" {
   if (!pixelSize) return "compact";
@@ -56,10 +43,9 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
     isDragging,
   } = useSortable({ id });
 
-  const hasTint = tintIndex !== undefined;
-  const tint = hasTint ? TINT_COLORS[tintIndex % TINT_COLORS.length] : null;
   const cardRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
+  const tier = getSizeTier(pixelSize);
 
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -112,43 +98,37 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
         "relative group transition-all duration-200",
         !pixelSize && "h-[140px]",
         isDragging && "shadow-lg",
-        isResizing && "ring-2 ring-primary/30"
+        isResizing && "ring-2 ring-foreground/10"
       )}
     >
-      {/* Back tab — the colored "folder back" with a tab bump */}
-      {tint && (
+      {/* Back tab — monochrome dark */}
+      <div
+        className="absolute inset-0 rounded-2xl overflow-visible"
+        style={{ background: "hsl(var(--foreground))" }}
+      >
+        {/* Tab bump */}
         <div
-          className="absolute inset-0 rounded-2xl overflow-visible"
-          style={{ background: tint.gradient }}
+          className="absolute -top-3 left-4 h-5 rounded-t-xl flex items-center px-2.5 gap-1"
+          style={{ background: "hsl(var(--foreground))" }}
         >
-          {/* Tab bump */}
-          <div
-            className="absolute -top-3 left-4 h-5 rounded-t-xl flex items-center px-2.5 gap-1"
-            style={{ background: tint.gradient }}
-          >
-            <span className="text-[8px] font-bold text-white/80 uppercase tracking-widest">{title}</span>
-          </div>
+          <span className="text-[8px] font-bold text-primary-foreground/70 uppercase tracking-widest">{title}</span>
         </div>
-      )}
+      </div>
 
-      {/* Front panel — frosted glass overlay */}
+      {/* Front panel — frosted glass */}
       <div
         className={cn(
           "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden",
-          "backdrop-blur-2xl border border-white/20"
+          "backdrop-blur-2xl border border-border/40"
         )}
         style={{
-          background: tint
-            ? `linear-gradient(160deg, hsl(0 0% 100% / 0.72), hsl(0 0% 100% / 0.42))`
-            : `hsl(var(--glass-bg))`,
-          boxShadow: tint
-            ? `0 8px 32px -8px ${tint.accent}33, inset 0 1px 0 hsl(0 0% 100% / 0.5)`
-            : "0 4px 24px -4px hsl(228 12% 30% / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.5)",
+          background: "linear-gradient(160deg, hsl(0 0% 100% / 0.78), hsl(0 0% 100% / 0.52))",
+          boxShadow: "0 8px 32px -8px hsl(var(--foreground) / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.6)",
         }}
       >
-        {/* Header — neat top-left title */}
+        {/* Header */}
         <div className="flex items-center justify-between px-3.5 pt-2.5 pb-0">
-          <h3 className="text-[10px] font-semibold tracking-wide uppercase text-foreground/45">{title}</h3>
+          <h3 className="text-[10px] font-semibold tracking-wide uppercase text-foreground/40">{title}</h3>
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               {...attributes}
@@ -166,8 +146,13 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-hidden px-3.5 pb-3 text-foreground">{children}</div>
+        {/* Content — hidden at compact, visible at standard+ */}
+        <div className={cn(
+          "flex-1 overflow-hidden px-3.5 pb-3 text-foreground transition-opacity duration-300",
+          tier === "compact" ? "opacity-0" : "opacity-100"
+        )}>
+          {tier !== "compact" && children}
+        </div>
       </div>
 
       {/* Corner resize handle */}
