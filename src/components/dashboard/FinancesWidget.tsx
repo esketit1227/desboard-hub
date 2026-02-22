@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { getSizeTier } from "./WidgetCard";
 
 // --- Data ---
 const monthlyData = [
@@ -60,28 +61,103 @@ const weeklySpending = [
   { day: "Sun", amount: 0 },
 ];
 
-// --- Preview --- Bold revenue + sparkline bars
 export const FinancesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
-  return (
-    <div className="flex flex-col justify-between h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-3xl font-bold tracking-tight leading-none">$7.8k</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Revenue</p>
+  const tier = getSizeTier(pixelSize);
+
+  if (tier === "compact") {
+    return (
+      <div className="flex flex-col justify-between h-full">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-3xl font-bold tracking-tight leading-none">$7.8k</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Revenue</p>
+          </div>
+          <div className="flex items-center gap-0.5 text-success">
+            <ArrowUpRight className="w-3 h-3" />
+            <span className="text-[10px] font-semibold">+28%</span>
+          </div>
         </div>
-        <div className="flex items-center gap-0.5 text-success">
-          <ArrowUpRight className="w-3 h-3" />
-          <span className="text-[10px] font-semibold">+28%</span>
+        <div className="flex items-end gap-[3px] mt-auto h-[28px]">
+          {monthlyData.map((d, i) => (
+            <div key={i} className="flex-1 rounded-sm bg-foreground/15" style={{ height: `${(d.income / 8400) * 100}%` }} />
+          ))}
         </div>
       </div>
-      <div className="flex items-end gap-[3px] mt-auto h-[28px]">
+    );
+  }
+
+  if (tier === "standard") {
+    return (
+      <div className="flex flex-col h-full gap-1.5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-2xl font-bold tracking-tight leading-none">$7.8k</p>
+            <p className="text-[10px] text-muted-foreground">Revenue this month</p>
+          </div>
+          <div className="flex items-center gap-0.5 text-success">
+            <ArrowUpRight className="w-3 h-3" />
+            <span className="text-[10px] font-semibold">+28%</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 mt-1">
+          <div className="text-center">
+            <p className="text-xs font-bold text-success">$5.1k</p>
+            <p className="text-[8px] text-muted-foreground">Profit</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xs font-bold text-destructive">$2.6k</p>
+            <p className="text-[8px] text-muted-foreground">Expenses</p>
+          </div>
+        </div>
+        <div className="flex items-end gap-[3px] mt-auto h-[32px]">
+          {monthlyData.map((d, i) => (
+            <div key={i} className="flex-1 flex flex-col gap-[1px] justify-end" style={{ height: "100%" }}>
+              <div className="rounded-sm bg-foreground/15" style={{ height: `${(d.income / 8400) * 100}%` }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // expanded
+  return (
+    <div className="flex flex-col h-full gap-2">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-2xl font-bold tracking-tight leading-none">$7.8k <span className="text-sm font-normal text-muted-foreground">revenue</span></p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0.5 text-success">
+            <ArrowUpRight className="w-3 h-3" />
+            <span className="text-[10px] font-semibold">+28%</span>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mt-1">
+        <div className="bg-muted/30 rounded-lg p-1.5 text-center">
+          <p className="text-xs font-bold">$5.1k</p>
+          <p className="text-[8px] text-muted-foreground">Profit</p>
+        </div>
+        <div className="bg-muted/30 rounded-lg p-1.5 text-center">
+          <p className="text-xs font-bold">$2.6k</p>
+          <p className="text-[8px] text-muted-foreground">Expenses</p>
+        </div>
+        <div className="bg-muted/30 rounded-lg p-1.5 text-center">
+          <p className="text-xs font-bold">$3.4k</p>
+          <p className="text-[8px] text-muted-foreground">Due</p>
+        </div>
+      </div>
+      <div className="flex items-end gap-[3px] flex-1 min-h-[40px]">
         {monthlyData.map((d, i) => (
-          <div
-            key={i}
-            className="flex-1 rounded-sm bg-foreground/15"
-            style={{ height: `${(d.income / 8400) * 100}%` }}
-          />
+          <div key={i} className="flex-1 flex flex-col gap-[1px] justify-end h-full">
+            <div className="rounded-sm bg-success/20" style={{ height: `${(d.profit / 8400) * 100}%` }} />
+            <div className="rounded-sm bg-foreground/10" style={{ height: `${(d.expenses / 8400) * 100}%` }} />
+          </div>
         ))}
+      </div>
+      <div className="flex items-center justify-between text-[8px] text-muted-foreground mt-auto">
+        {monthlyData.map((d, i) => <span key={i}>{d.month}</span>)}
       </div>
     </div>
   );

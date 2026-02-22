@@ -20,6 +20,7 @@ import {
 } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
+import { getSizeTier } from "./WidgetCard";
 
 // --- Types ---
 type FreelancerStatus = "available" | "on-project" | "unavailable";
@@ -84,26 +85,91 @@ type Tab = "freelancers" | "pipeline" | "proposals" | "budget" | "contacts";
 
 /* ─── Preview — business hub summary ─── */
 export const StudioPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const tier = getSizeTier(pixelSize);
   const available = initialFreelancers.filter(f => f.status === "available").length;
   const pipelineValue = "$82.5k";
 
-  return (
-    <div className="flex flex-col justify-between h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[10px] text-muted-foreground font-medium">Pipeline</p>
-          <p className="text-2xl font-bold tracking-tight leading-none mt-0.5">{pipelineValue}</p>
+  if (tier === "compact") {
+    return (
+      <div className="flex flex-col justify-between h-full">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-[10px] text-muted-foreground font-medium">Pipeline</p>
+            <p className="text-2xl font-bold tracking-tight leading-none mt-0.5">{pipelineValue}</p>
+          </div>
+          <Briefcase className="w-5 h-5 text-muted-foreground/40" />
         </div>
-        <Briefcase className="w-5 h-5 text-muted-foreground/40" />
+        <div className="flex items-center gap-3 mt-auto">
+          <div className="flex -space-x-1">
+            {initialFreelancers.slice(0, 3).map((f, i) => (
+              <div key={i} className="w-5 h-5 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[7px] font-bold">{f.avatar}</div>
+            ))}
+          </div>
+          <span className="text-[9px] text-muted-foreground">{available} available</span>
+          <span className="text-[9px] text-muted-foreground ml-auto">{initialDeals.length} deals</span>
+        </div>
       </div>
-      <div className="flex items-center gap-3 mt-auto">
+    );
+  }
+
+  if (tier === "standard") {
+    return (
+      <div className="flex flex-col h-full gap-1.5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-[10px] text-muted-foreground font-medium">Pipeline</p>
+            <p className="text-2xl font-bold tracking-tight leading-none mt-0.5">{pipelineValue}</p>
+          </div>
+          <Briefcase className="w-4 h-4 text-muted-foreground/40" />
+        </div>
+        <div className="flex-1 space-y-1 mt-1 overflow-hidden">
+          {initialDeals.slice(0, 3).map((deal) => (
+            <div key={deal.id} className="flex items-center gap-2">
+              <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${stageColors[deal.stage]}`}>{deal.stage.split(" ")[0]}</span>
+              <span className="text-[10px] font-medium truncate flex-1">{deal.name}</span>
+              <span className="text-[9px] font-bold">{deal.value}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 mt-auto">
+          <div className="flex -space-x-1">
+            {initialFreelancers.slice(0, 3).map((f, i) => (
+              <div key={i} className="w-4 h-4 rounded-full bg-muted border border-background flex items-center justify-center text-[6px] font-bold">{f.avatar}</div>
+            ))}
+          </div>
+          <span className="text-[9px] text-muted-foreground">{available} available</span>
+        </div>
+      </div>
+    );
+  }
+
+  // expanded
+  return (
+    <div className="flex flex-col h-full gap-2">
+      <div className="flex items-start justify-between">
+        <p className="text-lg font-bold leading-none">{pipelineValue} <span className="text-sm font-normal text-muted-foreground">pipeline</span></p>
+        <span className="text-[9px] text-muted-foreground">{initialDeals.length} deals</span>
+      </div>
+      <div className="flex-1 space-y-1.5 overflow-hidden">
+        {initialDeals.map((deal) => (
+          <div key={deal.id} className="flex items-center gap-2">
+            <span className={`text-[7px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${stageColors[deal.stage]}`}>{deal.stage}</span>
+            <span className="text-[10px] font-medium truncate flex-1">{deal.name}</span>
+            <span className="text-[9px] font-bold shrink-0">{deal.value}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between mt-auto pt-1 border-t border-border/30">
         <div className="flex -space-x-1">
-          {initialFreelancers.slice(0, 3).map((f, i) => (
+          {initialFreelancers.slice(0, 4).map((f, i) => (
             <div key={i} className="w-5 h-5 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[7px] font-bold">{f.avatar}</div>
           ))}
         </div>
-        <span className="text-[9px] text-muted-foreground">{available} available</span>
-        <span className="text-[9px] text-muted-foreground ml-auto">{initialDeals.length} deals</span>
+        <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
+          <span>{available} available</span>
+          <span>·</span>
+          <span>{initialProposals.length} proposals</span>
+        </div>
       </div>
     </div>
   );
@@ -239,155 +305,211 @@ const StageColumn = ({ stage, deals, onEditDeal, onDeleteDeal }: { stage: string
   const { setNodeRef } = useDroppable({ id: stage });
   return (
     <div ref={setNodeRef} className="flex-1 min-w-[200px]">
-      <div className="flex items-center gap-2 mb-2"><span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${stageColors[stage] || "bg-muted text-muted-foreground"}`}>{stage}</span><span className="text-[10px] text-muted-foreground">{deals.length}</span></div>
-      <div className="space-y-2 min-h-[60px]">{deals.map(d => <DraggableDealCard key={d.id} deal={d} onEdit={() => onEditDeal(d)} onDelete={() => onDeleteDeal(d.id)} />)}</div>
+      <div className="flex items-center gap-2 mb-3">
+        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${stageColors[stage]}`}>{stage}</span>
+        <span className="text-[10px] text-muted-foreground">{deals.length}</span>
+      </div>
+      <div className="space-y-2 min-h-[80px]">
+        {deals.map(deal => (
+          <DraggableDealCard key={deal.id} deal={deal} onEdit={() => onEditDeal(deal)} onDelete={() => onDeleteDeal(deal.id)} />
+        ))}
+      </div>
     </div>
   );
 };
 
-/* ─── Expanded View ─── */
+/* ─── Full Expanded View ─── */
 export const StudioExpanded = () => {
-  const [tab, setTab] = useState<Tab>("freelancers");
+  const [activeTab, setActiveTab] = useState<Tab>("freelancers");
   const [freelancers, setFreelancers] = useState(initialFreelancers);
   const [deals, setDeals] = useState(initialDeals);
   const [proposals, setProposals] = useState(initialProposals);
   const [contacts, setContacts] = useState(initialContacts);
+
   const [editFreelancer, setEditFreelancer] = useState<Freelancer | null>(null);
   const [editDeal, setEditDeal] = useState<Deal | null>(null);
   const [editProposal, setEditProposal] = useState<Proposal | null>(null);
   const [editContact, setEditContact] = useState<Contact | null>(null);
-  const [showFreelancerDialog, setShowFreelancerDialog] = useState(false);
-  const [showDealDialog, setShowDealDialog] = useState(false);
-  const [showProposalDialog, setShowProposalDialog] = useState(false);
-  const [showContactDialog, setShowContactDialog] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: string } | null>(null);
-  const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
+  const [addMode, setAddMode] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: string; label: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const dealsByStage = useMemo(() => {
-    const groups: Record<string, Deal[]> = {};
-    PIPELINE_STAGES.forEach(s => groups[s] = []);
-    deals.forEach(d => { if (groups[d.stage]) groups[d.stage].push(d); });
-    return groups;
-  }, [deals]);
-
-  const handleDragStart = (e: DragStartEvent) => { const d = deals.find(d => d.id === e.active.id); if (d) setDraggedDeal(d); };
+  const handleDragStart = (e: DragStartEvent) => setActiveDragId(e.active.id as string);
   const handleDragEnd = (e: DragEndEvent) => {
-    setDraggedDeal(null);
+    setActiveDragId(null);
     const { active, over } = e;
     if (!over) return;
     const dealId = active.id as string;
-    const targetStage = PIPELINE_STAGES.includes(over.id as string) ? (over.id as string) : deals.find(d => d.id === over.id)?.stage;
-    if (targetStage) setDeals(prev => prev.map(d => d.id === dealId ? { ...d, stage: targetStage } : d));
+    const newStage = over.id as string;
+    if (PIPELINE_STAGES.includes(newStage)) {
+      setDeals(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d));
+    }
   };
 
   const handleDelete = () => {
     if (!deleteTarget) return;
-    if (deleteTarget.type === "freelancer") setFreelancers(p => p.filter(f => f.id !== deleteTarget.id));
-    else if (deleteTarget.type === "deal") setDeals(p => p.filter(d => d.id !== deleteTarget.id));
-    else if (deleteTarget.type === "proposal") setProposals(p => p.filter(pr => pr.id !== deleteTarget.id));
-    else if (deleteTarget.type === "contact") setContacts(p => p.filter(c => c.id !== deleteTarget.id));
+    switch (deleteTarget.type) {
+      case "freelancer": setFreelancers(prev => prev.filter(f => f.id !== deleteTarget.id)); break;
+      case "deal": setDeals(prev => prev.filter(d => d.id !== deleteTarget.id)); break;
+      case "proposal": setProposals(prev => prev.filter(p => p.id !== deleteTarget.id)); break;
+      case "contact": setContacts(prev => prev.filter(c => c.id !== deleteTarget.id)); break;
+    }
     setDeleteTarget(null);
   };
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "freelancers", label: "Team", icon: <Users className="w-3.5 h-3.5" /> },
-    { id: "pipeline", label: "Pipeline", icon: <TrendingUp className="w-3.5 h-3.5" /> },
-    { id: "proposals", label: "Proposals", icon: <FileText className="w-3.5 h-3.5" /> },
-    { id: "budget", label: "Budget", icon: <DollarSign className="w-3.5 h-3.5" /> },
-    { id: "contacts", label: "Contacts", icon: <Building2 className="w-3.5 h-3.5" /> },
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    { key: "freelancers", label: "Freelancers", icon: <Users className="w-3.5 h-3.5" /> },
+    { key: "pipeline", label: "Pipeline", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+    { key: "proposals", label: "Proposals", icon: <FileText className="w-3.5 h-3.5" /> },
+    { key: "budget", label: "Budget", icon: <DollarSign className="w-3.5 h-3.5" /> },
+    { key: "contacts", label: "Contacts", icon: <Building2 className="w-3.5 h-3.5" /> },
   ];
 
-  const proposalStatusColors: Record<string, string> = { draft: "bg-muted text-muted-foreground", sent: "bg-primary/10 text-primary", accepted: "bg-success/10 text-success", rejected: "bg-destructive/10 text-destructive" };
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex gap-1 bg-muted/30 rounded-xl p-0.5">{tabs.map(t => (<button key={t.id} onClick={() => setTab(t.id)} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors", tab === t.id ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}>{t.icon}{t.label}</button>))}</div>
-        <div className="flex items-center gap-1.5 flex-1 min-w-[140px] bg-muted/30 border border-border/40 rounded-xl px-3 py-1.5 ml-auto max-w-[240px]"><Search className="w-3.5 h-3.5 text-muted-foreground" /><input type="text" placeholder="Search..." className="bg-transparent text-xs outline-none flex-1" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} /></div>
+        {tabs.map(t => (
+          <button key={t.key} onClick={() => { setActiveTab(t.key); setSearchQuery(""); }} className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors", activeTab === t.key ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-muted-foreground hover:bg-secondary")}>
+            {t.icon}{t.label}
+          </button>
+        ))}
       </div>
 
-      {tab === "freelancers" && (
-        <div className="space-y-3">
-          <div className="flex justify-end"><Button size="sm" className="rounded-xl gap-1 text-xs" onClick={() => { setEditFreelancer(null); setShowFreelancerDialog(true); }}><UserPlus className="w-3.5 h-3.5" />Add</Button></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {activeTab === "freelancers" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search..." className="pl-8 rounded-xl h-8 text-xs" />
+            </div>
+            <Button size="sm" className="rounded-xl gap-1 h-8" onClick={() => { setEditFreelancer(null); setAddMode(true); }}><UserPlus className="w-3.5 h-3.5" />Add</Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {freelancers.filter(f => !searchQuery || f.name.toLowerCase().includes(searchQuery.toLowerCase()) || f.role.toLowerCase().includes(searchQuery.toLowerCase())).map(f => (
-              <div key={f.id} className="p-4 rounded-xl bg-secondary/30 hover:bg-secondary/40 transition-colors group">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-sm font-bold relative"><span>{f.avatar}</span><div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${statusColors[f.status]}`} /></div>
-                  <div className="flex-1 min-w-0"><p className="text-sm font-semibold">{f.name}</p><p className="text-xs text-muted-foreground">{f.role}</p></div>
-                  <div className="flex gap-0.5 opacity-0 group-hover:opacity-100"><button onClick={() => { setEditFreelancer(f); setShowFreelancerDialog(true); }} className="p-1 rounded-md hover:bg-secondary"><Pencil className="w-3 h-3 text-muted-foreground" /></button><button onClick={() => setDeleteTarget({ type: "freelancer", id: f.id })} className="p-1 rounded-md hover:bg-destructive/10"><Trash2 className="w-3 h-3 text-destructive/60" /></button></div>
+              <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">{f.avatar}</div>
+                  <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${statusColors[f.status]}`} />
                 </div>
-                <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground"><span className="font-medium text-foreground">{f.rate}</span><span className="flex items-center gap-0.5"><Star className="w-3 h-3 fill-warning text-warning" />{f.rating}</span></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{f.name}</p>
+                  <p className="text-xs text-muted-foreground">{f.role} · {f.rate}</p>
+                </div>
+                <div className="flex items-center gap-1"><Star className="w-3 h-3 fill-warning text-warning" /><span className="text-xs font-medium">{f.rating}</span></div>
+                <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => { setEditFreelancer(f); setAddMode(false); }} className="p-1.5 rounded-lg hover:bg-secondary"><Pencil className="w-3 h-3 text-muted-foreground" /></button>
+                  <button onClick={() => setDeleteTarget({ type: "freelancer", id: f.id, label: f.name })} className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3 h-3 text-destructive/60" /></button>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {tab === "pipeline" && (
-        <div className="space-y-3">
-          <div className="flex justify-end"><Button size="sm" className="rounded-xl gap-1 text-xs" onClick={() => { setEditDeal(null); setShowDealDialog(true); }}><Plus className="w-3.5 h-3.5" />Add Deal</Button></div>
-          <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <div className="flex gap-3 overflow-x-auto pb-2">{PIPELINE_STAGES.map(stage => <StageColumn key={stage} stage={stage} deals={dealsByStage[stage] || []} onEditDeal={d => { setEditDeal(d); setShowDealDialog(true); }} onDeleteDeal={id => setDeleteTarget({ type: "deal", id })} />)}</div>
-            <DragOverlay>{draggedDeal && <div className="p-3 rounded-xl bg-background border border-border shadow-lg"><p className="text-xs font-medium">{draggedDeal.name}</p><p className="text-[10px] text-muted-foreground">{draggedDeal.value}</p></div>}</DragOverlay>
-          </DndContext>
+      {activeTab === "pipeline" && (
+        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-muted-foreground">{deals.length} deals · {deals.reduce((s, d) => s + parseFloat(d.value.replace(/[$,]/g, "")), 0).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })} total</p>
+            <Button size="sm" className="rounded-xl gap-1 h-8" onClick={() => { setEditDeal(null); setAddMode(true); }}><Plus className="w-3.5 h-3.5" />Add Deal</Button>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-4">
+            {PIPELINE_STAGES.map(stage => (
+              <StageColumn key={stage} stage={stage} deals={deals.filter(d => d.stage === stage)} onEditDeal={d => { setEditDeal(d); setAddMode(false); }} onDeleteDeal={id => setDeleteTarget({ type: "deal", id, label: deals.find(d => d.id === id)?.name || "" })} />
+            ))}
+          </div>
+        </DndContext>
+      )}
+
+      {activeTab === "proposals" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">{proposals.length} proposals</p>
+            <Button size="sm" className="rounded-xl gap-1 h-8" onClick={() => { setEditProposal(null); setAddMode(true); }}><Plus className="w-3.5 h-3.5" />New Proposal</Button>
+          </div>
+          <div className="space-y-2">
+            {proposals.map(p => {
+              const colors: Record<string, string> = { draft: "bg-muted text-muted-foreground", sent: "bg-primary/10 text-primary", accepted: "bg-success/10 text-success", rejected: "bg-destructive/10 text-destructive" };
+              return (
+                <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+                  <FileText className="w-5 h-5 text-muted-foreground shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2"><p className="text-sm font-medium">{p.title}</p><span className={`text-[10px] px-2 py-0.5 rounded-full font-medium capitalize ${colors[p.status]}`}>{p.status}</span></div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{p.scope} · {p.date}</p>
+                  </div>
+                  <span className="text-sm font-bold shrink-0">{p.value}</span>
+                  <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => { setEditProposal(p); setAddMode(false); }} className="p-1.5 rounded-lg hover:bg-secondary"><Pencil className="w-3 h-3 text-muted-foreground" /></button>
+                    <button onClick={() => setDeleteTarget({ type: "proposal", id: p.id, label: p.title })} className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3 h-3 text-destructive/60" /></button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {tab === "proposals" && (
-        <div className="space-y-3">
-          <div className="flex justify-end"><Button size="sm" className="rounded-xl gap-1 text-xs" onClick={() => { setEditProposal(null); setShowProposalDialog(true); }}><Plus className="w-3.5 h-3.5" />New Proposal</Button></div>
-          {proposals.filter(p => !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
-            <div key={p.id} className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 hover:bg-secondary/40 transition-colors group">
-              <div className="flex-1 min-w-0"><div className="flex items-center gap-2"><p className="text-sm font-semibold">{p.title}</p><span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${proposalStatusColors[p.status]}`}>{p.status}</span></div><p className="text-xs text-muted-foreground mt-0.5">{p.scope} · {p.date}</p></div>
-              <span className="text-sm font-bold">{p.value}</span>
-              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100"><button onClick={() => { setEditProposal(p); setShowProposalDialog(true); }} className="p-1.5 rounded-lg hover:bg-secondary"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button><button onClick={() => setDeleteTarget({ type: "proposal", id: p.id })} className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive/60" /></button></div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {tab === "budget" && (
+      {activeTab === "budget" && (
         <div className="space-y-4">
           {budgets.map(b => {
             const pct = Math.round((b.spent / b.budget) * 100);
-            const isOver = pct > 85;
             return (
               <div key={b.project} className="p-4 rounded-xl bg-secondary/30">
-                <div className="flex items-center justify-between mb-2"><p className="text-sm font-semibold">{b.project}</p><span className={cn("text-xs font-medium", isOver ? "text-destructive" : "text-muted-foreground")}>{pct}% used</span></div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium">{b.project}</p>
+                  <span className="text-xs text-muted-foreground">{pct}% used</span>
+                </div>
                 <Progress value={pct} className="h-2 mb-2" />
-                <div className="flex gap-4 text-xs text-muted-foreground"><span>Budget: <span className="font-medium text-foreground">${b.budget.toLocaleString()}</span></span><span>Spent: <span className="font-medium text-foreground">${b.spent.toLocaleString()}</span></span><span>Left: <span className={cn("font-medium", isOver ? "text-destructive" : "text-success")}>${b.remaining.toLocaleString()}</span></span></div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Spent: ${b.spent.toLocaleString()}</span>
+                  <span>Budget: ${b.budget.toLocaleString()}</span>
+                  <span className={b.remaining < 5000 ? "text-destructive font-medium" : ""}>Left: ${b.remaining.toLocaleString()}</span>
+                </div>
               </div>
             );
           })}
         </div>
       )}
 
-      {tab === "contacts" && (
-        <div className="space-y-3">
-          <div className="flex justify-end"><Button size="sm" className="rounded-xl gap-1 text-xs" onClick={() => { setEditContact(null); setShowContactDialog(true); }}><UserPlus className="w-3.5 h-3.5" />Add Contact</Button></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {activeTab === "contacts" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search contacts..." className="pl-8 rounded-xl h-8 text-xs" />
+            </div>
+            <Button size="sm" className="rounded-xl gap-1 h-8" onClick={() => { setEditContact(null); setAddMode(true); }}><UserPlus className="w-3.5 h-3.5" />Add</Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {contacts.filter(c => !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.company.toLowerCase().includes(searchQuery.toLowerCase())).map(c => (
-              <div key={c.id} className="p-4 rounded-xl bg-secondary/30 hover:bg-secondary/40 transition-colors group">
-                <div className="flex items-start justify-between">
-                  <div><p className="text-sm font-semibold">{c.name}</p><p className="text-xs text-muted-foreground flex items-center gap-1"><Building2 className="w-3 h-3" />{c.company}</p></div>
-                  <div className="flex items-center gap-1"><Badge variant="outline" className={cn("text-[10px]", c.type === "client" ? "border-success/30 text-success" : "border-primary/30 text-primary")}>{c.type}</Badge><div className="flex gap-0.5 opacity-0 group-hover:opacity-100 ml-1"><button onClick={() => { setEditContact(c); setShowContactDialog(true); }} className="p-1 rounded-md hover:bg-secondary"><Pencil className="w-3 h-3 text-muted-foreground" /></button><button onClick={() => setDeleteTarget({ type: "contact", id: c.id })} className="p-1 rounded-md hover:bg-destructive/10"><Trash2 className="w-3 h-3 text-destructive/60" /></button></div></div>
+              <div key={c.id} className="p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors group">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">{getInitials(c.name)}</div>
+                    <div><p className="text-sm font-medium">{c.name}</p><p className="text-xs text-muted-foreground">{c.company}</p></div>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] capitalize">{c.type}</Badge>
                 </div>
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground"><span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span><span className="flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</span></div>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span>
+                </div>
+                <div className="flex gap-0.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => { setEditContact(c); setAddMode(false); }} className="p-1.5 rounded-lg hover:bg-secondary"><Pencil className="w-3 h-3 text-muted-foreground" /></button>
+                  <button onClick={() => setDeleteTarget({ type: "contact", id: c.id, label: c.name })} className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3 h-3 text-destructive/60" /></button>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <FreelancerDialog open={showFreelancerDialog} onOpenChange={setShowFreelancerDialog} freelancer={editFreelancer} onSave={f => { if (editFreelancer) setFreelancers(p => p.map(x => x.id === f.id ? f : x)); else setFreelancers(p => [...p, f]); }} />
-      <DealDialog open={showDealDialog} onOpenChange={setShowDealDialog} deal={editDeal} onSave={d => { if (editDeal) setDeals(p => p.map(x => x.id === d.id ? d : x)); else setDeals(p => [...p, d]); }} />
-      <ProposalDialog open={showProposalDialog} onOpenChange={setShowProposalDialog} proposal={editProposal} onSave={p => { if (editProposal) setProposals(prev => prev.map(x => x.id === p.id ? p : x)); else setProposals(prev => [...prev, p]); }} />
-      <ContactDialog open={showContactDialog} onOpenChange={setShowContactDialog} contact={editContact} onSave={c => { if (editContact) setContacts(p => p.map(x => x.id === c.id ? c : x)); else setContacts(p => [...p, c]); }} />
-      <DeleteConfirmDialog open={!!deleteTarget} onOpenChange={o => !o && setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.type || ""} />
+      <FreelancerDialog open={(!!editFreelancer || addMode) && activeTab === "freelancers"} onOpenChange={o => { if (!o) { setEditFreelancer(null); setAddMode(false); } }} freelancer={editFreelancer} onSave={f => { if (editFreelancer) setFreelancers(prev => prev.map(x => x.id === f.id ? f : x)); else setFreelancers(prev => [...prev, f]); setEditFreelancer(null); setAddMode(false); }} />
+      <DealDialog open={(!!editDeal || addMode) && activeTab === "pipeline"} onOpenChange={o => { if (!o) { setEditDeal(null); setAddMode(false); } }} deal={editDeal} onSave={d => { if (editDeal) setDeals(prev => prev.map(x => x.id === d.id ? d : x)); else setDeals(prev => [...prev, d]); setEditDeal(null); setAddMode(false); }} />
+      <ProposalDialog open={(!!editProposal || addMode) && activeTab === "proposals"} onOpenChange={o => { if (!o) { setEditProposal(null); setAddMode(false); } }} proposal={editProposal} onSave={p => { if (editProposal) setProposals(prev => prev.map(x => x.id === p.id ? p : x)); else setProposals(prev => [...prev, p]); setEditProposal(null); setAddMode(false); }} />
+      <ContactDialog open={(!!editContact || addMode) && activeTab === "contacts"} onOpenChange={o => { if (!o) { setEditContact(null); setAddMode(false); } }} contact={editContact} onSave={c => { if (editContact) setContacts(prev => prev.map(x => x.id === c.id ? c : x)); else setContacts(prev => [...prev, c]); setEditContact(null); setAddMode(false); }} />
+      <DeleteConfirmDialog open={!!deleteTarget} onOpenChange={o => !o && setDeleteTarget(null)} onConfirm={handleDelete} label={deleteTarget?.label || ""} />
     </div>
   );
 };

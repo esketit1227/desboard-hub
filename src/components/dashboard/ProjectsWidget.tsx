@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { getSizeTier } from "./WidgetCard";
 
 // ── Types ──
 
@@ -188,29 +189,107 @@ const PRIORITY_CONFIG: Record<Priority, { label: string; style: string }> = {
 const previewProjects = INITIAL_PROJECTS.slice(0, 4);
 
 export const ProjectsPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const tier = getSizeTier(pixelSize);
   const active = previewProjects.filter(p => p.status === "active").length;
   const totalTasks = previewProjects.reduce((s, p) => s + p.tasks.length, 0);
   const doneTasks = previewProjects.reduce((s, p) => s + p.tasks.filter(t => t.status === "done").length, 0);
 
-  return (
-    <div className="flex flex-col justify-between h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-3xl font-bold tracking-tight leading-none">{active}</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Active</p>
+  if (tier === "compact") {
+    return (
+      <div className="flex flex-col justify-between h-full">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-3xl font-bold tracking-tight leading-none">{active}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Active</p>
+          </div>
+          <FolderKanban className="w-5 h-5 text-muted-foreground/40" />
         </div>
-        <FolderKanban className="w-5 h-5 text-muted-foreground/40" />
+        <div className="flex items-center gap-3 mt-auto">
+          <div className="flex -space-x-1.5">
+            {previewProjects.slice(0, 3).map((p, i) => (
+              <div key={i} className="w-4 h-4 rounded-full border-2 border-background" style={{ backgroundColor: p.color }} />
+            ))}
+          </div>
+          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+            <div className="h-full bg-foreground/25 rounded-full" style={{ width: `${Math.round((doneTasks / totalTasks) * 100)}%` }} />
+          </div>
+          <span className="text-[9px] text-muted-foreground font-medium">{doneTasks}/{totalTasks}</span>
+        </div>
       </div>
-      <div className="flex items-center gap-3 mt-auto">
-        <div className="flex -space-x-1.5">
-          {previewProjects.slice(0, 3).map((p, i) => (
-            <div key={i} className="w-4 h-4 rounded-full border-2 border-background" style={{ backgroundColor: p.color }} />
+    );
+  }
+
+  if (tier === "standard") {
+    return (
+      <div className="flex flex-col h-full gap-2">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-2xl font-bold tracking-tight leading-none">{active}</p>
+            <p className="text-[10px] text-muted-foreground">Active Projects</p>
+          </div>
+          <FolderKanban className="w-5 h-5 text-muted-foreground/40" />
+        </div>
+        <div className="flex-1 space-y-1.5 mt-1 overflow-hidden">
+          {previewProjects.filter(p => p.status === "active").slice(0, 3).map((p) => (
+            <div key={p.id} className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+              <span className="text-[10px] font-medium truncate flex-1">{p.name}</span>
+              <span className="text-[9px] text-muted-foreground">{p.progress}%</span>
+            </div>
           ))}
         </div>
-        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-          <div className="h-full bg-foreground/25 rounded-full" style={{ width: `${Math.round((doneTasks / totalTasks) * 100)}%` }} />
+        <div className="flex items-center gap-2 mt-auto">
+          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+            <div className="h-full bg-foreground/25 rounded-full" style={{ width: `${Math.round((doneTasks / totalTasks) * 100)}%` }} />
+          </div>
+          <span className="text-[9px] text-muted-foreground font-medium">{doneTasks}/{totalTasks} tasks</span>
         </div>
-        <span className="text-[9px] text-muted-foreground font-medium">{doneTasks}/{totalTasks}</span>
+      </div>
+    );
+  }
+
+  // expanded
+  return (
+    <div className="flex flex-col h-full gap-2">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-2xl font-bold tracking-tight leading-none">{active} <span className="text-sm font-normal text-muted-foreground">Active</span></p>
+        </div>
+        <div className="flex items-center gap-1 text-success">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          <span className="text-[10px] font-semibold">{doneTasks} done</span>
+        </div>
+      </div>
+      <div className="flex-1 space-y-2 overflow-hidden mt-1">
+        {previewProjects.map((p) => {
+          const cfg = STATUS_CONFIG[p.status];
+          return (
+            <div key={p.id} className="flex items-center gap-2.5">
+              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-medium truncate">{p.name}</span>
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${cfg.style}`}>{cfg.label}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-foreground/20 rounded-full transition-all" style={{ width: `${p.progress}%` }} />
+                  </div>
+                  <span className="text-[9px] text-muted-foreground">{p.progress}%</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-center justify-between text-[9px] text-muted-foreground mt-auto pt-1 border-t border-border/30">
+        <span>{previewProjects.length} projects</span>
+        <div className="flex -space-x-1">
+          {TEAM.slice(0, 4).map((t, i) => (
+            <div key={i} className="w-4 h-4 rounded-full bg-muted border border-background flex items-center justify-center text-[6px] font-bold">{t.charAt(0)}</div>
+          ))}
+        </div>
+        <span>{totalTasks} tasks</span>
       </div>
     </div>
   );
@@ -218,7 +297,11 @@ export const ProjectsPreview = ({ pixelSize }: { pixelSize?: { width: number; he
 
 // ── Task Card Component ──
 
-const TaskCard = ({ task, onStatusChange, onDelete }: {
+const TaskCard = ({
+  task,
+  onStatusChange,
+  onDelete,
+}: {
   task: Task;
   onStatusChange: (id: string, status: TaskStatus) => void;
   onDelete: (id: string) => void;
@@ -281,7 +364,12 @@ const TaskCard = ({ task, onStatusChange, onDelete }: {
 
 // ── Kanban Column ──
 
-const KanbanColumn = ({ status, tasks, onStatusChange, onDeleteTask }: {
+const KanbanColumn = ({
+  status,
+  tasks,
+  onStatusChange,
+  onDeleteTask,
+}: {
   status: TaskStatus;
   tasks: Task[];
   onStatusChange: (id: string, status: TaskStatus) => void;
@@ -307,7 +395,11 @@ const KanbanColumn = ({ status, tasks, onStatusChange, onDeleteTask }: {
 
 // ── Project Detail View ──
 
-const ProjectDetail = ({ project, onBack, onUpdate }: {
+const ProjectDetail = ({
+  project,
+  onBack,
+  onUpdate,
+}: {
   project: Project;
   onBack: () => void;
   onUpdate: (p: Project) => void;
@@ -403,58 +495,73 @@ const ProjectDetail = ({ project, onBack, onUpdate }: {
             <span className="text-sm font-bold">{project.progress}%</span>
           </div>
           <Progress value={project.progress} className="h-2" />
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-xs text-muted-foreground">Budget</span>
-            <span className="text-xs font-medium">${project.spent.toLocaleString()} / ${project.budget.toLocaleString()}</span>
-          </div>
+          <p className="text-xs text-muted-foreground mt-2">{project.description}</p>
         </div>
-        {([
-          { label: "To Do", value: statCounts.todo, style: "text-muted-foreground" },
-          { label: "In Progress", value: statCounts.inProgress, style: "text-primary" },
-          { label: "Done", value: statCounts.done, style: "text-emerald-600" },
-        ]).map(s => (
-          <div key={s.label} className="p-3 rounded-xl bg-muted/30 flex flex-col items-center justify-center">
-            <p className={`text-xl font-bold ${s.style}`}>{s.value}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
+        {[
+          { label: "Total", value: statCounts.total, icon: <Target className="w-3.5 h-3.5" /> },
+          { label: "Done", value: statCounts.done, icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> },
+          { label: "In Progress", value: statCounts.inProgress, icon: <Clock className="w-3.5 h-3.5 text-primary" /> },
+        ].map(s => (
+          <div key={s.label} className="p-4 rounded-xl bg-muted/30 flex flex-col items-center justify-center text-center">
+            {s.icon}
+            <p className="text-lg font-bold mt-1">{s.value}</p>
+            <p className="text-[10px] text-muted-foreground">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Team + Milestones */}
+      {/* Team + Budget */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <h4 className="text-xs font-semibold text-muted-foreground mb-2">Team</h4>
+        <div className="p-4 rounded-xl bg-muted/30">
+          <div className="flex items-center gap-2 mb-3">
+            <Users className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-semibold">Team</span>
+          </div>
           <div className="flex flex-wrap gap-2">
-            {project.team.map(member => (
-              <div key={member} className="flex items-center gap-1.5 bg-muted/30 rounded-full pl-1 pr-2.5 py-1">
-                <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[9px] font-bold">{member.charAt(0)}</div>
-                <span className="text-xs">{member}</span>
+            {project.team.map(name => (
+              <div key={name} className="flex items-center gap-1.5 bg-secondary/50 rounded-lg px-2 py-1">
+                <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[9px] font-semibold">{name.charAt(0)}</div>
+                <span className="text-xs">{name}</span>
               </div>
             ))}
           </div>
         </div>
-        <div>
-          <h4 className="text-xs font-semibold text-muted-foreground mb-2">Milestones</h4>
-          <div className="space-y-1.5">
-            {project.milestones.map(m => (
-              <div key={m.id} className="flex items-center gap-2">
-                {m.completed ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Circle className="w-3.5 h-3.5 text-muted-foreground" />}
-                <span className="text-xs flex-1">{m.title}</span>
-                <span className="text-[10px] text-muted-foreground">{m.dueDate}</span>
-              </div>
-            ))}
+        <div className="p-4 rounded-xl bg-muted/30">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold">Budget</span>
+            <span className="text-xs text-muted-foreground">${project.spent.toLocaleString()} / ${project.budget.toLocaleString()}</span>
+          </div>
+          <Progress value={(project.spent / project.budget) * 100} className="h-2" />
+          <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
+            <span>Remaining: ${(project.budget - project.spent).toLocaleString()}</span>
+            <span>{Math.round((project.spent / project.budget) * 100)}% used</span>
           </div>
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-1.5 flex-1 min-w-[180px] bg-muted/30 border border-border/50 rounded-xl px-3 py-2">
-          <Search className="w-3.5 h-3.5 text-muted-foreground" />
-          <input type="text" placeholder="Search tasks…" className="bg-transparent text-sm outline-none flex-1 placeholder:text-muted-foreground/60" value={search} onChange={e => setSearch(e.target.value)} />
+      {/* Milestones */}
+      <div className="p-4 rounded-xl bg-muted/30">
+        <h4 className="text-xs font-semibold mb-3">Milestones</h4>
+        <div className="space-y-2">
+          {project.milestones.map(m => (
+            <div key={m.id} className="flex items-center gap-2">
+              {m.completed ? <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> : <Circle className="w-4 h-4 text-muted-foreground shrink-0" />}
+              <span className={`text-sm flex-1 ${m.completed ? "line-through text-muted-foreground" : ""}`}>{m.title}</span>
+              <span className="text-xs text-muted-foreground">{m.dueDate}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Task toolbar */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search tasks…" className="pl-9 rounded-xl" />
         </div>
         <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-28 rounded-xl text-xs h-9">
+          <SelectTrigger className="w-[120px] rounded-xl">
+            <Filter className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>
@@ -465,14 +572,14 @@ const ProjectDetail = ({ project, onBack, onUpdate }: {
             <SelectItem value="low">Low</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex gap-1 bg-muted/30 rounded-xl p-0.5">
-          <button onClick={() => setView("board")} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${view === "board" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>Board</button>
-          <button onClick={() => setView("list")} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${view === "list" ? "bg-background shadow-sm" : "text-muted-foreground"}`}>List</button>
+        <div className="flex gap-1">
+          <button onClick={() => setView("board")} className={`p-2 rounded-xl transition-colors ${view === "board" ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-muted-foreground"}`}><LayoutGrid className="w-4 h-4" /></button>
+          <button onClick={() => setView("list")} className={`p-2 rounded-xl transition-colors ${view === "list" ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-muted-foreground"}`}><List className="w-4 h-4" /></button>
         </div>
-        <Button size="sm" className="rounded-xl gap-1 text-xs ml-auto" onClick={() => setNewTaskOpen(true)}><Plus className="w-3.5 h-3.5" />Add Task</Button>
+        <Button onClick={() => setNewTaskOpen(true)} size="sm" className="rounded-xl gap-1"><Plus className="w-4 h-4" />Add Task</Button>
       </div>
 
-      {/* Tasks */}
+      {/* Board / List */}
       {view === "board" ? (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {(["todo", "in_progress", "review", "done"] as TaskStatus[]).map(status => (
@@ -487,16 +594,16 @@ const ProjectDetail = ({ project, onBack, onUpdate }: {
         </div>
       )}
 
-      {/* Add Task Dialog */}
+      {/* New Task Dialog */}
       <Dialog open={newTaskOpen} onOpenChange={setNewTaskOpen}>
-        <DialogContent className="glass-strong rounded-3xl border-border/30 sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-[500px] rounded-2xl">
           <DialogHeader><DialogTitle>New Task</DialogTitle></DialogHeader>
-          <div className="space-y-3 mt-2">
+          <div className="space-y-3">
             <Input value={newTask.title} onChange={e => setNewTask(p => ({ ...p, title: e.target.value }))} placeholder="Task title" className="rounded-xl" />
-            <Textarea value={newTask.description} onChange={e => setNewTask(p => ({ ...p, description: e.target.value }))} placeholder="Description (optional)" className="rounded-xl resize-none" rows={2} />
+            <Textarea value={newTask.description} onChange={e => setNewTask(p => ({ ...p, description: e.target.value }))} placeholder="Description (optional)" className="rounded-xl" rows={2} />
             <div className="grid grid-cols-3 gap-2">
               <Select value={newTask.priority} onValueChange={v => setNewTask(p => ({ ...p, priority: v as Priority }))}>
-                <SelectTrigger className="rounded-xl text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="rounded-xl"><SelectValue placeholder="Priority" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="urgent">Urgent</SelectItem>
                   <SelectItem value="high">High</SelectItem>
@@ -505,64 +612,85 @@ const ProjectDetail = ({ project, onBack, onUpdate }: {
                 </SelectContent>
               </Select>
               <Select value={newTask.assignee} onValueChange={v => setNewTask(p => ({ ...p, assignee: v }))}>
-                <SelectTrigger className="rounded-xl text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {project.team.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                </SelectContent>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>{project.team.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
               </Select>
-              <Input value={newTask.tags} onChange={e => setNewTask(p => ({ ...p, tags: e.target.value }))} placeholder="Tags (comma sep)" className="rounded-xl text-xs" />
+              <Input value={newTask.tags} onChange={e => setNewTask(p => ({ ...p, tags: e.target.value }))} placeholder="Tags (comma)" className="rounded-xl" />
             </div>
           </div>
-          <DialogFooter className="mt-4">
-            <Button variant="ghost" onClick={() => setNewTaskOpen(false)} className="rounded-xl">Cancel</Button>
-            <Button onClick={handleAddTask} className="rounded-xl" disabled={!newTask.title.trim()}>Create</Button>
-          </DialogFooter>
+          <DialogFooter><Button onClick={handleAddTask} className="rounded-xl">Create Task</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   );
 };
 
-// ── Expanded View ──
+// ── Main Expanded View ──
 
 export const ProjectsExpanded = () => {
   const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
-  const [selected, setSelected] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const handleUpdate = (updated: Project) => {
+  const filtered = useMemo(() => {
+    if (statusFilter === "all") return projects;
+    return projects.filter(p => p.status === statusFilter);
+  }, [projects, statusFilter]);
+
+  const handleUpdateProject = (updated: Project) => {
     setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
-    setSelected(updated);
+    setSelectedProject(updated);
   };
 
-  if (selected) {
-    return <ProjectDetail project={selected} onBack={() => setSelected(null)} onUpdate={handleUpdate} />;
+  if (selectedProject) {
+    return <ProjectDetail project={selectedProject} onBack={() => setSelectedProject(null)} onUpdate={handleUpdateProject} />;
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{projects.length} projects</p>
+    <div className="space-y-5">
+      <div className="flex items-center gap-2 flex-wrap">
+        {["all", "active", "planning", "on_hold", "completed"].map(s => (
+          <button key={s} onClick={() => setStatusFilter(s)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors capitalize ${statusFilter === s ? "bg-primary text-primary-foreground" : "bg-secondary/50 text-muted-foreground hover:bg-secondary"}`}>
+            {s === "all" ? `All (${projects.length})` : `${s.replace("_", " ")} (${projects.filter(p => p.status === s).length})`}
+          </button>
+        ))}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {projects.map(project => {
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filtered.map(project => {
           const cfg = STATUS_CONFIG[project.status];
+          const doneTasks = project.tasks.filter(t => t.status === "done").length;
           return (
-            <button key={project.id} onClick={() => setSelected(project)} className="text-left p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-all group">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
-                  <h3 className="text-sm font-semibold">{project.name}</h3>
+            <button key={project.id} onClick={() => setSelectedProject(project)} className="text-left p-5 rounded-2xl bg-secondary/30 hover:bg-secondary/50 transition-all group border border-border/20 hover:border-border/40">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
+                  <div>
+                    <p className="text-sm font-semibold group-hover:text-primary transition-colors">{project.name}</p>
+                    <p className="text-xs text-muted-foreground">{project.client}</p>
+                  </div>
                 </div>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${cfg.style}`}>{cfg.icon}{cfg.label}</span>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${cfg.style}`}>
+                  {cfg.icon}{cfg.label}
+                </span>
               </div>
-              <p className="text-xs text-muted-foreground mb-3">{project.client} · Due {project.deadline}</p>
-              <div className="flex items-center gap-2">
-                <Progress value={project.progress} className="h-1.5 flex-1" />
-                <span className="text-xs font-medium">{project.progress}%</span>
+              <div className="mb-3">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                  <span>Progress</span><span className="font-semibold text-foreground">{project.progress}%</span>
+                </div>
+                <Progress value={project.progress} className="h-1.5" />
               </div>
-              <div className="flex items-center gap-3 mt-2 text-muted-foreground">
-                <span className="text-[10px] flex items-center gap-1"><Users className="w-3 h-3" />{project.team.length}</span>
-                <span className="text-[10px] flex items-center gap-1"><Target className="w-3 h-3" />{project.tasks.length} tasks</span>
+              <div className="flex items-center justify-between text-muted-foreground">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px]">{doneTasks}/{project.tasks.length} tasks</span>
+                  <span className="text-[10px]">Due {project.deadline}</span>
+                </div>
+                <div className="flex -space-x-1.5">
+                  {project.team.slice(0, 3).map((name, i) => (
+                    <div key={i} className="w-5 h-5 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[8px] font-semibold">{name.charAt(0)}</div>
+                  ))}
+                  {project.team.length > 3 && <div className="w-5 h-5 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[8px] font-semibold">+{project.team.length - 3}</div>}
+                </div>
               </div>
             </button>
           );

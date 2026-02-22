@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getSizeTier } from "./WidgetCard";
 
 // ── Types ──
 
@@ -66,30 +67,103 @@ const FILE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
   pdf: FileText, design: FolderOpen, image: Image, video: Film, audio: Music, archive: Archive, doc: File,
 };
 
-/** Compact preview — storage usage visual */
 export const FilesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const tier = getSizeTier(pixelSize);
   const rootFolderCount = FOLDERS.filter(f => !f.parent).length;
-  const totalSize = 271; // MB
-  const usedPct = 54; // simulated usage
+  const totalSize = 271;
+  const usedPct = 54;
 
-  return (
-    <div className="flex flex-col justify-between h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-3xl font-bold tracking-tight leading-none">{FILES.length}</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Files</p>
+  if (tier === "compact") {
+    return (
+      <div className="flex flex-col justify-between h-full">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-3xl font-bold tracking-tight leading-none">{FILES.length}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Files</p>
+          </div>
+          <HardDrive className="w-5 h-5 text-muted-foreground/40" />
         </div>
-        <HardDrive className="w-5 h-5 text-muted-foreground/40" />
+        <div className="mt-auto space-y-1">
+          <div className="flex items-end gap-[2px] h-[16px]">
+            {[40, 65, 80, 30, 55, 70, 25].map((h, i) => (
+              <div key={i} className="flex-1 rounded-sm bg-foreground/12" style={{ height: `${h}%` }} />
+            ))}
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] text-muted-foreground">{totalSize} MB</span>
+            <span className="text-[9px] text-muted-foreground">{rootFolderCount} folders</span>
+          </div>
+        </div>
       </div>
-      <div className="mt-auto space-y-1">
-        <div className="flex items-end gap-[2px] h-[16px]">
-          {[40, 65, 80, 30, 55, 70, 25].map((h, i) => (
-            <div key={i} className="flex-1 rounded-sm bg-foreground/12" style={{ height: `${h}%` }} />
-          ))}
+    );
+  }
+
+  if (tier === "standard") {
+    return (
+      <div className="flex flex-col h-full gap-1.5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-2xl font-bold tracking-tight leading-none">{FILES.length}</p>
+            <p className="text-[10px] text-muted-foreground">Files · {totalSize} MB</p>
+          </div>
+          <HardDrive className="w-4 h-4 text-muted-foreground/40" />
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-[9px] text-muted-foreground">{totalSize} MB</span>
-          <span className="text-[9px] text-muted-foreground">{rootFolderCount} folders</span>
+        <div className="flex-1 space-y-1 mt-1 overflow-hidden">
+          {FILES.slice(0, 3).map((file) => {
+            const Icon = FILE_ICONS[file.type] || FileText;
+            return (
+              <div key={file.id} className="flex items-center gap-2">
+                <Icon className="w-3 h-3 text-muted-foreground shrink-0" />
+                <span className="text-[10px] font-medium truncate flex-1">{file.name}</span>
+                <span className="text-[8px] text-muted-foreground">{file.size}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-auto">
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${usedPct}%` }} />
+          </div>
+          <div className="flex items-center justify-between mt-0.5">
+            <span className="text-[8px] text-muted-foreground">{usedPct}% used</span>
+            <span className="text-[8px] text-muted-foreground">{rootFolderCount} folders</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // expanded
+  return (
+    <div className="flex flex-col h-full gap-2">
+      <div className="flex items-start justify-between">
+        <p className="text-lg font-bold leading-none">{FILES.length} <span className="text-sm font-normal text-muted-foreground">files</span></p>
+        <span className="text-[9px] text-muted-foreground">{totalSize} MB</span>
+      </div>
+      <div className="flex-1 space-y-1.5 overflow-hidden">
+        {FILES.slice(0, 5).map((file) => {
+          const Icon = FILE_ICONS[file.type] || FileText;
+          return (
+            <div key={file.id} className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-muted/40 flex items-center justify-center shrink-0">
+                <Icon className="w-3 h-3 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-medium truncate">{file.name}</p>
+                <p className="text-[8px] text-muted-foreground">{file.date} · {file.size}</p>
+              </div>
+              {file.tags[0] && <span className={`text-[7px] px-1 py-0.5 rounded-full font-medium ${file.tags[0].color}`}>{file.tags[0].label}</span>}
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-auto pt-1 border-t border-border/30">
+        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+          <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${usedPct}%` }} />
+        </div>
+        <div className="flex items-center justify-between mt-0.5 text-[8px] text-muted-foreground">
+          <span>{usedPct}% of 500 MB used</span>
+          <span>{rootFolderCount} folders</span>
         </div>
       </div>
     </div>
@@ -267,7 +341,6 @@ export const FilesExpanded = () => {
                     <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-2"><Icon className="w-5 h-5 text-muted-foreground" /></div>
                     <p className="text-xs font-medium truncate">{file.name}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{file.size}</p>
-                    <div className="flex gap-1 mt-1.5">{file.tags.map(t => <span key={t.label} className={`text-[8px] px-1 py-0.5 rounded-full font-medium ${t.color}`}>{t.label}</span>)}</div>
                   </div>
                 );
               })}

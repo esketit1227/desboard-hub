@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Send, Circle, Check, CheckCheck, Search, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { getSizeTier } from "./WidgetCard";
 
 interface Message {
   id: string;
@@ -47,30 +48,89 @@ const initialMessages: Message[] = [
   },
 ];
 
-/** Compact preview — unread count + latest sender */
 export const MessagesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const tier = getSizeTier(pixelSize);
   const unread = initialMessages.filter(m => !m.read);
   const latest = initialMessages[0];
 
-  return (
-    <div className="flex flex-col justify-between h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-3xl font-bold tracking-tight leading-none">{unread.length}</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Unread</p>
+  if (tier === "compact") {
+    return (
+      <div className="flex flex-col justify-between h-full">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-3xl font-bold tracking-tight leading-none">{unread.length}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Unread</p>
+          </div>
+          <MessageSquare className="w-5 h-5 text-muted-foreground/40" />
         </div>
-        <MessageSquare className="w-5 h-5 text-muted-foreground/40" />
+        <div className="mt-auto">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[8px] font-bold shrink-0">
+              {latest.avatar}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold truncate">{latest.from}</p>
+              <p className="text-[9px] text-muted-foreground truncate">{latest.preview.slice(0, 40)}…</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="mt-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[8px] font-bold shrink-0">
-            {latest.avatar}
+    );
+  }
+
+  if (tier === "standard") {
+    return (
+      <div className="flex flex-col h-full gap-1.5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-2xl font-bold tracking-tight leading-none">{unread.length}</p>
+            <p className="text-[10px] text-muted-foreground">Unread Messages</p>
           </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold truncate">{latest.from}</p>
-            <p className="text-[9px] text-muted-foreground truncate">{latest.preview.slice(0, 40)}…</p>
-          </div>
+          <MessageSquare className="w-4 h-4 text-muted-foreground/40" />
         </div>
+        <div className="flex-1 space-y-1.5 mt-1 overflow-hidden">
+          {initialMessages.slice(0, 3).map((msg) => (
+            <div key={msg.id} className="flex items-center gap-2">
+              <div className={cn(
+                "w-5 h-5 rounded-full flex items-center justify-center text-[7px] font-bold shrink-0",
+                !msg.read ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              )}>{msg.avatar}</div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-medium truncate">{msg.from}</p>
+                <p className="text-[9px] text-muted-foreground truncate">{msg.preview.slice(0, 35)}…</p>
+              </div>
+              <span className="text-[8px] text-muted-foreground shrink-0">{msg.time}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // expanded
+  return (
+    <div className="flex flex-col h-full gap-2">
+      <div className="flex items-start justify-between">
+        <p className="text-lg font-bold leading-none">{unread.length} <span className="text-sm font-normal text-muted-foreground">unread</span></p>
+        <span className="text-[9px] text-muted-foreground">{initialMessages.length} total</span>
+      </div>
+      <div className="flex-1 space-y-2 overflow-hidden">
+        {initialMessages.slice(0, 4).map((msg) => (
+          <div key={msg.id} className="flex items-start gap-2">
+            <div className={cn(
+              "w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0 mt-0.5",
+              !msg.read ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            )}>{msg.avatar}</div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <p className={cn("text-[10px] truncate", !msg.read ? "font-semibold" : "font-medium")}>{msg.from}</p>
+                {msg.project && <span className="text-[8px] text-primary/60">{msg.project}</span>}
+                <span className="text-[8px] text-muted-foreground ml-auto shrink-0">{msg.time}</span>
+              </div>
+              <p className="text-[9px] text-muted-foreground truncate">{msg.preview}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

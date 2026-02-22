@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Star, MessageSquare, Check, ChevronRight, Users } from "lucide-react";
 import ClientDetailSheet from "./ClientDetailSheet";
+import { getSizeTier } from "./WidgetCard";
 
 export interface Handoff {
   id: string; client: string; project: string;
@@ -45,29 +46,102 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   changes: { label: "Changes", className: "bg-destructive/10 text-destructive" },
 };
 
-/** Compact preview — client count + status dots */
 export const ClientsPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const tier = getSizeTier(pixelSize);
   const pending = initialHandoffs.filter(h => h.status === "pending").length;
   const approved = initialHandoffs.filter(h => h.status === "approved").length;
+  const changes = initialHandoffs.filter(h => h.status === "changes").length;
 
-  return (
-    <div className="flex flex-col justify-between h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-3xl font-bold tracking-tight leading-none">{initialHandoffs.length}</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Hand-offs</p>
+  if (tier === "compact") {
+    return (
+      <div className="flex flex-col justify-between h-full">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-3xl font-bold tracking-tight leading-none">{initialHandoffs.length}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Hand-offs</p>
+          </div>
+          <Users className="w-5 h-5 text-muted-foreground/40" />
         </div>
-        <Users className="w-5 h-5 text-muted-foreground/40" />
+        <div className="flex items-center gap-3 mt-auto">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-success" />
+            <span className="text-[9px] text-muted-foreground">{approved} done</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-warning" />
+            <span className="text-[9px] text-muted-foreground">{pending} pending</span>
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-3 mt-auto">
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-success" />
-          <span className="text-[9px] text-muted-foreground">{approved} done</span>
+    );
+  }
+
+  if (tier === "standard") {
+    return (
+      <div className="flex flex-col h-full gap-1.5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-2xl font-bold tracking-tight leading-none">{initialHandoffs.length}</p>
+            <p className="text-[10px] text-muted-foreground">Hand-offs</p>
+          </div>
+          <Users className="w-4 h-4 text-muted-foreground/40" />
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-warning" />
-          <span className="text-[9px] text-muted-foreground">{pending} pending</span>
+        <div className="flex-1 space-y-1 mt-1 overflow-hidden">
+          {initialHandoffs.map((h) => {
+            const cfg = statusConfig[h.status];
+            return (
+              <div key={h.id} className="flex items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.className.includes("success") ? "bg-success" : cfg.className.includes("warning") ? "bg-warning" : "bg-destructive"}`} />
+                <span className="text-[10px] font-medium truncate flex-1">{h.client}</span>
+                <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${cfg.className}`}>{cfg.label}</span>
+              </div>
+            );
+          })}
         </div>
+      </div>
+    );
+  }
+
+  // expanded
+  return (
+    <div className="flex flex-col h-full gap-2">
+      <div className="flex items-start justify-between">
+        <p className="text-lg font-bold leading-none">{initialHandoffs.length} <span className="text-sm font-normal text-muted-foreground">hand-offs</span></p>
+      </div>
+      <div className="flex-1 space-y-1.5 overflow-hidden">
+        {initialHandoffs.map((h) => {
+          const cfg = statusConfig[h.status];
+          return (
+            <div key={h.id} className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-medium truncate">{h.project}</span>
+                  <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${cfg.className}`}>{cfg.label}</span>
+                </div>
+                <p className="text-[9px] text-muted-foreground">{h.client}</p>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {h.rating && (
+                  <div className="flex items-center gap-0.5">
+                    <Star className="w-2.5 h-2.5 fill-warning text-warning" />
+                    <span className="text-[8px]">{h.rating}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-0.5 text-muted-foreground">
+                  <MessageSquare className="w-2.5 h-2.5" />
+                  <span className="text-[8px]">{h.messages.length}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-center gap-2 mt-auto pt-1 border-t border-border/30 text-[9px] text-muted-foreground">
+        <span>{approved} approved</span>
+        <span>·</span>
+        <span>{pending} pending</span>
+        <span>·</span>
+        <span>{changes} changes</span>
       </div>
     </div>
   );
