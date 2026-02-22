@@ -3,6 +3,7 @@ import {
   Home, FolderKanban, CalendarDays, Users, DollarSign,
   HardDrive, Receipt, ListTodo, MessageSquare, BarChart3,
   Settings, Menu, X, Briefcase, PanelLeft, ChevronRight, MoreHorizontal,
+  Moon, Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,14 @@ interface SidebarProps {
 
 const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: SidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  const toggleDarkMode = () => {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+  };
 
   return (
     <>
@@ -95,7 +104,18 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
         </nav>
 
         {/* Bottom */}
-        <div className={cn("mt-auto pt-3", collapsed ? "px-2" : "px-3 w-full")}>
+        <div className={cn("mt-auto pt-3 flex flex-col gap-1", collapsed ? "px-2" : "px-3 w-full")}>
+          <button
+            onClick={toggleDarkMode}
+            className={cn(
+              "flex items-center gap-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors",
+              collapsed ? "w-10 h-10 justify-center" : "w-full h-10 px-3"
+            )}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? <Sun className="w-[18px] h-[18px] shrink-0" /> : <Moon className="w-[18px] h-[18px] shrink-0" />}
+            {!collapsed && <span className="text-sm">{isDark ? "Light Mode" : "Dark Mode"}</span>}
+          </button>
           <button
             className={cn(
               "flex items-center gap-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors",
