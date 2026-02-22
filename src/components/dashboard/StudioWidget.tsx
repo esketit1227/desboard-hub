@@ -364,9 +364,10 @@ const KanbanCard = ({ deal, onEdit, onDelete }: { deal: Deal; onEdit: () => void
   );
 };
 
-const KanbanColumn = ({ stage, deals, onEdit, onDelete }: { stage: string; deals: Deal[]; onEdit: (d: Deal) => void; onDelete: (d: Deal) => void }) => {
+const KanbanColumn = ({ stage, deals, onEdit, onDelete, totalPipelineValue }: { stage: string; deals: Deal[]; onEdit: (d: Deal) => void; onDelete: (d: Deal) => void; totalPipelineValue: number }) => {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
   const stageTotal = deals.reduce((sum, d) => sum + (parseFloat(d.value.replace(/[^0-9.]/g, "")) || 0), 0);
+  const stagePercent = totalPipelineValue > 0 ? Math.round((stageTotal / totalPipelineValue) * 100) : 0;
 
   return (
     <div
@@ -376,16 +377,27 @@ const KanbanColumn = ({ stage, deals, onEdit, onDelete }: { stage: string; deals
         isOver && "bg-primary/5 ring-1 ring-primary/20"
       )}
     >
-      <div className="flex items-center justify-between mb-2 px-1">
+      <div className="flex items-center justify-between mb-1 px-1">
         <div className="flex items-center gap-1.5">
           <span className={cn("w-2 h-2 rounded-full", stageColors[stage]?.replace(/text-\S+/, "").trim() || "bg-muted")} />
           <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{stage}</p>
         </div>
-        <span className="text-[10px] text-muted-foreground">{deals.length}</span>
+        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 rounded-full font-semibold">
+          {deals.length}
+        </Badge>
       </div>
-      <p className="text-[10px] text-muted-foreground px-1 mb-2">
-        ${stageTotal.toLocaleString()}
-      </p>
+      <div className="px-1 mb-1.5">
+        <p className="text-sm font-semibold">${stageTotal.toLocaleString()}</p>
+      </div>
+      <div className="px-1 mb-2.5">
+        <div className="w-full h-1 rounded-full bg-muted/30 overflow-hidden">
+          <div
+            className={cn("h-full rounded-full transition-all", stage === "Closed Won" ? "bg-success" : stage === "Closed Lost" ? "bg-destructive" : "bg-primary")}
+            style={{ width: `${stagePercent}%` }}
+          />
+        </div>
+        <p className="text-[9px] text-muted-foreground mt-0.5">{stagePercent}% of pipeline</p>
+      </div>
       <div className="flex flex-col gap-1.5 flex-1 min-h-[60px]">
         {deals.map(d => (
           <KanbanCard key={d.id} deal={d} onEdit={() => onEdit(d)} onDelete={() => onDelete(d)} />
@@ -427,8 +439,33 @@ const KanbanBoard = ({ deals, onMoveDeal, onEdit, onDelete }: {
     }
   };
 
+  const totalPipelineValue = deals.reduce((sum, d) => sum + (parseFloat(d.value.replace(/[^0-9.]/g, "")) || 0), 0);
+
+  // Stage progression summary
+  const stageSummary = KANBAN_STAGES.map(stage => {
+    const stageDeals = deals.filter(d => d.stage === stage);
+    const stageVal = stageDeals.reduce((s, d) => s + (parseFloat(d.value.replace(/[^0-9.]/g, "")) || 0), 0);
+    return { stage, count: stageDeals.length, value: stageVal };
+  });
+
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      {/* Pipeline progress bar */}
+      <div className="flex items-center gap-0.5 mb-3 px-1">
+        {stageSummary.map((s, i) => (
+          <div key={s.stage} className="flex items-center flex-1">
+            <div className="flex-1">
+              <div
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  s.stage === "Closed Won" ? "bg-success" : s.stage === "Closed Lost" ? "bg-destructive" : s.count > 0 ? "bg-primary" : "bg-muted/30"
+                )}
+              />
+            </div>
+            {i < stageSummary.length - 1 && <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0 mx-0.5" />}
+          </div>
+        ))}
+      </div>
       <div className="flex gap-2.5 overflow-x-auto pb-2">
         {KANBAN_STAGES.map(stage => (
           <KanbanColumn
@@ -437,6 +474,7 @@ const KanbanBoard = ({ deals, onMoveDeal, onEdit, onDelete }: {
             deals={deals.filter(d => d.stage === stage)}
             onEdit={onEdit}
             onDelete={onDelete}
+            totalPipelineValue={totalPipelineValue}
           />
         ))}
       </div>
