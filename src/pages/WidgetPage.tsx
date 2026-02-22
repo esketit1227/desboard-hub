@@ -44,25 +44,27 @@ const WidgetPage = () => {
   const Expanded = widget.expanded;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40 px-4 py-3 flex items-center gap-3">
-        <button
-          onClick={() => navigate(-1)}
-          className="rounded-xl p-2 hover:bg-secondary transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">{widget.icon}</span>
-          <h1 className="text-lg font-bold">{widget.title}</h1>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background p-3 md:p-5 lg:p-6">
+      <div className="dashboard-container min-h-[calc(100vh-3rem)] flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="sticky top-0 z-50 px-5 py-4 flex items-center gap-3 border-b border-border/30">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-xl p-2 hover:bg-muted/50 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">{widget.icon}</span>
+            <h1 className="text-lg font-bold">{widget.title}</h1>
+          </div>
+        </header>
 
-      {/* Content */}
-      <main className="flex-1 p-4 overflow-auto">
-        <Expanded />
-      </main>
+        {/* Content */}
+        <main className="flex-1 p-5 md:p-8 lg:p-10 overflow-auto">
+          <Expanded />
+        </main>
+      </div>
     </div>
   );
 };
