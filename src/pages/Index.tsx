@@ -22,7 +22,7 @@ import { CalendarPreview, CalendarExpanded } from "@/components/dashboard/Calend
 import { ClientsPreview, ClientsExpanded } from "@/components/dashboard/ClientPortalWidget";
 import { FinancesPreview, FinancesExpanded } from "@/components/dashboard/FinancesWidget";
 import { FilesPreview, FilesExpanded } from "@/components/dashboard/FileStorageWidget";
-import { InvoicesPreview, InvoicesExpanded } from "@/components/dashboard/InvoicesWidget";
+
 import { TasksPreview, TasksExpanded } from "@/components/dashboard/TasksWidget";
 import { MessagesPreview, MessagesExpanded } from "@/components/dashboard/MessagesWidget";
 import { AnalyticsPreview, AnalyticsExpanded } from "@/components/dashboard/AnalyticsWidget";
@@ -30,7 +30,7 @@ import { StudioPreview, StudioExpanded } from "@/components/dashboard/StudioWidg
 import WidgetCustomizer from "@/components/dashboard/WidgetCustomizer";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "invoices" | "tasks" | "messages" | "analytics" | "studio";
+type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "tasks" | "messages" | "analytics" | "studio";
 
 const WIDGETS: Record<
   WidgetId,
@@ -96,16 +96,6 @@ const WIDGETS: Record<
     bgColor: "",
     textColor: ""
   },
-  invoices: {
-    title: "Invoices",
-    icon: <Receipt className="w-4 h-4" />,
-    preview: InvoicesPreview,
-    expanded: InvoicesExpanded,
-    cols: 1,
-    component: InvoicesPreview,
-    bgColor: "",
-    textColor: ""
-  },
   tasks: {
     title: "Tasks",
     icon: <ListTodo className="w-4 h-4" />,
@@ -148,7 +138,7 @@ const WIDGETS: Record<
   }
 };
 
-const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "invoices", "tasks", "messages", "analytics", "studio"];
+const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "tasks", "messages", "analytics", "studio"];
 
 const Index = () => {
   const isMobile = useIsMobile();
