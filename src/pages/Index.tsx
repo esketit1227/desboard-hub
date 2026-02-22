@@ -159,6 +159,7 @@ const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
+  const [pixelSizes, setPixelSizes] = useState<Record<string, { width: number; height: number }>>({});
   // Dark mode is default — no toggle needed
   useEffect(() => {
     document.documentElement.classList.remove("light");
@@ -243,7 +244,7 @@ const Index = () => {
           {!isMobile ? (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={activeWidgets} strategy={rectSortingStrategy}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="flex flex-wrap gap-4">
                   {activeWidgets.map((id, i) => {
                     const widget = WIDGETS[id];
                     const Preview = widget.preview;
@@ -253,10 +254,7 @@ const Index = () => {
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35, delay: 0.15 + i * 0.04 }}
-                        className={
-                          (widgetSizes[id] === "medium" ? "sm:col-span-2" : "") +
-                          (widgetSizes[id] === "large" ? " sm:col-span-2 lg:col-span-3" : "")
-                        }
+                        style={pixelSizes[id] ? { width: pixelSizes[id].width } : { width: "calc(33.333% - 11px)" }}
                       >
                         <WidgetCard
                           id={id}
@@ -265,7 +263,8 @@ const Index = () => {
                           size={widgetSizes[id] || "small"}
                           tintIndex={i}
                           onExpand={() => handleExpand(id)}
-                          onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
+                          pixelSize={pixelSizes[id]}
+                          onPixelResize={(size) => setPixelSizes((prev) => ({ ...prev, [id]: size }))}
                         >
                           <Preview />
                         </WidgetCard>
