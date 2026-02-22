@@ -58,7 +58,7 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
         {/* Logo */}
         <div className={cn("mb-6", collapsed ? "px-0" : "px-4 w-full")}>
           <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center mx-auto">
-            <span className="text-primary-foreground text-xs font-bold">•••</span>
+            <span className="text-primary-foreground text-[7px] font-bold tracking-tight">desboard</span>
           </div>
         </div>
 
