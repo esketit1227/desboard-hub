@@ -15,23 +15,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 type FileTag = { label: string; color: string };
 type ClientTag = { name: string; avatar: string };
 type FileItem = {
-  id: string;
-  name: string;
-  type: "pdf" | "design" | "image" | "video" | "audio" | "archive" | "doc";
-  folder: string;
-  size: string;
-  addedBy: string;
-  date: string;
-  tags: FileTag[];
-  client?: ClientTag;
-  label?: string;
+  id: string; name: string; type: "pdf" | "design" | "image" | "video" | "audio" | "archive" | "doc";
+  folder: string; size: string; addedBy: string; date: string; tags: FileTag[]; client?: ClientTag; label?: string;
 };
-type FolderItem = {
-  id: string;
-  name: string;
-  parent: string | null;
-  fileCount: number;
-};
+type FolderItem = { id: string; name: string; parent: string | null; fileCount: number; };
 
 /* ─── Mock Data ─── */
 const TAGS: FileTag[] = [
@@ -77,28 +64,61 @@ const FILES: FileItem[] = [
 
 /* ─── Icon Map ─── */
 const FILE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  pdf: FileText,
-  design: FolderOpen,
-  image: Image,
-  video: Film,
-  audio: Music,
-  archive: Archive,
-  doc: File,
+  pdf: FileText, design: FolderOpen, image: Image, video: Film, audio: Music, archive: Archive, doc: File,
+};
+
+/* ─── Compact Preview ─── */
+export const FilesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const h = pixelSize?.height ?? 140;
+  const w = pixelSize?.width ?? 300;
+
+  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
+  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
+  const itemSize = w > 400 ? "text-xs" : "text-[11px]";
+  const subSize = w > 400 ? "text-[11px]" : "text-[9px]";
+
+  const showList = h > 180;
+  const showDate = w > 350;
+  const showTag = w > 300 && h > 240;
+  const itemCount = h > 400 ? 5 : h > 300 ? 4 : h > 220 ? 3 : 2;
+
+  const rootFolderCount = FOLDERS.filter(f => !f.parent).length;
+
+  if (!showList) {
+    return (
+      <div>
+        <p className={`${titleSize} font-bold tracking-tight`}>271 MB</p>
+        <p className={`${labelSize} text-muted-foreground mt-1`}>{FILES.length} files · {rootFolderCount} folders</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className={`${labelSize} text-muted-foreground font-medium`}>271 MB · {FILES.length} files</p>
+      {FILES.slice(0, itemCount).map((file) => {
+        const Icon = FILE_ICONS[file.type] || FileText;
+        return (
+          <div key={file.id} className="flex items-center gap-2 py-0.5">
+            <Icon className="w-3.5 h-3.5 opacity-50 shrink-0" />
+            <span className={`${itemSize} font-medium truncate flex-1`}>{file.name}</span>
+            {showTag && file.tags[0] && (
+              <span className={`${subSize} font-medium px-1 py-0.5 rounded-full ${file.tags[0].color}`}>{file.tags[0].label}</span>
+            )}
+            {showDate && <span className={`${subSize} opacity-40 shrink-0`}>{file.date}</span>}
+            <span className={`${subSize} opacity-40 shrink-0`}>{file.size}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 /* ─── Folder Tree Component ─── */
 const FolderTreeNode = ({
-  folder,
-  allFolders,
-  selectedFolder,
-  onSelect,
-  depth = 0,
+  folder, allFolders, selectedFolder, onSelect, depth = 0,
 }: {
-  folder: FolderItem;
-  allFolders: FolderItem[];
-  selectedFolder: string | null;
-  onSelect: (id: string) => void;
-  depth?: number;
+  folder: FolderItem; allFolders: FolderItem[]; selectedFolder: string | null; onSelect: (id: string) => void; depth?: number;
 }) => {
   const [expanded, setExpanded] = useState(depth === 0);
   const children = allFolders.filter((f) => f.parent === folder.id);
@@ -107,10 +127,7 @@ const FolderTreeNode = ({
   return (
     <div>
       <button
-        onClick={() => {
-          onSelect(folder.id);
-          if (children.length) setExpanded(!expanded);
-        }}
+        onClick={() => { onSelect(folder.id); if (children.length) setExpanded(!expanded); }}
         className={`w-full flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${
           isSelected ? "bg-secondary text-foreground font-medium" : "text-muted-foreground"
         }`}
@@ -126,47 +143,8 @@ const FolderTreeNode = ({
         <span className="text-[10px] bg-secondary rounded-full px-1.5 py-0.5 font-medium">{folder.fileCount}</span>
       </button>
       {expanded && children.map((child) => (
-        <FolderTreeNode
-          key={child.id}
-          folder={child}
-          allFolders={allFolders}
-          selectedFolder={selectedFolder}
-          onSelect={onSelect}
-          depth={depth + 1}
-        />
+        <FolderTreeNode key={child.id} folder={child} allFolders={allFolders} selectedFolder={selectedFolder} onSelect={onSelect} depth={depth + 1} />
       ))}
-    </div>
-  );
-};
-
-/* ─── Compact Preview ─── */
-export const FilesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
-  const h = pixelSize?.height ?? 140;
-  const showList = h > 200;
-  const itemCount = h > 300 ? 4 : 2;
-
-  if (!showList) {
-    return (
-      <div>
-        <p className="text-3xl font-bold tracking-tight">271 MB</p>
-        <p className="text-xs text-muted-foreground mt-1">10 files · 3 folders</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-1.5">
-      <p className="text-xs text-muted-foreground font-medium">271 MB · 10 files</p>
-      {FILES.slice(0, itemCount).map((file) => {
-        const Icon = FILE_ICONS[file.type] || FileText;
-        return (
-          <div key={file.id} className="flex items-center gap-2 py-0.5">
-            <Icon className="w-3.5 h-3.5 opacity-50 shrink-0" />
-            <span className="text-[11px] font-medium truncate flex-1">{file.name}</span>
-            <span className="text-[9px] opacity-40 shrink-0">{file.size}</span>
-          </div>
-        );
-      })}
     </div>
   );
 };
@@ -182,7 +160,6 @@ export const FilesExpanded = () => {
 
   const rootFolders = FOLDERS.filter((f) => !f.parent);
 
-  // Get all descendant folder IDs for a given folder
   const getDescendants = (folderId: string): string[] => {
     const children = FOLDERS.filter((f) => f.parent === folderId);
     return [folderId, ...children.flatMap((c) => getDescendants(c.id))];
@@ -209,20 +186,13 @@ export const FilesExpanded = () => {
     <div className="flex gap-0 -mx-6 -mb-6 -mt-4 h-[70vh]">
       {/* Left Sidebar */}
       <div className="w-[260px] border-r border-border/40 flex flex-col shrink-0">
-        {/* Search */}
         <div className="p-3 border-b border-border/30">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <Input
-              placeholder="Search files..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 h-8 text-xs bg-secondary/30 border-border/30"
-            />
+            <Input placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-8 h-8 text-xs bg-secondary/30 border-border/30" />
           </div>
         </div>
 
-        {/* Sidebar Tabs */}
         <Tabs value={sidebarTab} onValueChange={(v) => setSidebarTab(v as any)} className="flex-1 flex flex-col min-h-0">
           <TabsList className="mx-3 mt-2 h-8 bg-secondary/40">
             <TabsTrigger value="folders" className="text-xs h-6 gap-1"><Folder className="w-3 h-3" />Folders</TabsTrigger>
@@ -243,13 +213,7 @@ export const FilesExpanded = () => {
                   <span className="text-[10px] bg-secondary rounded-full px-1.5 py-0.5 font-medium">{FILES.length}</span>
                 </button>
                 {rootFolders.map((folder) => (
-                  <FolderTreeNode
-                    key={folder.id}
-                    folder={folder}
-                    allFolders={FOLDERS}
-                    selectedFolder={selectedFolder}
-                    onSelect={setSelectedFolder}
-                  />
+                  <FolderTreeNode key={folder.id} folder={folder} allFolders={FOLDERS} selectedFolder={selectedFolder} onSelect={setSelectedFolder} />
                 ))}
               </div>
             </ScrollArea>
@@ -262,36 +226,23 @@ export const FilesExpanded = () => {
                   const count = FILES.filter((f) => f.tags.some((t) => t.label === tag.label)).length;
                   const isActive = activeTagFilter === tag.label;
                   return (
-                    <button
-                      key={tag.label}
-                      onClick={() => setActiveTagFilter(isActive ? null : tag.label)}
-                      className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${
-                        isActive ? "bg-secondary font-medium" : ""
-                      }`}
-                    >
+                    <button key={tag.label} onClick={() => setActiveTagFilter(isActive ? null : tag.label)}
+                      className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${isActive ? "bg-secondary font-medium" : ""}`}>
                       <span className={`w-2.5 h-2.5 rounded-full ${tag.color.split(" ")[0]}`} />
                       <span className="flex-1 text-left">{tag.label}</span>
                       <span className="text-[10px] text-muted-foreground">{count}</span>
                     </button>
                   );
                 })}
-
                 <div className="border-t border-border/30 pt-3 mt-3">
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2 px-2">Clients</p>
                   {CLIENTS.map((client) => {
                     const count = FILES.filter((f) => f.client?.name === client.name).length;
                     const isActive = activeClientFilter === client.name;
                     return (
-                      <button
-                        key={client.name}
-                        onClick={() => setActiveClientFilter(isActive ? null : client.name)}
-                        className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${
-                          isActive ? "bg-secondary font-medium" : ""
-                        }`}
-                      >
-                        <div className="w-5 h-5 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[9px] font-bold shrink-0">
-                          {client.avatar}
-                        </div>
+                      <button key={client.name} onClick={() => setActiveClientFilter(isActive ? null : client.name)}
+                        className={`w-full flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors hover:bg-secondary/60 ${isActive ? "bg-secondary font-medium" : ""}`}>
+                        <div className="w-5 h-5 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[9px] font-bold shrink-0">{client.avatar}</div>
                         <span className="flex-1 text-left truncate">{client.name}</span>
                         <span className="text-[10px] text-muted-foreground">{count}</span>
                       </button>
@@ -306,7 +257,6 @@ export const FilesExpanded = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Toolbar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border/30">
           <div className="flex items-center gap-2 min-w-0">
             <h3 className="text-sm font-semibold truncate">{currentFolderName}</h3>
@@ -332,23 +282,17 @@ export const FilesExpanded = () => {
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewMode("grid")}>
               <Grid3X3 className={`w-3.5 h-3.5 ${viewMode === "grid" ? "text-foreground" : "text-muted-foreground"}`} />
             </Button>
-            <Button size="sm" className="h-7 text-xs gap-1 ml-2">
-              <Upload className="w-3 h-3" /> Upload
-            </Button>
+            <Button size="sm" className="h-7 text-xs gap-1 ml-2"><Upload className="w-3 h-3" /> Upload</Button>
           </div>
         </div>
 
-        {/* Sub-folders row */}
         {subFolders.length > 0 && (
           <div className="px-5 py-3 border-b border-border/20">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">Folders</p>
             <div className="flex gap-2 flex-wrap">
               {subFolders.map((sf) => (
-                <button
-                  key={sf.id}
-                  onClick={() => setSelectedFolder(sf.id)}
-                  className="flex items-center gap-2 bg-secondary/40 hover:bg-secondary/60 rounded-xl px-3 py-2 transition-colors group"
-                >
+                <button key={sf.id} onClick={() => setSelectedFolder(sf.id)}
+                  className="flex items-center gap-2 bg-secondary/40 hover:bg-secondary/60 rounded-xl px-3 py-2 transition-colors group">
                   <Folder className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   <div className="text-left">
                     <p className="text-xs font-medium">{sf.name}</p>
@@ -360,88 +304,53 @@ export const FilesExpanded = () => {
           </div>
         )}
 
-        {/* File List / Grid */}
         <ScrollArea className="flex-1">
           {viewMode === "list" ? (
             <div className="px-5 py-2">
-              {/* Header */}
               <div className="grid grid-cols-[1fr_120px_100px_80px_80px_32px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-                <span>Name</span>
-                <span>Client</span>
-                <span>Added By</span>
-                <span>Size</span>
-                <span>Tags</span>
-                <span />
+                <span>Name</span><span>Client</span><span>Added By</span><span>Size</span><span>Tags</span><span />
               </div>
               {filteredFiles.length === 0 && (
-                <div className="text-center py-12 text-sm text-muted-foreground">
-                  No files found
-                </div>
+                <div className="text-center py-12 text-sm text-muted-foreground">No files found</div>
               )}
               {filteredFiles.map((file) => {
                 const Icon = FILE_ICONS[file.type] || FileText;
                 return (
-                  <div
-                    key={file.id}
-                    className="grid grid-cols-[1fr_120px_100px_80px_80px_32px] gap-2 items-center px-3 py-2.5 rounded-xl hover:bg-secondary/30 transition-colors group cursor-pointer"
-                  >
-                    {/* Name */}
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div key={file.id} className="grid grid-cols-[1fr_120px_100px_80px_80px_32px] gap-2 items-center px-3 py-2.5 rounded-xl hover:bg-secondary/30 transition-colors group cursor-pointer">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-secondary/60 flex items-center justify-center shrink-0">
                         <Icon className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{file.name}</p>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-[10px] text-muted-foreground">{file.date}</p>
-                          {file.label && (
-                            <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">{file.label}</span>
-                          )}
-                        </div>
+                        <p className="text-[10px] text-muted-foreground">{file.date}</p>
                       </div>
                     </div>
-
-                    {/* Client */}
-                    <div>
+                    <div className="flex items-center gap-1.5 min-w-0">
                       {file.client ? (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[8px] font-bold shrink-0">
-                            {file.client.avatar}
-                          </div>
-                          <span className="text-xs text-muted-foreground truncate">{file.client.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground/50">—</span>
-                      )}
+                        <>
+                          <div className="w-5 h-5 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[8px] font-bold shrink-0">{file.client.avatar}</div>
+                          <span className="text-xs truncate">{file.client.name}</span>
+                        </>
+                      ) : <span className="text-xs text-muted-foreground">—</span>}
                     </div>
-
-                    {/* Added By */}
                     <span className="text-xs text-muted-foreground truncate">{file.addedBy.split("@")[0]}</span>
-
-                    {/* Size */}
                     <span className="text-xs text-muted-foreground">{file.size}</span>
-
-                    {/* Tags */}
-                    <div className="flex gap-1 flex-wrap">
-                      {file.tags.map((t) => (
-                        <span key={t.label} className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${t.color}`}>{t.label}</span>
+                    <div className="flex gap-1">
+                      {file.tags.map((tag) => (
+                        <span key={tag.label} className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${tag.color}`}>{tag.label}</span>
                       ))}
                     </div>
-
-                    {/* Actions */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreHorizontal className="w-3.5 h-3.5" />
-                        </Button>
+                        <button className="rounded-md p-1 hover:bg-secondary opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuContent align="end" className="rounded-xl">
                         <DropdownMenuItem className="text-xs">Open</DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs">Rename</DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs">Move to…</DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs">Add Tag</DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs">Assign Client</DropdownMenuItem>
-                        <DropdownMenuItem className="text-xs">Add Label</DropdownMenuItem>
+                        <DropdownMenuItem className="text-xs">Download</DropdownMenuItem>
+                        <DropdownMenuItem className="text-xs">Share</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-xs text-destructive">Delete</DropdownMenuItem>
                       </DropdownMenuContent>
@@ -451,57 +360,21 @@ export const FilesExpanded = () => {
               })}
             </div>
           ) : (
-            <div className="px-5 py-3 grid grid-cols-2 md:grid-cols-3 gap-3">
-              {filteredFiles.length === 0 && (
-                <div className="col-span-full text-center py-12 text-sm text-muted-foreground">
-                  No files found
-                </div>
-              )}
+            <div className="px-5 py-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {filteredFiles.map((file) => {
                 const Icon = FILE_ICONS[file.type] || FileText;
                 return (
-                  <div
-                    key={file.id}
-                    className="rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors p-4 cursor-pointer group relative"
-                  >
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-6 w-6">
-                            <MoreHorizontal className="w-3.5 h-3.5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem className="text-xs">Open</DropdownMenuItem>
-                          <DropdownMenuItem className="text-xs">Rename</DropdownMenuItem>
-                          <DropdownMenuItem className="text-xs">Move to…</DropdownMenuItem>
-                          <DropdownMenuItem className="text-xs">Add Tag</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-xs text-destructive">Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center mb-3">
+                  <div key={file.id} className="rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors p-4 cursor-pointer group">
+                    <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center mb-3">
                       <Icon className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <p className="text-sm font-medium truncate">{file.name}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{file.size} · {file.date}</p>
-                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                      {file.tags.map((t) => (
-                        <span key={t.label} className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${t.color}`}>{t.label}</span>
+                    <p className="text-[10px] text-muted-foreground mt-1">{file.size} · {file.date}</p>
+                    <div className="flex gap-1 mt-2">
+                      {file.tags.map((tag) => (
+                        <span key={tag.label} className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${tag.color}`}>{tag.label}</span>
                       ))}
-                      {file.label && (
-                        <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">{file.label}</span>
-                      )}
                     </div>
-                    {file.client && (
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <div className="w-4 h-4 rounded bg-primary/10 text-primary flex items-center justify-center text-[7px] font-bold">
-                          {file.client.avatar}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground">{file.client.name}</span>
-                      </div>
-                    )}
                   </div>
                 );
               })}

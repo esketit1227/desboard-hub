@@ -32,26 +32,50 @@ const priorityConfig = {
 /** Compact preview */
 export const TasksPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const h = pixelSize?.height ?? 140;
+  const w = pixelSize?.width ?? 300;
   const pending = initialTasks.filter(t => !t.completed);
-  const showList = h > 200;
-  const itemCount = h > 320 ? pending.length : h > 240 ? 3 : 2;
+  const completed = initialTasks.filter(t => t.completed);
+
+  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
+  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
+  const itemSize = w > 400 ? "text-sm" : h > 240 ? "text-xs" : "text-[11px]";
+  const subSize = w > 400 ? "text-xs" : "text-[10px]";
+
+  const showList = h > 180;
+  const showProject = w > 300;
+  const showDue = h > 280;
+  const itemCount = h > 400 ? pending.length : h > 320 ? 4 : h > 240 ? 3 : 2;
 
   if (!showList) {
     return (
       <div>
-        <p className="text-3xl font-bold tracking-tight">{pending.length}</p>
-        <p className="text-xs text-muted-foreground mt-1">Pending tasks</p>
+        <p className={`${titleSize} font-bold tracking-tight`}>{pending.length}</p>
+        <p className={`${labelSize} text-muted-foreground mt-1`}>Pending tasks</p>
+        {h > 160 && (
+          <p className={`${subSize} opacity-40 mt-1`}>{completed.length} completed</p>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-1.5">
-      <p className="text-xs text-muted-foreground font-medium">{pending.length} Pending</p>
+      <div className="flex items-center justify-between">
+        <p className={`${labelSize} text-muted-foreground font-medium`}>{pending.length} Pending</p>
+        <p className={`${subSize} opacity-40`}>{completed.length} done</p>
+      </div>
       {pending.slice(0, itemCount).map((task) => (
         <div key={task.id} className="flex items-center gap-2 py-0.5">
           <Flag className={cn("w-3 h-3 shrink-0", priorityConfig[task.priority].className)} />
-          <span className="text-[11px] font-medium truncate flex-1">{task.title}</span>
+          <span className={`${itemSize} font-medium truncate flex-1`}>{task.title}</span>
+          {showProject && task.project && (
+            <span className={`${subSize} opacity-40 shrink-0`}>{task.project}</span>
+          )}
+          {showDue && task.dueDate && (
+            <span className={`${subSize} opacity-40 shrink-0`}>
+              {new Date(task.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            </span>
+          )}
         </div>
       ))}
     </div>

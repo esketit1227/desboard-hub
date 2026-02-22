@@ -1,8 +1,8 @@
 const projects = [
-  { name: "Brand Identity — Flux", client: "Flux Labs", status: "progress", progress: 72 },
-  { name: "Website Redesign", client: "Mono Studio", status: "started", progress: 15 },
-  { name: "Mobile App UI", client: "Nextwave", status: "progress", progress: 48 },
-  { name: "Packaging Design", client: "Verdant Co", status: "completed", progress: 100 },
+  { name: "Brand Identity — Flux", client: "Flux Labs", status: "progress", progress: 72, deadline: "Mar 15" },
+  { name: "Website Redesign", client: "Mono Studio", status: "started", progress: 15, deadline: "Apr 2" },
+  { name: "Mobile App UI", client: "Nextwave", status: "progress", progress: 48, deadline: "Mar 28" },
+  { name: "Packaging Design", client: "Verdant Co", status: "completed", progress: 100, deadline: "Feb 10" },
 ];
 
 const statusStyles: Record<string, string> = {
@@ -20,28 +20,49 @@ const statusLabels: Record<string, string> = {
 /** Compact preview — reveals more at larger sizes */
 export const ProjectsPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const h = pixelSize?.height ?? 140;
-  const showList = h > 200;
-  const showProgress = h > 280;
-  const itemCount = h > 360 ? projects.length : h > 280 ? 3 : 2;
+  const w = pixelSize?.width ?? 300;
+
+  // Adaptive font sizes
+  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
+  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
+  const itemNameSize = w > 400 ? "text-sm" : h > 240 ? "text-xs" : "text-[11px]";
+  const subSize = w > 400 ? "text-xs" : "text-[10px]";
+  const badgeSize = w > 400 ? "text-[11px]" : "text-[9px]";
+
+  const showList = h > 180;
+  const showProgress = h > 260;
+  const showDeadline = w > 350;
+  const itemCount = h > 400 ? projects.length : h > 300 ? 4 : h > 240 ? 3 : 2;
 
   if (!showList) {
+    const completed = projects.filter(p => p.status === "completed").length;
+    const inProgress = projects.filter(p => p.status === "progress").length;
     return (
       <div>
-        <p className="text-3xl font-bold tracking-tight">4</p>
-        <p className="text-xs opacity-60 mt-1">Active Projects</p>
+        <p className={`${titleSize} font-bold tracking-tight`}>{projects.length}</p>
+        <p className={`${labelSize} opacity-60 mt-1`}>Active Projects</p>
+        {h > 160 && (
+          <div className={`flex gap-3 mt-2 ${subSize} opacity-50`}>
+            <span>{inProgress} in progress</span>
+            <span>{completed} done</span>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      <p className="text-xs opacity-60 font-medium">{projects.length} Active Projects</p>
+    <div className="space-y-1.5">
+      <p className={`${labelSize} opacity-60 font-medium`}>{projects.length} Active Projects</p>
       {projects.slice(0, itemCount).map((project) => (
-        <div key={project.name} className="flex items-center gap-3 py-1">
+        <div key={project.name} className="flex items-center gap-2 py-1">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium truncate">{project.name}</p>
-            <p className="text-[10px] opacity-50">{project.client}</p>
+            <p className={`${itemNameSize} font-medium truncate`}>{project.name}</p>
+            <p className={`${subSize} opacity-50`}>{project.client}</p>
           </div>
+          {showDeadline && (
+            <span className={`${subSize} opacity-40 shrink-0`}>{project.deadline}</span>
+          )}
           {showProgress ? (
             <div className="w-16 shrink-0">
               <div className="h-1.5 bg-black/10 rounded-full overflow-hidden">
@@ -50,7 +71,7 @@ export const ProjectsPreview = ({ pixelSize }: { pixelSize?: { width: number; he
               <p className="text-[9px] opacity-50 mt-0.5 text-right">{project.progress}%</p>
             </div>
           ) : (
-            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${statusStyles[project.status]}`}>
+            <span className={`${badgeSize} font-medium px-1.5 py-0.5 rounded-full ${statusStyles[project.status]}`}>
               {statusLabels[project.status]}
             </span>
           )}

@@ -20,47 +20,19 @@ export interface Invoice {
 
 const initialInvoices: Invoice[] = [
   {
-    id: "1",
-    number: "INV-001",
-    client: "Flux Labs",
-    project: "Brand Identity",
-    amount: 4500,
-    status: "paid",
-    date: "2026-01-15",
-    dueDate: "2026-02-15",
-    items: [
-      { description: "Logo Design", hours: 12, rate: 150 },
-      { description: "Brand Guidelines", hours: 18, rate: 150 },
-    ],
+    id: "1", number: "INV-001", client: "Flux Labs", project: "Brand Identity", amount: 4500, status: "paid",
+    date: "2026-01-15", dueDate: "2026-02-15",
+    items: [{ description: "Logo Design", hours: 12, rate: 150 }, { description: "Brand Guidelines", hours: 18, rate: 150 }],
   },
   {
-    id: "2",
-    number: "INV-002",
-    client: "Mono Studio",
-    project: "Website V2",
-    amount: 6200,
-    status: "pending",
-    date: "2026-02-01",
-    dueDate: "2026-03-01",
-    items: [
-      { description: "UI Design", hours: 24, rate: 150 },
-      { description: "Prototyping", hours: 16, rate: 150 },
-      { description: "Design System", hours: 8, rate: 125 },
-    ],
+    id: "2", number: "INV-002", client: "Mono Studio", project: "Website V2", amount: 6200, status: "pending",
+    date: "2026-02-01", dueDate: "2026-03-01",
+    items: [{ description: "UI Design", hours: 24, rate: 150 }, { description: "Prototyping", hours: 16, rate: 150 }, { description: "Design System", hours: 8, rate: 125 }],
   },
   {
-    id: "3",
-    number: "INV-003",
-    client: "Nextwave",
-    project: "Mobile App UI",
-    amount: 3800,
-    status: "overdue",
-    date: "2026-01-01",
-    dueDate: "2026-02-01",
-    items: [
-      { description: "App Screen Design", hours: 20, rate: 150 },
-      { description: "Icon Set", hours: 6, rate: 130 },
-    ],
+    id: "3", number: "INV-003", client: "Nextwave", project: "Mobile App UI", amount: 3800, status: "overdue",
+    date: "2026-01-01", dueDate: "2026-02-01",
+    items: [{ description: "App Screen Design", hours: 20, rate: 150 }, { description: "Icon Set", hours: 6, rate: 130 }],
   },
 ];
 
@@ -74,31 +46,57 @@ const statusConfig: Record<string, { label: string; className: string; icon: typ
 /** Compact preview */
 export const InvoicesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const h = pixelSize?.height ?? 140;
-  const showList = h > 200;
-  const itemCount = h > 300 ? initialInvoices.length : 2;
+  const w = pixelSize?.width ?? 300;
+
+  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
+  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
+  const itemSize = w > 400 ? "text-xs" : "text-[11px]";
+  const badgeSize = w > 400 ? "text-[10px]" : "text-[9px]";
+  const amountSize = w > 400 ? "text-xs" : "text-[11px]";
+
+  const showList = h > 180;
+  const showAmount = w > 280;
+  const showDate = w > 380;
+  const itemCount = h > 340 ? initialInvoices.length : h > 240 ? 2 : 2;
+
+  const totalOutstanding = initialInvoices
+    .filter(i => i.status !== "paid")
+    .reduce((s, i) => s + i.amount, 0);
 
   if (!showList) {
+    const overdue = initialInvoices.filter(i => i.status === "overdue").length;
     return (
       <div>
-        <p className="text-3xl font-bold tracking-tight">$10,000</p>
-        <p className="text-xs text-muted-foreground mt-1">Outstanding</p>
+        <p className={`${titleSize} font-bold tracking-tight`}>${totalOutstanding.toLocaleString()}</p>
+        <p className={`${labelSize} text-muted-foreground mt-1`}>Outstanding</p>
+        {h > 160 && overdue > 0 && (
+          <p className="text-[10px] text-destructive mt-1">{overdue} overdue</p>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-1.5">
-      <p className="text-xs text-muted-foreground font-medium">$10,000 Outstanding</p>
+      <div className="flex items-center justify-between">
+        <p className={`${labelSize} text-muted-foreground font-medium`}>${totalOutstanding.toLocaleString()} Outstanding</p>
+        <p className={`${badgeSize} opacity-40`}>{initialInvoices.length} total</p>
+      </div>
       {initialInvoices.slice(0, itemCount).map((inv) => {
         const config = statusConfig[inv.status];
         return (
           <div key={inv.id} className="flex items-center gap-2 py-0.5">
-            <span className="text-[11px] font-medium">{inv.number}</span>
-            <span className="text-[10px] opacity-50 truncate flex-1">{inv.client}</span>
-            <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${config.className}`}>
+            <span className={`${itemSize} font-medium`}>{inv.number}</span>
+            <span className={`${badgeSize} opacity-50 truncate flex-1`}>{inv.client}</span>
+            {showDate && (
+              <span className={`${badgeSize} opacity-40 shrink-0`}>{inv.dueDate}</span>
+            )}
+            <span className={`${badgeSize} font-medium px-1.5 py-0.5 rounded-full ${config.className}`}>
               {config.label}
             </span>
-            <span className="text-[11px] font-semibold">${inv.amount.toLocaleString()}</span>
+            {showAmount && (
+              <span className={`${amountSize} font-semibold shrink-0`}>${inv.amount.toLocaleString()}</span>
+            )}
           </div>
         );
       })}
@@ -112,7 +110,6 @@ export const InvoicesExpanded = () => {
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
-  // Create form state
   const [newInvoice, setNewInvoice] = useState({
     client: "",
     project: "",
@@ -190,7 +187,6 @@ export const InvoicesExpanded = () => {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">
@@ -204,7 +200,6 @@ export const InvoicesExpanded = () => {
         </Button>
       </div>
 
-      {/* Invoice list */}
       <div className="space-y-3">
         {invoices.map((inv) => {
           const config = statusConfig[inv.status];
@@ -264,63 +259,36 @@ export const InvoicesExpanded = () => {
         })}
       </div>
 
-      {/* Preview dialog */}
       <Dialog open={!!previewInvoice} onOpenChange={(open) => !open && setPreviewInvoice(null)}>
         <DialogContent className="sm:max-w-[550px] rounded-2xl">
           {previewInvoice && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-lg font-bold">
-                  {previewInvoice.number}
-                </DialogTitle>
+                <DialogTitle className="text-lg font-bold">{previewInvoice.number}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 mt-2">
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Client</p>
-                    <p className="font-medium">{previewInvoice.client}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Project</p>
-                    <p className="font-medium">{previewInvoice.project}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Date</p>
-                    <p className="font-medium">{previewInvoice.date}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Due Date</p>
-                    <p className="font-medium">{previewInvoice.dueDate}</p>
-                  </div>
+                  <div><p className="text-xs text-muted-foreground">Client</p><p className="font-medium">{previewInvoice.client}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Project</p><p className="font-medium">{previewInvoice.project}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Date</p><p className="font-medium">{previewInvoice.date}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Due Date</p><p className="font-medium">{previewInvoice.dueDate}</p></div>
                 </div>
-
                 <div className="border-t border-border/50 pt-4">
                   <div className="grid grid-cols-[1fr_60px_80px_80px] gap-2 text-[10px] text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                    <span>Description</span>
-                    <span className="text-right">Hours</span>
-                    <span className="text-right">Rate</span>
-                    <span className="text-right">Total</span>
+                    <span>Description</span><span className="text-right">Hours</span><span className="text-right">Rate</span><span className="text-right">Total</span>
                   </div>
                   {previewInvoice.items.map((item, i) => (
-                    <div
-                      key={i}
-                      className="grid grid-cols-[1fr_60px_80px_80px] gap-2 text-sm py-2 px-1 rounded-lg hover:bg-secondary/30"
-                    >
+                    <div key={i} className="grid grid-cols-[1fr_60px_80px_80px] gap-2 text-sm py-2 px-1 rounded-lg hover:bg-secondary/30">
                       <span>{item.description}</span>
                       <span className="text-right text-muted-foreground">{item.hours}</span>
                       <span className="text-right text-muted-foreground">${item.rate}</span>
-                      <span className="text-right font-semibold">
-                        ${(item.hours * item.rate).toLocaleString()}
-                      </span>
+                      <span className="text-right font-semibold">${(item.hours * item.rate).toLocaleString()}</span>
                     </div>
                   ))}
                 </div>
-
                 <div className="border-t border-border/50 pt-3 flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Total</span>
-                  <span className="text-xl font-bold">
-                    ${previewInvoice.amount.toLocaleString()}
-                  </span>
+                  <span className="text-xl font-bold">${previewInvoice.amount.toLocaleString()}</span>
                 </div>
               </div>
             </>
@@ -328,7 +296,6 @@ export const InvoicesExpanded = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Create dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-[550px] rounded-2xl">
           <DialogHeader>
@@ -338,75 +305,36 @@ export const InvoicesExpanded = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-muted-foreground mb-1 block">Client</label>
-                <Input
-                  value={newInvoice.client}
-                  onChange={(e) => setNewInvoice((p) => ({ ...p, client: e.target.value }))}
-                  placeholder="Client name"
-                  className="rounded-xl"
-                />
+                <Input value={newInvoice.client} onChange={(e) => setNewInvoice((p) => ({ ...p, client: e.target.value }))} placeholder="Client name" className="rounded-xl" />
               </div>
               <div>
                 <label className="text-xs text-muted-foreground mb-1 block">Project</label>
-                <Input
-                  value={newInvoice.project}
-                  onChange={(e) => setNewInvoice((p) => ({ ...p, project: e.target.value }))}
-                  placeholder="Project name"
-                  className="rounded-xl"
-                />
+                <Input value={newInvoice.project} onChange={(e) => setNewInvoice((p) => ({ ...p, project: e.target.value }))} placeholder="Project name" className="rounded-xl" />
               </div>
             </div>
-
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs text-muted-foreground">Line Items</label>
-                <button
-                  onClick={addItem}
-                  className="text-xs text-primary font-medium hover:underline"
-                >
-                  + Add item
-                </button>
+                <button onClick={addItem} className="text-xs text-primary font-medium hover:underline">+ Add item</button>
               </div>
               <div className="space-y-2">
                 {newInvoice.items.map((item, i) => (
                   <div key={i} className="flex gap-2 items-center">
-                    <Input
-                      value={item.description}
-                      onChange={(e) => updateItem(i, "description", e.target.value)}
-                      placeholder="Description"
-                      className="rounded-xl flex-1"
-                    />
-                    <Input
-                      type="number"
-                      value={item.hours || ""}
-                      onChange={(e) => updateItem(i, "hours", Number(e.target.value))}
-                      placeholder="Hrs"
-                      className="rounded-xl w-16"
-                    />
-                    <Input
-                      type="number"
-                      value={item.rate || ""}
-                      onChange={(e) => updateItem(i, "rate", Number(e.target.value))}
-                      placeholder="Rate"
-                      className="rounded-xl w-20"
-                    />
+                    <Input value={item.description} onChange={(e) => updateItem(i, "description", e.target.value)} placeholder="Description" className="rounded-xl flex-1" />
+                    <Input type="number" value={item.hours || ""} onChange={(e) => updateItem(i, "hours", Number(e.target.value))} placeholder="Hrs" className="rounded-xl w-16" />
+                    <Input type="number" value={item.rate || ""} onChange={(e) => updateItem(i, "rate", Number(e.target.value))} placeholder="Rate" className="rounded-xl w-20" />
                     {newInvoice.items.length > 1 && (
-                      <button onClick={() => removeItem(i)} className="p-1 rounded-lg hover:bg-secondary">
-                        <X className="w-4 h-4 text-muted-foreground" />
-                      </button>
+                      <button onClick={() => removeItem(i)} className="p-1 rounded-lg hover:bg-secondary"><X className="w-4 h-4 text-muted-foreground" /></button>
                     )}
                   </div>
                 ))}
               </div>
             </div>
-
             <div className="border-t border-border/50 pt-3 flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Total</span>
               <span className="text-xl font-bold">${newTotal.toLocaleString()}</span>
             </div>
-
-            <Button onClick={handleCreate} className="w-full rounded-xl">
-              Create Invoice
-            </Button>
+            <Button onClick={handleCreate} className="w-full rounded-xl">Create Invoice</Button>
           </div>
         </DialogContent>
       </Dialog>

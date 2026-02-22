@@ -65,15 +65,26 @@ const weeklySpending = [
 
 export const FinancesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const h = pixelSize?.height ?? 140;
-  const showBreakdown = h > 200;
-  const showChart = h > 300;
+  const w = pixelSize?.width ?? 300;
+
+  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
+  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
+  const statSize = w > 400 ? "text-xs" : "text-[11px]";
+  const barLabelSize = w > 400 ? "text-[11px]" : "text-[10px]";
+
+  const showBreakdown = h > 180;
+  const showChart = h > 260;
+  const showTrend = w > 350;
 
   return (
     <div>
-      <p className="text-3xl font-bold tracking-tight">$7.8k</p>
-      <p className="text-xs text-muted-foreground mt-1">Revenue this month</p>
+      <div className="flex items-baseline gap-2">
+        <p className={`${titleSize} font-bold tracking-tight`}>$7.8k</p>
+        {showTrend && <span className="text-success text-[11px] font-medium">+28%</span>}
+      </div>
+      <p className={`${labelSize} text-muted-foreground mt-1`}>Revenue this month</p>
       {showBreakdown && !showChart && (
-        <div className="mt-2 flex gap-4 text-[11px]">
+        <div className={`mt-2 flex gap-4 ${statSize}`}>
           <span className="opacity-60">Expenses <span className="font-semibold opacity-100">$2.6k</span></span>
           <span className="opacity-60">Profit <span className="font-semibold opacity-100">$5.2k</span></span>
         </div>
@@ -86,7 +97,7 @@ export const FinancesPreview = ({ pixelSize }: { pixelSize?: { width: number; he
             { label: "Profit", value: "$5,150", pct: 66 },
           ].map((item) => (
             <div key={item.label}>
-              <div className="flex justify-between text-[10px] mb-0.5">
+              <div className={`flex justify-between ${barLabelSize} mb-0.5`}>
                 <span className="opacity-60">{item.label}</span>
                 <span className="font-medium">{item.value}</span>
               </div>
@@ -95,6 +106,17 @@ export const FinancesPreview = ({ pixelSize }: { pixelSize?: { width: number; he
               </div>
             </div>
           ))}
+          {h > 360 && (
+            <div className="mt-2 pt-2 border-t border-border/20">
+              <p className={`${barLabelSize} opacity-50 font-medium mb-1`}>Top Expenses</p>
+              {expenseCategories.slice(0, 3).map(cat => (
+                <div key={cat.name} className={`flex justify-between ${barLabelSize} py-0.5`}>
+                  <span className="opacity-60">{cat.name}</span>
+                  <span className="font-medium">${cat.value.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -358,7 +380,7 @@ export const FinancesExpanded = () => {
                     contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }}
                     formatter={(value: number) => [`$${value.toLocaleString()}`, "Income"]}
                   />
-                  <Bar dataKey="income" fill="hsl(var(--foreground))" radius={[6, 6, 0, 0]} opacity={0.15} />
+                  <Bar dataKey="income" fill="hsl(var(--foreground))" radius={[6, 6, 0, 0]} opacity={0.7} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

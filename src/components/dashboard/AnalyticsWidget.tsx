@@ -35,14 +35,32 @@ const clientRevenue = [
 /** Compact preview */
 export const AnalyticsPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const h = pixelSize?.height ?? 140;
-  const showChart = h > 220;
+  const w = pixelSize?.width ?? 300;
+
+  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
+  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
+  const statSize = w > 400 ? "text-sm" : "text-[11px]";
+
+  const showStats = h > 160;
+  const showChart = h > 200;
 
   return (
     <div>
-      <p className="text-3xl font-bold tracking-tight">+42%</p>
-      <p className="text-xs text-muted-foreground mt-1">Revenue growth</p>
+      <p className={`${titleSize} font-bold tracking-tight`}>+42%</p>
+      <p className={`${labelSize} text-muted-foreground mt-1`}>Revenue growth</p>
+      {showStats && !showChart && (
+        <div className={`flex gap-4 mt-2 ${statSize}`}>
+          <span className="opacity-60">This month <span className="font-semibold opacity-100">$24.5k</span></span>
+          <span className="opacity-60">Clients <span className="font-semibold opacity-100">14</span></span>
+        </div>
+      )}
       {showChart && (
         <div className="mt-3">
+          <div className={`flex gap-4 mb-2 ${statSize}`}>
+            <span className="opacity-60">Revenue <span className="font-semibold opacity-100">$24.5k</span></span>
+            <span className="opacity-60">Avg. <span className="font-semibold opacity-100">$6.3k</span></span>
+            {w > 350 && <span className="opacity-60">Clients <span className="font-semibold opacity-100">14</span></span>}
+          </div>
           <ResponsiveContainer width="100%" height={Math.min(h - 120, 160)}>
             <BarChart data={revenueData}>
               <Bar dataKey="revenue" fill="currentColor" radius={[3, 3, 0, 0]} opacity={0.25} />

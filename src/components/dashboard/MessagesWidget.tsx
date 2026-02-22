@@ -68,34 +68,50 @@ const initialMessages: Message[] = [
 /** Compact preview */
 export const MessagesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
   const h = pixelSize?.height ?? 140;
+  const w = pixelSize?.width ?? 300;
   const unread = initialMessages.filter(m => !m.read);
-  const showList = h > 200;
-  const itemCount = h > 320 ? 4 : h > 240 ? 3 : 2;
+
+  const titleSize = h > 300 ? "text-4xl" : h > 200 ? "text-3xl" : "text-2xl";
+  const labelSize = h > 300 ? "text-sm" : h > 200 ? "text-xs" : "text-[11px]";
+  const nameSize = w > 400 ? "text-xs" : "text-[11px]";
+  const previewSize = w > 400 ? "text-[11px]" : "text-[10px]";
+  const timeSize = w > 400 ? "text-[10px]" : "text-[9px]";
+  const avatarSize = h > 280 ? "w-6 h-6 text-[9px]" : "w-5 h-5 text-[8px]";
+
+  const showList = h > 180;
+  const showPreview = w > 300 && h > 240;
+  const itemCount = h > 400 ? 5 : h > 320 ? 4 : h > 240 ? 3 : 2;
 
   if (!showList) {
     return (
       <div>
-        <p className="text-3xl font-bold tracking-tight">{unread.length}</p>
-        <p className="text-xs text-muted-foreground mt-1">Unread messages</p>
+        <p className={`${titleSize} font-bold tracking-tight`}>{unread.length}</p>
+        <p className={`${labelSize} text-muted-foreground mt-1`}>Unread messages</p>
+        {h > 160 && (
+          <p className={`${previewSize} opacity-40 mt-1`}>{initialMessages.length} total</p>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-1.5">
-      <p className="text-xs text-muted-foreground font-medium">{unread.length} Unread</p>
+      <p className={`${labelSize} text-muted-foreground font-medium`}>{unread.length} Unread · {initialMessages.length} total</p>
       {initialMessages.slice(0, itemCount).map((msg) => (
         <div key={msg.id} className="flex items-center gap-2 py-0.5">
           <div className={cn(
-            "w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0",
+            `${avatarSize} rounded-full flex items-center justify-center font-bold shrink-0`,
             !msg.read ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
           )}>
             {msg.avatar}
           </div>
           <div className="flex-1 min-w-0">
-            <p className={cn("text-[11px] truncate", !msg.read ? "font-semibold" : "font-medium opacity-70")}>{msg.from}</p>
+            <p className={cn(`${nameSize} truncate`, !msg.read ? "font-semibold" : "font-medium opacity-70")}>{msg.from}</p>
+            {showPreview && (
+              <p className={`${previewSize} opacity-50 truncate`}>{msg.preview}</p>
+            )}
           </div>
-          <span className="text-[9px] opacity-40 shrink-0">{msg.time}</span>
+          <span className={`${timeSize} opacity-40 shrink-0`}>{msg.time}</span>
         </div>
       ))}
     </div>
