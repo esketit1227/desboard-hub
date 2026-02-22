@@ -108,33 +108,33 @@ const WidgetCard = ({ id, title, icon, accentColor, size = "small", tintIndex, o
         isResizing && "ring-2 ring-foreground/10"
       )}
     >
-      {/* Back tab — monochrome dark */}
+      {/* Back tab — light neutral */}
       <div
         className="absolute inset-0 rounded-2xl overflow-visible"
-        style={{ background: "hsl(var(--foreground) / 0.7)" }}
+        style={{ background: "hsl(var(--foreground) / 0.18)" }}
       >
         {/* Tab bump */}
         <div
           className="absolute -top-3 left-4 h-5 rounded-t-xl flex items-center px-2.5 gap-1"
-          style={{ background: "hsl(var(--foreground) / 0.7)" }}
+          style={{ background: "hsl(var(--foreground) / 0.18)" }}
         >
-          <span className="text-[8px] font-bold text-primary-foreground/70 uppercase tracking-widest">{title}</span>
+          <span className="text-[8px] font-bold text-foreground/50 uppercase tracking-widest">{title}</span>
         </div>
       </div>
 
-      {/* Front panel — glassy transparent with accent tint when expanded */}
+      {/* Front panel — bright glassy with accent tint when expanded */}
       <div
         className={cn(
           "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden",
-          "backdrop-blur-2xl border border-white/20 dark:border-white/10"
+          "backdrop-blur-2xl border border-white/40 dark:border-white/15"
         )}
         style={{
           background: tier !== "compact" && accentColor
-            ? `linear-gradient(160deg, ${accentColor}18 0%, hsl(0 0% 100% / 0.35) 40%, hsl(0 0% 100% / 0.15) 100%)`
-            : "linear-gradient(160deg, hsl(0 0% 100% / 0.45), hsl(0 0% 100% / 0.2))",
+            ? `linear-gradient(160deg, ${accentColor}12 0%, hsl(0 0% 100% / 0.75) 40%, hsl(0 0% 100% / 0.6) 100%)`
+            : "linear-gradient(160deg, hsl(0 0% 100% / 0.8), hsl(0 0% 100% / 0.6))",
           boxShadow: tier !== "compact" && accentColor
-            ? `0 8px 32px -8px ${accentColor}20, inset 0 1px 0 hsl(0 0% 100% / 0.5), inset 0 -1px 0 hsl(0 0% 0% / 0.03)`
-            : "0 8px 32px -8px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.5), inset 0 -1px 0 hsl(0 0% 0% / 0.03)",
+            ? `0 8px 32px -8px ${accentColor}15, inset 0 1px 0 hsl(0 0% 100% / 0.7), inset 0 -1px 0 hsl(0 0% 0% / 0.02)`
+            : "0 8px 32px -8px hsl(var(--foreground) / 0.04), inset 0 1px 0 hsl(0 0% 100% / 0.7), inset 0 -1px 0 hsl(0 0% 0% / 0.02)",
         }}
       >
         {/* Accent gradient strip at top when expanded */}
