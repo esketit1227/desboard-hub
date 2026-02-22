@@ -116,7 +116,8 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, bgColor, textC
       {/* Front panel — solid color, no transparency */}
       <div
         className={cn(
-          "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden"
+          "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden",
+          textColor && "widget-force-color"
         )}
         style={{
           background: bgColor || "hsl(var(--card))",
