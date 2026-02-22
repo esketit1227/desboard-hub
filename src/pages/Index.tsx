@@ -287,7 +287,7 @@ const Index = () => {
             </DndContext>
           ) : (
             /* Mobile: Minimal stacked cards */
-            <div className="space-y-3 pb-8">
+            <div className="space-y-3 pb-24">
               {activeWidgets.map((id, i) => {
                 const widget = WIDGETS[id];
                 return (

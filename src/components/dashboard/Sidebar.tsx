@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Home, FolderKanban, CalendarDays, Users, DollarSign,
   HardDrive, Receipt, ListTodo, MessageSquare, BarChart3,
-  Settings, Menu, X, Briefcase, PanelLeft, ChevronRight,
+  Settings, Menu, X, Briefcase, PanelLeft, ChevronRight, MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,14 @@ const mainNavItems = [
   { id: "studio", label: "Studio", icon: Briefcase },
 ];
 
+const mobileTabItems = [
+  { id: "home", label: "Home", icon: Home },
+  { id: "projects", label: "Projects", icon: FolderKanban },
+  { id: "messages", label: "Messages", icon: MessageSquare },
+  { id: "finances", label: "Finances", icon: DollarSign },
+  { id: "tasks", label: "Tasks", icon: ListTodo },
+];
+
 interface SidebarProps {
   activeNav: string;
   onNavChange: (id: string) => void;
@@ -32,15 +40,7 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
 
   return (
     <>
-      {/* Mobile toggle */}
-      <button
-        onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed top-8 left-6 z-50 lg:hidden rounded-xl p-2 bg-card border border-border shadow-sm"
-      >
-        {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
-
-      {/* Sidebar — inside the container */}
+      {/* Sidebar — desktop only, inside the container */}
       <aside
         className={cn(
           "hidden lg:flex flex-col items-center py-6 border-r border-border/50 transition-all duration-300 shrink-0 relative",
@@ -108,41 +108,32 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
         </div>
       </aside>
 
-      {/* Mobile sidebar */}
-      {mobileOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-foreground/10 backdrop-blur-sm z-30 lg:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
-          <aside className="fixed left-0 top-0 h-full w-[240px] z-40 bg-card border-r border-border p-4 flex flex-col lg:hidden">
-            <div className="mt-14 flex flex-col gap-1">
-              {mainNavItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeNav === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      onNavChange(item.id);
-                      setMobileOpen(false);
-                    }}
-                    className={cn(
-                      "flex items-center gap-3 w-full h-10 px-3 rounded-xl transition-all",
-                      isActive
-                        ? "bg-foreground text-background font-medium"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                    )}
-                  >
-                    <Icon className="w-[18px] h-[18px] shrink-0" />
-                    <span className="text-sm">{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </aside>
-        </>
-      )}
+      {/* Mobile bottom tab bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background/90 backdrop-blur-xl border-t border-border/40">
+        <div className="flex items-center justify-around px-2 py-1.5 max-w-md mx-auto">
+          {mobileTabItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeNav === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onNavChange(item.id)}
+                className={cn(
+                  "flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-colors min-w-[56px]",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                <Icon className={cn("w-5 h-5", isActive && "stroke-[2.5]")} />
+                <span className={cn("text-[10px] leading-tight", isActive ? "font-semibold" : "font-medium")}>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        {/* Safe area spacer for iOS */}
+        <div className="h-[env(safe-area-inset-bottom)]" />
+      </nav>
     </>
   );
 };
