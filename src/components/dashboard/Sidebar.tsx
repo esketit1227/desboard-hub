@@ -7,6 +7,9 @@ import {
   DollarSign,
   HardDrive,
   Receipt,
+  ListTodo,
+  MessageSquare,
+  BarChart3,
   Settings,
   Menu,
   X,
@@ -21,6 +24,9 @@ const navItems = [
   { id: "finances", label: "Finances", icon: DollarSign },
   { id: "invoices", label: "Invoices", icon: Receipt },
   { id: "files", label: "Files", icon: HardDrive },
+  { id: "tasks", label: "Tasks", icon: ListTodo },
+  { id: "messages", label: "Messages", icon: MessageSquare },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 interface SidebarProps {
