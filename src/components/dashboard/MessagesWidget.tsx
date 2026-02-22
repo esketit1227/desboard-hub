@@ -70,13 +70,15 @@ export const MessagesPreview = () => {
   const unread = initialMessages.filter((m) => !m.read).length;
 
   return (
-    <div>
-      <p className="text-3xl font-bold tracking-tight">{unread}</p>
-      <p className="text-xs text-muted-foreground mt-1">Unread messages</p>
-      <div className="mt-3 space-y-2">
+    <div className="h-full flex flex-col justify-between">
+      <div>
+        <p className="text-3xl font-bold tracking-tight">{unread}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Unread messages</p>
+      </div>
+      <div className="space-y-2">
         {initialMessages.filter((m) => !m.read).slice(0, 2).map((m) => (
           <div key={m.id} className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold shrink-0">
+            <div className="w-6 h-6 rounded-full bg-foreground/10 flex items-center justify-center text-[9px] font-bold shrink-0">
               {m.avatar}
             </div>
             <p className="text-[11px] text-muted-foreground truncate">{m.from}</p>

@@ -35,10 +35,12 @@ export const TasksPreview = () => {
   const overdue = initialTasks.filter((t) => !t.completed && t.dueDate && new Date(t.dueDate) < new Date()).length;
 
   return (
-    <div>
-      <p className="text-3xl font-bold tracking-tight">{pending}</p>
-      <p className="text-xs text-muted-foreground mt-1">Pending tasks</p>
-      <div className="flex items-center gap-2 mt-3">
+    <div className="h-full flex flex-col justify-between">
+      <div>
+        <p className="text-3xl font-bold tracking-tight">{pending}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Pending tasks</p>
+      </div>
+      <div className="flex items-center gap-2">
         {overdue > 0 && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-destructive/10 text-destructive">
             {overdue} Overdue
