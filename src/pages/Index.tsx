@@ -13,7 +13,7 @@ import {
   Receipt, Bell, Settings2, ListTodo, MessageSquare, BarChart3,
   ArrowUpRight, Briefcase, Search, SlidersHorizontal, Plus,
 } from "lucide-react";
-import { Moon, Sun } from "lucide-react";
+
 import Sidebar from "@/components/dashboard/Sidebar";
 import WidgetCard from "@/components/dashboard/WidgetCard";
 import WidgetExpandedView from "@/components/dashboard/WidgetExpandedView";
@@ -159,15 +159,10 @@ const Index = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
-  const [dark, setDark] = useState(() => {
-    if (typeof window !== "undefined") return localStorage.getItem("theme") === "dark";
-    return false;
-  });
-
+  // Dark mode is default — no toggle needed
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  }, [dark]);
+    document.documentElement.classList.remove("light");
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -234,12 +229,6 @@ const Index = () => {
                 <Plus className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Add Widget</span>
               </button>
-              <button
-                onClick={() => setDark(!dark)}
-                className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors"
-              >
-                {dark ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
-              </button>
               <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors relative">
                 <Bell className="w-4 h-4 text-muted-foreground" />
                 <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-destructive" />
@@ -274,6 +263,7 @@ const Index = () => {
                           title={widget.title}
                           icon={widget.icon}
                           size={widgetSizes[id] || "small"}
+                          tintIndex={i}
                           onExpand={() => handleExpand(id)}
                           onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
                         >
