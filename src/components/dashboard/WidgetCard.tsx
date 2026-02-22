@@ -132,7 +132,7 @@ const WidgetCard = ({ id, title, icon, accentColor, size = "small", tintIndex, o
           background: tier !== "compact" && accentColor
             ? `linear-gradient(160deg, ${accentColor}08 0%, hsl(0 0% 100%) 40%, hsl(0 0% 99%) 100%)`
             : "hsl(0 0% 100%)",
-          boxShadow: "0 1px 3px hsl(var(--foreground) / 0.04), 0 4px 12px hsl(var(--foreground) / 0.03)",
+          boxShadow: "0 2px 8px hsl(var(--foreground) / 0.08), 0 8px 24px hsl(var(--foreground) / 0.06), 0 1px 2px hsl(var(--foreground) / 0.04)",
         }}
       >
         {/* Accent gradient strip at top when expanded */}
