@@ -15,6 +15,7 @@ import {
 "lucide-react";
 
 import Sidebar from "@/components/dashboard/Sidebar";
+import TopIsland from "@/components/dashboard/TopIsland";
 import WidgetCard from "@/components/dashboard/WidgetCard";
 // WidgetExpandedView no longer used — widgets navigate to full page
 import { ProjectsPreview, ProjectsExpanded } from "@/components/dashboard/ProjectsWidget";
@@ -216,16 +217,16 @@ const Index = () => {
 
         {/* Main content */}
         <main className="flex-1 min-w-0 p-5 md:p-8 lg:p-10">
+          {/* Top Island */}
+          <TopIsland />
+
           {/* Top bar */}
           <motion.header
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center justify-between mb-8">
+            className="flex items-center justify-end mb-8">
 
-            <div>
-              
-            </div>
             <div className="flex items-center gap-2">
               <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors">
                 <Search className="w-4 h-4 text-muted-foreground" />
