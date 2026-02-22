@@ -254,30 +254,26 @@ const Index = () => {
           {!isMobile ? (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={activeWidgets} strategy={rectSortingStrategy}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[200px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {activeWidgets.map((id, i) => {
                     const widget = WIDGETS[id];
                     const Preview = widget.preview;
-                    const sz = widgetSizes[id] || { colSpan: 1, rowSpan: 1 };
-                    const colClass =
-                      sz.colSpan === 2 ? "sm:col-span-2" :
-                      sz.colSpan >= 3 ? "sm:col-span-2 lg:col-span-3" : "";
-                    const rowClass =
-                      sz.rowSpan === 2 ? "row-span-2" :
-                      sz.rowSpan >= 3 ? "row-span-3" : "";
                     return (
                       <motion.div
                         key={id}
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35, delay: 0.15 + i * 0.04 }}
-                        className={`${colClass} ${rowClass}`}
+                        className={
+                          (widgetSizes[id] === "medium" ? "sm:col-span-2" : "") +
+                          (widgetSizes[id] === "large" ? " sm:col-span-2 lg:col-span-3" : "")
+                        }
                       >
                         <WidgetCard
                           id={id}
                           title={widget.title}
                           icon={widget.icon}
-                          size={sz}
+                          size={widgetSizes[id] || "small"}
                           onExpand={() => handleExpand(id)}
                           onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
                         >

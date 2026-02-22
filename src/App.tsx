@@ -20,6 +20,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/widget/:id" element={<WidgetPage />} />
           <Route path="/portal/:portalId" element={<ClientPortalPage />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

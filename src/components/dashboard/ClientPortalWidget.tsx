@@ -70,12 +70,10 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 /** Compact preview */
 export const ClientsPreview = () => (
-  <div className="h-full flex flex-col justify-between">
-    <div>
-      <p className="text-3xl font-bold tracking-tight">3</p>
-      <p className="text-xs text-muted-foreground mt-0.5">Active Hand-offs</p>
-    </div>
-    <div className="flex items-center gap-2 flex-wrap">
+  <div>
+    <p className="text-3xl font-bold tracking-tight">3</p>
+    <p className="text-xs text-muted-foreground mt-1">Active Hand-offs</p>
+    <div className="flex items-center gap-2 mt-3">
       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-success/10 text-success">1 Approved</span>
       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-warning/10 text-warning">1 Pending</span>
       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-destructive/10 text-destructive">1 Changes</span>
