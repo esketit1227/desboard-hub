@@ -25,17 +25,26 @@ interface WidgetCardProps {
 }
 
 const TINT_COLORS = [
-  { gradient: "linear-gradient(135deg, hsl(220 85% 62%), hsl(240 75% 58%))", light: "hsl(220 85% 62% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(340 75% 58%), hsl(320 70% 52%))", light: "hsl(340 75% 58% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(152 55% 48%), hsl(170 60% 42%))", light: "hsl(152 55% 48% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(28 85% 58%), hsl(15 80% 52%))", light: "hsl(28 85% 58% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(260 70% 62%), hsl(280 65% 55%))", light: "hsl(260 70% 62% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(195 80% 50%), hsl(210 75% 48%))", light: "hsl(195 80% 50% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(45 85% 55%), hsl(35 80% 50%))", light: "hsl(45 85% 55% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(0 70% 58%), hsl(350 65% 50%))", light: "hsl(0 70% 58% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(180 50% 48%), hsl(165 55% 42%))", light: "hsl(180 50% 48% / 0.15)" },
-  { gradient: "linear-gradient(135deg, hsl(290 60% 55%), hsl(310 55% 50%))", light: "hsl(290 60% 55% / 0.15)" },
+  { gradient: "linear-gradient(135deg, hsl(220 85% 62%), hsl(240 75% 58%))", light: "hsl(220 85% 62% / 0.12)", accent: "hsl(220 85% 62%)" },
+  { gradient: "linear-gradient(135deg, hsl(340 75% 58%), hsl(320 70% 52%))", light: "hsl(340 75% 58% / 0.12)", accent: "hsl(340 75% 58%)" },
+  { gradient: "linear-gradient(135deg, hsl(152 55% 48%), hsl(170 60% 42%))", light: "hsl(152 55% 48% / 0.12)", accent: "hsl(152 55% 48%)" },
+  { gradient: "linear-gradient(135deg, hsl(28 85% 58%), hsl(15 80% 52%))", light: "hsl(28 85% 58% / 0.12)", accent: "hsl(28 85% 58%)" },
+  { gradient: "linear-gradient(135deg, hsl(260 70% 62%), hsl(280 65% 55%))", light: "hsl(260 70% 62% / 0.12)", accent: "hsl(260 70% 62%)" },
+  { gradient: "linear-gradient(135deg, hsl(195 80% 50%), hsl(210 75% 48%))", light: "hsl(195 80% 50% / 0.12)", accent: "hsl(195 80% 50%)" },
+  { gradient: "linear-gradient(135deg, hsl(45 85% 55%), hsl(35 80% 50%))", light: "hsl(45 85% 55% / 0.12)", accent: "hsl(45 85% 55%)" },
+  { gradient: "linear-gradient(135deg, hsl(0 70% 58%), hsl(350 65% 50%))", light: "hsl(0 70% 58% / 0.12)", accent: "hsl(0 70% 58%)" },
+  { gradient: "linear-gradient(135deg, hsl(180 50% 48%), hsl(165 55% 42%))", light: "hsl(180 50% 48% / 0.12)", accent: "hsl(180 50% 48%)" },
+  { gradient: "linear-gradient(135deg, hsl(290 60% 55%), hsl(310 55% 50%))", light: "hsl(290 60% 55% / 0.12)", accent: "hsl(290 60% 55%)" },
 ];
+
+/** Returns a size tier based on pixel dimensions */
+export function getSizeTier(pixelSize?: { width: number; height: number }): "compact" | "standard" | "expanded" {
+  if (!pixelSize) return "compact";
+  const area = pixelSize.width * pixelSize.height;
+  if (area >= 120000 || (pixelSize.width >= 340 && pixelSize.height >= 280)) return "expanded";
+  if (area >= 45000 || pixelSize.height >= 200 || pixelSize.width >= 280) return "standard";
+  return "compact";
+}
 
 const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onResize, pixelSize, onPixelResize, onResetSize, children }: WidgetCardProps) => {
   const {
@@ -114,9 +123,11 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
         >
           {/* Tab bump */}
           <div
-            className="absolute -top-3 left-4 w-16 h-5 rounded-t-xl"
+            className="absolute -top-3 left-4 h-5 rounded-t-xl flex items-center px-2.5 gap-1"
             style={{ background: tint.gradient }}
-          />
+          >
+            <span className="text-[8px] font-bold text-white/80 uppercase tracking-widest">{title}</span>
+          </div>
         </div>
       )}
 
@@ -124,18 +135,20 @@ const WidgetCard = ({ id, title, icon, size = "small", tintIndex, onExpand, onRe
       <div
         className={cn(
           "absolute inset-0 top-1 rounded-2xl flex flex-col overflow-hidden",
-          "backdrop-blur-2xl border border-white/30"
+          "backdrop-blur-2xl border border-white/20"
         )}
         style={{
           background: tint
-            ? `linear-gradient(180deg, hsl(0 0% 100% / 0.65), hsl(0 0% 100% / 0.35))`
+            ? `linear-gradient(160deg, hsl(0 0% 100% / 0.72), hsl(0 0% 100% / 0.42))`
             : `hsl(var(--glass-bg))`,
-          boxShadow: "0 4px 24px -4px hsl(228 12% 30% / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.5)",
+          boxShadow: tint
+            ? `0 8px 32px -8px ${tint.accent}33, inset 0 1px 0 hsl(0 0% 100% / 0.5)`
+            : "0 4px 24px -4px hsl(228 12% 30% / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.5)",
         }}
       >
         {/* Header — neat top-left title */}
-        <div className="flex items-center justify-between px-3.5 pt-3 pb-0">
-          <h3 className="text-[11px] font-semibold tracking-wide uppercase text-foreground/50">{title}</h3>
+        <div className="flex items-center justify-between px-3.5 pt-2.5 pb-0">
+          <h3 className="text-[10px] font-semibold tracking-wide uppercase text-foreground/45">{title}</h3>
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               {...attributes}

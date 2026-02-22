@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getSizeTier } from "./WidgetCard";
 
 export interface Invoice {
   id: string; number: string; client: string; project: string; amount: number;
@@ -25,28 +26,96 @@ const statusConfig: Record<string, { label: string; className: string; icon: typ
   draft: { label: "Draft", className: "bg-muted text-muted-foreground", icon: FileText },
 };
 
-/** Compact preview — outstanding $ + overdue alert */
 export const InvoicesPreview = ({ pixelSize }: { pixelSize?: { width: number; height: number } }) => {
+  const tier = getSizeTier(pixelSize);
   const totalOutstanding = initialInvoices.filter(i => i.status !== "paid").reduce((s, i) => s + i.amount, 0);
   const overdue = initialInvoices.filter(i => i.status === "overdue").length;
+  const paid = initialInvoices.filter(i => i.status === "paid").length;
 
-  return (
-    <div className="flex flex-col justify-between h-full">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-3xl font-bold tracking-tight leading-none">${(totalOutstanding / 1000).toFixed(1)}k</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Outstanding</p>
-        </div>
-        <Receipt className="w-5 h-5 text-muted-foreground/40" />
-      </div>
-      <div className="flex items-center gap-3 mt-auto">
-        {overdue > 0 && (
-          <div className="flex items-center gap-1">
-            <AlertCircle className="w-3 h-3 text-destructive" />
-            <span className="text-[10px] font-medium text-destructive">{overdue} overdue</span>
+  if (tier === "compact") {
+    return (
+      <div className="flex flex-col justify-between h-full">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-3xl font-bold tracking-tight leading-none">${(totalOutstanding / 1000).toFixed(1)}k</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Outstanding</p>
           </div>
-        )}
-        <span className="text-[9px] text-muted-foreground">{initialInvoices.length} total</span>
+          <Receipt className="w-5 h-5 text-muted-foreground/40" />
+        </div>
+        <div className="flex items-center gap-3 mt-auto">
+          {overdue > 0 && (
+            <div className="flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 text-destructive" />
+              <span className="text-[10px] font-medium text-destructive">{overdue} overdue</span>
+            </div>
+          )}
+          <span className="text-[9px] text-muted-foreground">{initialInvoices.length} total</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (tier === "standard") {
+    return (
+      <div className="flex flex-col h-full gap-1.5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-2xl font-bold tracking-tight leading-none">${(totalOutstanding / 1000).toFixed(1)}k</p>
+            <p className="text-[10px] text-muted-foreground">Outstanding</p>
+          </div>
+          <Receipt className="w-4 h-4 text-muted-foreground/40" />
+        </div>
+        <div className="flex-1 space-y-1 mt-1 overflow-hidden">
+          {initialInvoices.slice(0, 3).map((inv) => {
+            const cfg = statusConfig[inv.status];
+            return (
+              <div key={inv.id} className="flex items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.className.includes("success") ? "bg-success" : cfg.className.includes("warning") ? "bg-warning" : cfg.className.includes("destructive") ? "bg-destructive" : "bg-muted-foreground"}`} />
+                <span className="text-[10px] font-medium truncate flex-1">{inv.number}</span>
+                <span className="text-[9px] text-muted-foreground">${inv.amount.toLocaleString()}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-2 mt-auto">
+          <div className="flex items-center gap-1">
+            <Check className="w-3 h-3 text-success" />
+            <span className="text-[9px] text-muted-foreground">{paid} paid</span>
+          </div>
+          {overdue > 0 && (
+            <div className="flex items-center gap-1">
+              <AlertCircle className="w-3 h-3 text-destructive" />
+              <span className="text-[9px] text-destructive">{overdue} overdue</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // expanded
+  return (
+    <div className="flex flex-col h-full gap-2">
+      <div className="flex items-start justify-between">
+        <p className="text-lg font-bold leading-none">${(totalOutstanding / 1000).toFixed(1)}k <span className="text-sm font-normal text-muted-foreground">outstanding</span></p>
+      </div>
+      <div className="flex-1 space-y-1.5 overflow-hidden">
+        {initialInvoices.map((inv) => {
+          const cfg = statusConfig[inv.status];
+          const StatusIcon = cfg.icon;
+          return (
+            <div key={inv.id} className="flex items-center gap-2">
+              <StatusIcon className={cn("w-3 h-3 shrink-0", cfg.className.split(" ")[1])} />
+              <span className="text-[10px] font-medium flex-1 truncate">{inv.number} — {inv.client}</span>
+              <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-medium ${cfg.className}`}>{cfg.label}</span>
+              <span className="text-[10px] font-bold">${inv.amount.toLocaleString()}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-center justify-between mt-auto pt-1 border-t border-border/30 text-[9px] text-muted-foreground">
+        <span>${initialInvoices.reduce((s, i) => s + i.amount, 0).toLocaleString()} total</span>
+        <span>{paid}/{initialInvoices.length} paid</span>
       </div>
     </div>
   );
