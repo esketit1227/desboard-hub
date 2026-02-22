@@ -38,49 +38,49 @@ const TopIsland = () => {
   const timerSecs = timerSeconds % 60;
 
   return (
-    <div className="w-full flex justify-center mb-6">
+    <div className="w-full flex justify-center mb-3">
       <div
-        className="inline-flex items-center gap-6 px-6 py-3 rounded-2xl border border-border/30"
+        className="inline-flex items-center gap-4 px-4 py-1.5 rounded-xl border border-border/30"
         style={{
           background: "hsl(0 0% 100%)",
           boxShadow:
-            "0 2px 8px hsl(var(--foreground) / 0.06), 0 8px 24px hsl(var(--foreground) / 0.04)",
+            "0 1px 4px hsl(var(--foreground) / 0.05), 0 4px 12px hsl(var(--foreground) / 0.03)",
         }}
       >
         {/* Greeting + Date */}
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-foreground">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-semibold text-foreground">
             {getGreeting()} 👋
           </span>
-          <span className="text-[11px] text-muted-foreground">{formatDate(now)}</span>
+          <span className="text-[10px] text-muted-foreground">{formatDate(now)}</span>
         </div>
 
-        <div className="w-px h-8 bg-border/40" />
+        <div className="w-px h-5 bg-border/40" />
 
         {/* Clock */}
-        <div className="flex items-center gap-2">
-          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-sm font-medium tabular-nums text-foreground">
+        <div className="flex items-center gap-1.5">
+          <Clock className="w-3 h-3 text-muted-foreground" />
+          <span className="text-xs font-medium tabular-nums text-foreground">
             {formatTime(now)}
           </span>
         </div>
 
-        <div className="w-px h-8 bg-border/40" />
+        <div className="w-px h-5 bg-border/40" />
 
         {/* Timer */}
-        <div className="flex items-center gap-2">
-          <Timer className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-sm font-medium tabular-nums text-foreground min-w-[48px]">
+        <div className="flex items-center gap-1.5">
+          <Timer className="w-3 h-3 text-muted-foreground" />
+          <span className="text-xs font-medium tabular-nums text-foreground min-w-[40px]">
             {String(timerMinutes).padStart(2, "0")}:{String(timerSecs).padStart(2, "0")}
           </span>
           <button
             onClick={() => setTimerRunning((r) => !r)}
-            className="rounded-lg p-1 hover:bg-muted/50 transition-colors"
+            className="rounded p-0.5 hover:bg-muted/50 transition-colors"
           >
             {timerRunning ? (
-              <Pause className="w-3 h-3 text-foreground/60" />
+              <Pause className="w-2.5 h-2.5 text-foreground/60" />
             ) : (
-              <Play className="w-3 h-3 text-foreground/60" />
+              <Play className="w-2.5 h-2.5 text-foreground/60" />
             )}
           </button>
           {timerSeconds > 0 && (
@@ -89,20 +89,19 @@ const TopIsland = () => {
                 setTimerRunning(false);
                 setTimerSeconds(0);
               }}
-              className="rounded-lg p-1 hover:bg-muted/50 transition-colors"
+              className="rounded p-0.5 hover:bg-muted/50 transition-colors"
             >
-              <RotateCcw className="w-3 h-3 text-foreground/60" />
+              <RotateCcw className="w-2.5 h-2.5 text-foreground/60" />
             </button>
           )}
         </div>
 
-        <div className="w-px h-8 bg-border/40" />
+        <div className="w-px h-5 bg-border/40" />
 
-        {/* Weather (static/decorative) */}
-        <div className="flex items-center gap-2">
-          <Sun className="w-3.5 h-3.5 text-amber-500" />
-          <span className="text-sm font-medium text-foreground">72°F</span>
-          <span className="text-[11px] text-muted-foreground">Sunny</span>
+        {/* Weather */}
+        <div className="flex items-center gap-1.5">
+          <Sun className="w-3 h-3 text-amber-500" />
+          <span className="text-xs font-medium text-foreground">72°F</span>
         </div>
       </div>
     </div>
