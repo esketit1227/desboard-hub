@@ -104,21 +104,24 @@ export const FilesPreview = ({ pixelSize }: { pixelSize?: { width: number; heigh
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-1.5 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">{initialFiles.length}</p>
-          <p className="text-[10px] text-muted-foreground">files</p>
+        <div className="flex items-center gap-2">
+          <HardDrive className="w-4 h-4" style={{ color: "#3b82f6" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">{initialFiles.length}</p>
+            <p className="text-[10px] text-muted-foreground">files</p>
+          </div>
         </div>
         <div className="flex-1 space-y-1 overflow-hidden">
           {initialFiles.slice(0, 3).map((f) => (
             <div key={f.id} className="flex items-center gap-1.5">
-              <div className="w-1 h-1 rounded-full bg-foreground/30 shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#3b82f680" }} />
               <span className="text-[10px] font-medium truncate">{f.name}</span>
             </div>
           ))}
         </div>
         <div className="flex items-center gap-2 mt-auto">
-          <div className="flex-1 h-1 bg-foreground/8 rounded-full overflow-hidden">
-            <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${usedPct}%` }} />
+          <div className="flex-1 h-1.5 bg-foreground/8 rounded-full overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${usedPct}%`, background: "#3b82f6" }} />
           </div>
           <span className="text-[9px] text-muted-foreground">{usedPct}%</span>
         </div>

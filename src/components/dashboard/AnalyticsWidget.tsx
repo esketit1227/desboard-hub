@@ -32,13 +32,16 @@ export const AnalyticsPreview = ({ pixelSize }: { pixelSize?: { width: number; h
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-1.5 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">+42%</p>
-          <p className="text-[10px] text-muted-foreground">growth</p>
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-4 h-4" style={{ color: "#f97316" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">+42%</p>
+            <p className="text-[10px] text-muted-foreground">growth</p>
+          </div>
         </div>
         <div className="flex items-end gap-[3px] flex-1 h-[28px]">
           {revenueData.map((d, i) => (
-            <div key={i} className="flex-1 rounded-sm bg-foreground/15" style={{ height: `${(d.revenue / 24500) * 100}%` }} />
+            <div key={i} className="flex-1 rounded-sm" style={{ height: `${(d.revenue / 24500) * 100}%`, background: `#f9731640` }} />
           ))}
         </div>
         <div className="flex items-center justify-between text-[9px] text-muted-foreground mt-auto">

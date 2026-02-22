@@ -153,22 +153,25 @@ export const ProjectsPreview = ({ pixelSize }: { pixelSize?: { width: number; he
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-2 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">{active}</p>
-          <p className="text-[10px] text-muted-foreground">active</p>
+        <div className="flex items-center gap-2">
+          <FolderKanban className="w-4 h-4" style={{ color: "#6366f1" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">{active}</p>
+            <p className="text-[10px] text-muted-foreground">active</p>
+          </div>
         </div>
         <div className="flex-1 space-y-1.5 overflow-hidden">
           {previewProjects.filter(p => p.status === "active").slice(0, 3).map((p) => (
             <div key={p.id} className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-foreground/30 shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#6366f180" }} />
               <span className="text-[10px] font-medium truncate flex-1">{p.name}</span>
               <span className="text-[9px] text-muted-foreground">{p.progress}%</span>
             </div>
           ))}
         </div>
         <div className="flex items-center gap-2 mt-auto">
-          <div className="flex-1 h-1 bg-foreground/8 rounded-full overflow-hidden">
-            <div className="h-full bg-foreground/20 rounded-full" style={{ width: `${Math.round((doneTasks / totalTasks) * 100)}%` }} />
+          <div className="flex-1 h-1.5 bg-foreground/8 rounded-full overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${Math.round((doneTasks / totalTasks) * 100)}%`, background: "#6366f1" }} />
           </div>
           <span className="text-[9px] text-muted-foreground">{doneTasks}/{totalTasks}</span>
         </div>

@@ -89,14 +89,17 @@ export const StudioPreview = ({ pixelSize }: { pixelSize?: { width: number; heig
   if (tier === "standard") {
     return (
       <div className="flex flex-col h-full gap-1.5 mt-1">
-        <div className="flex items-baseline gap-2">
-          <p className="text-2xl font-bold tracking-tight leading-none">{pipelineValue}</p>
-          <p className="text-[10px] text-muted-foreground">pipeline</p>
+        <div className="flex items-center gap-2">
+          <Briefcase className="w-4 h-4" style={{ color: "#ec4899" }} />
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold tracking-tight leading-none">{pipelineValue}</p>
+            <p className="text-[10px] text-muted-foreground">pipeline</p>
+          </div>
         </div>
         <div className="flex-1 space-y-1 overflow-hidden">
           {initialDeals.slice(0, 3).map((d) => (
             <div key={d.id} className="flex items-center gap-1.5">
-              <div className="w-1 h-1 rounded-full bg-foreground/30 shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#ec489980" }} />
               <span className="text-[10px] font-medium truncate flex-1">{d.name}</span>
               <span className="text-[9px] text-muted-foreground">{d.value}</span>
             </div>
