@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   DndContext,
@@ -27,6 +27,7 @@ import {
   ListTodo,
   MessageSquare,
   BarChart3,
+  ArrowUpRight,
 } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import Sidebar from "@/components/dashboard/Sidebar";
@@ -42,6 +43,7 @@ import { TasksPreview, TasksExpanded } from "@/components/dashboard/TasksWidget"
 import { MessagesPreview, MessagesExpanded } from "@/components/dashboard/MessagesWidget";
 import { AnalyticsPreview, AnalyticsExpanded } from "@/components/dashboard/AnalyticsWidget";
 import WidgetCustomizer from "@/components/dashboard/WidgetCustomizer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "invoices" | "tasks" | "messages" | "analytics";
 
@@ -142,8 +144,10 @@ const stats = [
 ];
 
 const Index = () => {
+  const isMobile = useIsMobile();
   const [activeWidgets, setActiveWidgets] = useState<WidgetId[]>(DEFAULT_WIDGETS);
   const [expandedWidget, setExpandedWidget] = useState<WidgetId | null>(null);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [activeNav, setActiveNav] = useState("home");
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [widgetSizes, setWidgetSizes] = useState<Record<string, import("@/components/dashboard/WidgetCard").WidgetSize>>({});
@@ -247,41 +251,98 @@ const Index = () => {
           ))}
         </div>
 
-        {/* Widget grid */}
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={activeWidgets} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeWidgets.map((id, i) => {
-                const widget = WIDGETS[id];
-                const Preview = widget.preview;
-                return (
-                  <motion.div
-                    key={id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, delay: 0.3 + i * 0.06 }}
-                    className={
-                      (widgetSizes[id] === "medium" ? "sm:col-span-2" : "") +
-                      (widgetSizes[id] === "large" ? " sm:col-span-2 lg:col-span-3" : "")
-                    }
-                  >
-                    <WidgetCard
-                      id={id}
-                      title={widget.title}
-                      icon={widget.icon}
-                      accent={widget.accent}
-                      size={widgetSizes[id] || "small"}
-                      onExpand={() => setExpandedWidget(id)}
-                      onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
+        {/* Widget grid - Desktop */}
+        {!isMobile ? (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={activeWidgets} strategy={rectSortingStrategy}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activeWidgets.map((id, i) => {
+                  const widget = WIDGETS[id];
+                  const Preview = widget.preview;
+                  return (
+                    <motion.div
+                      key={id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, delay: 0.3 + i * 0.06 }}
+                      className={
+                        (widgetSizes[id] === "medium" ? "sm:col-span-2" : "") +
+                        (widgetSizes[id] === "large" ? " sm:col-span-2 lg:col-span-3" : "")
+                      }
                     >
+                      <WidgetCard
+                        id={id}
+                        title={widget.title}
+                        icon={widget.icon}
+                        accent={widget.accent}
+                        size={widgetSizes[id] || "small"}
+                        onExpand={() => setExpandedWidget(id)}
+                        onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
+                      >
+                        <Preview />
+                      </WidgetCard>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          /* Mobile: Stacked scrollable cards — each card sticks at a slightly offset top position */
+          <div className="relative pb-8">
+            {activeWidgets.map((id, i) => {
+              const widget = WIDGETS[id];
+              const Preview = widget.preview;
+
+              return (
+                <div
+                  key={id}
+                  className="sticky mb-[-60px] last:mb-0"
+                  style={{
+                    top: `${8 + i * 44}px`,
+                    zIndex: i + 1,
+                  }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: i * 0.04 }}
+                    className={`rounded-2xl p-5 transition-shadow duration-300 overflow-hidden ${
+                      widget.accent
+                        ? "bg-primary text-primary-foreground shadow-[0_-4px_24px_-4px_hsl(0_0%_0%/0.15)]"
+                        : "glass shadow-[0_-4px_24px_-4px_hsl(0_0%_0%/0.08)]"
+                    }`}
+                  >
+                    {/* Card header */}
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        {widget.icon && <span className="text-sm">{widget.icon}</span>}
+                        <h3 className={`text-sm font-semibold ${!widget.accent ? "text-foreground" : ""}`}>
+                          {widget.title}
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => setExpandedWidget(id)}
+                        className={`rounded-full w-7 h-7 flex items-center justify-center transition-all ${
+                          widget.accent
+                            ? "bg-primary-foreground/15 hover:bg-primary-foreground/25"
+                            : "bg-secondary hover:bg-secondary/80"
+                        }`}
+                      >
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Card content */}
+                    <div className="mt-2">
                       <Preview />
-                    </WidgetCard>
+                    </div>
                   </motion.div>
-                );
-              })}
-            </div>
-          </SortableContext>
-        </DndContext>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Expanded widget dialog */}
         {expandedWidget && (() => {
