@@ -53,8 +53,8 @@ const WIDGETS: Record<
     expanded: ProjectsExpanded,
     cols: 1,
     component: ProjectsPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#151419",
+    textColor: "#FBFBFB"
   },
   calendar: {
     title: "Calendar",
@@ -63,8 +63,8 @@ const WIDGETS: Record<
     expanded: CalendarExpanded,
     cols: 1,
     component: CalendarPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#F56E0F",
+    textColor: "#FBFBFB"
   },
   finances: {
     title: "Finances",
@@ -73,8 +73,8 @@ const WIDGETS: Record<
     expanded: FinancesExpanded,
     cols: 1,
     component: FinancesPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#1B1B1E",
+    textColor: "#FBFBFB"
   },
   clients: {
     title: "Client Portal",
@@ -83,8 +83,8 @@ const WIDGETS: Record<
     expanded: ClientsExpanded,
     cols: 1,
     component: ClientsPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#262626",
+    textColor: "#FBFBFB"
   },
   files: {
     title: "Files",
@@ -93,8 +93,8 @@ const WIDGETS: Record<
     expanded: FilesExpanded,
     cols: 1,
     component: FilesPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#878787",
+    textColor: "#FBFBFB"
   },
   tasks: {
     title: "Tasks",
@@ -103,8 +103,8 @@ const WIDGETS: Record<
     expanded: TasksExpanded,
     cols: 1,
     component: TasksPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#FBFBFB",
+    textColor: "#151419"
   },
   messages: {
     title: "Messages",
@@ -113,8 +113,8 @@ const WIDGETS: Record<
     expanded: MessagesExpanded,
     cols: 1,
     component: MessagesPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#F56E0F",
+    textColor: "#FBFBFB"
   },
   analytics: {
     title: "Analytics",
@@ -123,8 +123,8 @@ const WIDGETS: Record<
     expanded: AnalyticsExpanded,
     cols: 1,
     component: AnalyticsPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#151419",
+    textColor: "#FBFBFB"
   },
   studio: {
     title: "Studio",
@@ -133,8 +133,8 @@ const WIDGETS: Record<
     expanded: StudioExpanded,
     cols: 1,
     component: StudioPreview,
-    bgColor: "",
-    textColor: ""
+    bgColor: "#262626",
+    textColor: "#FBFBFB"
   }
 };
 
@@ -201,8 +201,7 @@ const Index = () => {
     <div className="min-h-screen bg-background p-3 md:p-5 lg:p-6">
       {/* Outer container — the "window" */}
       <div className="dashboard-container min-h-[calc(100vh-3rem)] flex overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar activeNav={activeNav} onNavChange={setActiveNav} collapsed={sidebarCollapsed} onCollapsedChange={setSidebarCollapsed} />
+        {/* Sidebar - hidden */}
 
         {/* Main content */}
         <main className="flex-1 min-w-0 p-5 md:p-8 lg:p-10">
@@ -264,6 +263,8 @@ const Index = () => {
                         icon={widget.icon}
                         size={widgetSizes[id] || "small"}
                         tintIndex={i}
+                        bgColor={widget.bgColor}
+                        textColor={widget.textColor}
                         onExpand={() => handleExpand(id)}
                         pixelSize={pixelSizes[id]}
                         onPixelResize={(size) => setPixelSizes((prev) => ({ ...prev, [id]: size }))}
