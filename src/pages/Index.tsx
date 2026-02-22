@@ -24,6 +24,9 @@ import {
   Receipt,
   Bell,
   Settings2,
+  ListTodo,
+  MessageSquare,
+  BarChart3,
 } from "lucide-react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import WidgetCard from "@/components/dashboard/WidgetCard";
@@ -34,9 +37,12 @@ import { ClientsPreview, ClientsExpanded } from "@/components/dashboard/ClientPo
 import { FinancesPreview, FinancesExpanded } from "@/components/dashboard/FinancesWidget";
 import { FilesPreview, FilesExpanded } from "@/components/dashboard/FileStorageWidget";
 import { InvoicesPreview, InvoicesExpanded } from "@/components/dashboard/InvoicesWidget";
+import { TasksPreview, TasksExpanded } from "@/components/dashboard/TasksWidget";
+import { MessagesPreview, MessagesExpanded } from "@/components/dashboard/MessagesWidget";
+import { AnalyticsPreview, AnalyticsExpanded } from "@/components/dashboard/AnalyticsWidget";
 import WidgetCustomizer from "@/components/dashboard/WidgetCustomizer";
 
-type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "invoices";
+type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "invoices" | "tasks" | "messages" | "analytics";
 
 const WIDGETS: Record<
   WidgetId,
@@ -99,9 +105,33 @@ const WIDGETS: Record<
     cols: 1,
     component: InvoicesPreview,
   },
+  tasks: {
+    title: "Tasks",
+    icon: <ListTodo className="w-4 h-4" />,
+    preview: TasksPreview,
+    expanded: TasksExpanded,
+    cols: 1,
+    component: TasksPreview,
+  },
+  messages: {
+    title: "Messages",
+    icon: <MessageSquare className="w-4 h-4" />,
+    preview: MessagesPreview,
+    expanded: MessagesExpanded,
+    cols: 1,
+    component: MessagesPreview,
+  },
+  analytics: {
+    title: "Analytics",
+    icon: <BarChart3 className="w-4 h-4" />,
+    preview: AnalyticsPreview,
+    expanded: AnalyticsExpanded,
+    cols: 1,
+    component: AnalyticsPreview,
+  },
 };
 
-const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "invoices"];
+const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "invoices", "tasks", "messages", "analytics"];
 
 const stats = [
   { label: "Active Projects", value: "12", trend: "+3" },
