@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Home, FolderKanban, CalendarDays, Users, DollarSign,
   HardDrive, Receipt, ListTodo, MessageSquare, BarChart3,
-  Settings, Menu, X, Briefcase, PanelLeft,
+  Settings, Menu, X, Briefcase, PanelLeft, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,71 +35,55 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed top-5 left-4 z-50 lg:hidden glass-strong rounded-2xl p-2.5"
+        className="fixed top-8 left-6 z-50 lg:hidden rounded-xl p-2 bg-card border border-border shadow-sm"
       >
         {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
-      {/* Sidebar */}
+      {/* Sidebar — inside the container */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full z-40 flex flex-col glass-strong border-r-0 transition-all duration-300",
-          collapsed ? "w-[72px] items-center" : "w-[240px]",
-          "py-5",
-          "lg:translate-x-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          "hidden lg:flex flex-col items-center py-6 border-r border-border/50 transition-all duration-300 shrink-0 relative",
+          collapsed ? "w-[60px]" : "w-[220px]"
         )}
       >
-        {/* Header: Logo + collapse toggle */}
-        <div className={cn("flex items-center mb-2", collapsed ? "justify-center px-2" : "justify-between px-4")}>
-          <div className="w-10 h-10 rounded-2xl bg-foreground flex items-center justify-center">
-            <span className="text-background text-sm font-bold tracking-wide">•••</span>
+        {/* Collapse toggle */}
+        <button
+          onClick={() => onCollapsedChange(!collapsed)}
+          className="absolute -right-3 top-8 z-10 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm"
+        >
+          <ChevronRight className={cn("w-3 h-3 transition-transform", !collapsed && "rotate-180")} />
+        </button>
+
+        {/* Logo */}
+        <div className={cn("mb-6", collapsed ? "px-0" : "px-4 w-full")}>
+          <div className="w-10 h-10 rounded-2xl bg-foreground flex items-center justify-center mx-auto">
+            <span className="text-background text-xs font-bold">•••</span>
           </div>
-          {!collapsed && (
-            <button
-              onClick={() => onCollapsedChange(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
-            >
-              <PanelLeft className="w-4 h-4" />
-            </button>
-          )}
-          {collapsed && (
-            <button
-              onClick={() => onCollapsedChange(false)}
-              className="absolute -right-3 top-7 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shadow-sm"
-            >
-              <PanelLeft className="w-3 h-3 rotate-180" />
-            </button>
-          )}
         </div>
 
-        {/* Section label */}
-        {!collapsed && (
-          <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60 px-5 mt-4 mb-2">
-            Main menu
-          </p>
-        )}
-
         {/* Nav */}
-        <nav className={cn("flex-1 flex flex-col gap-0.5 overflow-y-auto", collapsed ? "items-center px-2" : "px-3")}>
+        <nav className={cn("flex-1 flex flex-col gap-1 w-full overflow-y-auto", collapsed ? "items-center px-2" : "px-3")}>
+          {!collapsed && (
+            <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/50 px-3 mb-2">
+              Menu
+            </p>
+          )}
           {mainNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeNav === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => {
-                  onNavChange(item.id);
-                  setMobileOpen(false);
-                }}
+                onClick={() => onNavChange(item.id)}
                 className={cn(
                   "flex items-center gap-3 transition-all duration-200 rounded-xl",
                   collapsed
-                    ? "w-11 h-11 justify-center"
-                    : "w-full h-11 px-3",
+                    ? "w-10 h-10 justify-center"
+                    : "w-full h-10 px-3",
                   isActive
-                    ? "bg-card shadow-sm text-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                    ? "bg-foreground text-background font-medium shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 )}
                 title={item.label}
               >
@@ -110,47 +94,54 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
           })}
         </nav>
 
-        {/* Bottom: Settings */}
-        <div className={cn("mt-auto pt-2 border-t border-border/30", collapsed ? "px-2" : "px-3")}>
-          {!collapsed && (
-            <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60 px-2 mb-2">
-              Settings
-            </p>
-          )}
+        {/* Bottom */}
+        <div className={cn("mt-auto pt-3", collapsed ? "px-2" : "px-3 w-full")}>
           <button
             className={cn(
-              "flex items-center gap-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors",
-              collapsed ? "w-11 h-11 justify-center" : "w-full h-11 px-3"
+              "flex items-center gap-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors",
+              collapsed ? "w-10 h-10 justify-center" : "w-full h-10 px-3"
             )}
           >
             <Settings className="w-[18px] h-[18px] shrink-0" />
             {!collapsed && <span className="text-sm">Settings</span>}
           </button>
-
-          {/* Account */}
-          {!collapsed && (
-            <div className="mt-3 px-2 pb-1">
-              <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60 mb-2">Account</p>
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                  U
-                </div>
-                <div>
-                  <p className="text-sm font-medium leading-tight">User</p>
-                  <p className="text-[11px] text-muted-foreground leading-tight">Freelancer</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </aside>
 
-      {/* Mobile overlay */}
+      {/* Mobile sidebar */}
       {mobileOpen && (
-        <div
-          className="fixed inset-0 bg-foreground/10 backdrop-blur-sm z-30 lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
+        <>
+          <div
+            className="fixed inset-0 bg-foreground/10 backdrop-blur-sm z-30 lg:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="fixed left-0 top-0 h-full w-[240px] z-40 bg-card border-r border-border p-4 flex flex-col lg:hidden">
+            <div className="mt-14 flex flex-col gap-1">
+              {mainNavItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeNav === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      onNavChange(item.id);
+                      setMobileOpen(false);
+                    }}
+                    className={cn(
+                      "flex items-center gap-3 w-full h-10 px-3 rounded-xl transition-all",
+                      isActive
+                        ? "bg-foreground text-background font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                    )}
+                  >
+                    <Icon className="w-[18px] h-[18px] shrink-0" />
+                    <span className="text-sm">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </aside>
+        </>
       )}
     </>
   );

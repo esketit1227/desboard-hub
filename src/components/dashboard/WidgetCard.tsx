@@ -47,8 +47,8 @@ const WidgetCard = ({ id, title, icon, size = "small", onExpand, onResize, child
       ref={setNodeRef}
       style={style}
       className={cn(
-        "glass-strong rounded-3xl p-5 transition-all duration-300 group relative overflow-hidden",
-        isDragging && "shadow-[0_24px_64px_-16px_hsl(0_0%_0%/0.15)]"
+        "bg-card border border-border rounded-2xl p-5 transition-all duration-200 group relative overflow-hidden",
+        isDragging && "shadow-lg"
       )}
     >
       {/* Header */}
@@ -57,37 +57,36 @@ const WidgetCard = ({ id, title, icon, size = "small", onExpand, onResize, child
           <button
             {...attributes}
             {...listeners}
-            className="rounded-xl p-1 transition-colors cursor-grab active:cursor-grabbing touch-none hover:bg-muted/50 opacity-0 group-hover:opacity-100"
+            className="rounded-lg p-1 transition-colors cursor-grab active:cursor-grabbing touch-none hover:bg-muted/50 opacity-0 group-hover:opacity-100"
           >
             <GripVertical className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
-          {icon && <span className="text-muted-foreground">{icon}</span>}
-          <h3 className="text-sm font-medium text-foreground tracking-tight">{title}</h3>
+          <h3 className="text-sm font-semibold text-foreground tracking-tight">{title}</h3>
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {onResize && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="rounded-full w-7 h-7 flex items-center justify-center hover:bg-muted/60 transition-colors">
+                <button className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-muted/50 transition-colors">
                   <Maximize2 className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[140px] rounded-2xl glass-strong border-0">
+              <DropdownMenuContent align="end" className="min-w-[140px] rounded-xl">
                 <DropdownMenuItem
                   onClick={() => onResize("small")}
-                  className={cn("gap-2 rounded-xl", size === "small" && "bg-muted/50")}
+                  className={cn("gap-2 rounded-lg", size === "small" && "bg-muted/50")}
                 >
                   <Square className="w-3.5 h-3.5" /> Small
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => onResize("medium")}
-                  className={cn("gap-2 rounded-xl", size === "medium" && "bg-muted/50")}
+                  className={cn("gap-2 rounded-lg", size === "medium" && "bg-muted/50")}
                 >
                   <RectangleHorizontal className="w-3.5 h-3.5" /> Medium
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => onResize("large")}
-                  className={cn("gap-2 rounded-xl", size === "large" && "bg-muted/50")}
+                  className={cn("gap-2 rounded-lg", size === "large" && "bg-muted/50")}
                 >
                   <Maximize2 className="w-3.5 h-3.5" /> Large
                 </DropdownMenuItem>
@@ -96,7 +95,7 @@ const WidgetCard = ({ id, title, icon, size = "small", onExpand, onResize, child
           )}
           <button
             onClick={onExpand}
-            className="rounded-full w-7 h-7 flex items-center justify-center hover:bg-muted/60 transition-colors"
+            className="rounded-lg w-7 h-7 flex items-center justify-center hover:bg-muted/50 transition-colors"
           >
             <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground" />
           </button>

@@ -11,7 +11,7 @@ import {
 import {
   FolderKanban, CalendarDays, Users, DollarSign, HardDrive,
   Receipt, Bell, Settings2, ListTodo, MessageSquare, BarChart3,
-  ArrowUpRight, Briefcase,
+  ArrowUpRight, Briefcase, Search, SlidersHorizontal, Plus,
 } from "lucide-react";
 import { Moon, Sun } from "lucide-react";
 import Sidebar from "@/components/dashboard/Sidebar";
@@ -150,13 +150,6 @@ const WIDGETS: Record<
 
 const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "invoices", "tasks", "messages", "analytics", "studio"];
 
-const stats = [
-  { label: "Active Projects", value: "12", trend: "+3" },
-  { label: "Revenue", value: "$24.5k", trend: "+12%" },
-  { label: "Pending Tasks", value: "8", trend: "-2" },
-  { label: "Storage", value: "64%", trend: "+5%" },
-];
-
 const Index = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -208,159 +201,144 @@ const Index = () => {
     }
   };
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
-
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} collapsed={sidebarCollapsed} onCollapsedChange={setSidebarCollapsed} />
+    <div className="min-h-screen bg-background p-3 md:p-5 lg:p-6">
+      {/* Outer container — the "window" */}
+      <div className="dashboard-container min-h-[calc(100vh-3rem)] flex overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar activeNav={activeNav} onNavChange={setActiveNav} collapsed={sidebarCollapsed} onCollapsedChange={setSidebarCollapsed} />
 
-      {/* Main content */}
-      <main className={`${sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[240px]'} p-5 md:p-8 lg:p-10 transition-all duration-300`}>
-        {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center justify-between mb-10"
-        >
-          <div className="lg:pl-0 pl-12">
-            <p className="text-sm text-muted-foreground font-medium">{today}</p>
-            <h2 className="text-2xl font-semibold tracking-tight mt-0.5">Good morning, Jordan</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setDark(!dark)}
-              className="glass-strong rounded-2xl p-2.5 hover:scale-105 transition-transform"
-            >
-              {dark ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
-            </button>
-            <button className="glass-strong rounded-2xl p-2.5 hover:scale-105 transition-transform relative">
-              <Bell className="w-4 h-4 text-muted-foreground" />
-              <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-destructive" />
-            </button>
-            <button
-              onClick={() => setCustomizerOpen(true)}
-              className="glass-strong rounded-2xl p-2.5 hover:scale-105 transition-transform"
-            >
-              <Settings2 className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-xs font-semibold ml-1">
-              J
+        {/* Main content */}
+        <main className="flex-1 min-w-0 p-5 md:p-8 lg:p-10">
+          {/* Top bar */}
+          <motion.header
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center justify-between mb-8"
+          >
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
             </div>
-          </div>
-        </motion.header>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-              className="glass-strong rounded-3xl p-5"
-            >
-              <p className="text-[11px] text-muted-foreground font-medium tracking-wide uppercase">{stat.label}</p>
-              <div className="flex items-end justify-between mt-2">
-                <span className="text-2xl font-semibold tracking-tight">{stat.value}</span>
-                <span className="text-xs text-success font-medium">{stat.trend}</span>
+            <div className="flex items-center gap-2">
+              <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors">
+                <Search className="w-4 h-4 text-muted-foreground" />
+              </button>
+              <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors">
+                <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+              </button>
+              <button
+                onClick={() => setCustomizerOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Add Widget</span>
+              </button>
+              <button
+                onClick={() => setDark(!dark)}
+                className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors"
+              >
+                {dark ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
+              </button>
+              <button className="rounded-xl p-2.5 hover:bg-muted/50 transition-colors relative">
+                <Bell className="w-4 h-4 text-muted-foreground" />
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-destructive" />
+              </button>
+              <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-foreground text-xs font-semibold ml-1 overflow-hidden">
+                J
               </div>
-            </motion.div>
-          ))}
-        </div>
+            </div>
+          </motion.header>
 
-        {/* Widget grid - Desktop */}
-        {!isMobile ? (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={activeWidgets} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {activeWidgets.map((id, i) => {
-                  const widget = WIDGETS[id];
-                  const Preview = widget.preview;
-                  return (
-                    <motion.div
-                      key={id}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, delay: 0.25 + i * 0.04 }}
-                      className={
-                        (widgetSizes[id] === "medium" ? "sm:col-span-2" : "") +
-                        (widgetSizes[id] === "large" ? " sm:col-span-2 lg:col-span-3" : "")
-                      }
-                    >
-                      <WidgetCard
-                        id={id}
-                        title={widget.title}
-                        icon={widget.icon}
-                        size={widgetSizes[id] || "small"}
-                        onExpand={() => handleExpand(id)}
-                        onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
+          {/* Widget grid - Desktop */}
+          {!isMobile ? (
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={activeWidgets} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {activeWidgets.map((id, i) => {
+                    const widget = WIDGETS[id];
+                    const Preview = widget.preview;
+                    return (
+                      <motion.div
+                        key={id}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, delay: 0.15 + i * 0.04 }}
+                        className={
+                          (widgetSizes[id] === "medium" ? "sm:col-span-2" : "") +
+                          (widgetSizes[id] === "large" ? " sm:col-span-2 lg:col-span-3" : "")
+                        }
                       >
-                        <Preview />
-                      </WidgetCard>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </SortableContext>
-          </DndContext>
-        ) : (
-          /* Mobile: Minimal stacked cards */
-          <div className="space-y-3 pb-8">
-            {activeWidgets.map((id, i) => {
-              const widget = WIDGETS[id];
-              return (
-                <motion.div
-                  key={id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.03 }}
-                  onClick={() => handleExpand(id)}
-                  className="glass-strong rounded-3xl px-5 py-4 active:scale-[0.98] transition-transform cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-2xl bg-muted/50 flex items-center justify-center">
-                        <span className="text-muted-foreground">{widget.icon}</span>
+                        <WidgetCard
+                          id={id}
+                          title={widget.title}
+                          icon={widget.icon}
+                          size={widgetSizes[id] || "small"}
+                          onExpand={() => handleExpand(id)}
+                          onResize={(size) => setWidgetSizes((prev) => ({ ...prev, [id]: size }))}
+                        >
+                          <Preview />
+                        </WidgetCard>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
+          ) : (
+            /* Mobile: Minimal stacked cards */
+            <div className="space-y-3 pb-8">
+              {activeWidgets.map((id, i) => {
+                const widget = WIDGETS[id];
+                return (
+                  <motion.div
+                    key={id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.03 }}
+                    onClick={() => handleExpand(id)}
+                    className="glass-strong rounded-2xl px-5 py-4 active:scale-[0.98] transition-transform cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-muted/50 flex items-center justify-center">
+                          <span className="text-muted-foreground">{widget.icon}</span>
+                        </div>
+                        <h3 className="text-sm font-medium text-foreground">{widget.title}</h3>
                       </div>
-                      <h3 className="text-sm font-medium text-foreground">{widget.title}</h3>
+                      <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
                     </div>
-                    <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
 
-        {/* Expanded widget dialog */}
-        {expandedWidget && (() => {
-          const widget = WIDGETS[expandedWidget];
-          const Expanded = widget.expanded;
-          return (
-            <WidgetExpandedView
-              open={true}
-              onOpenChange={(open) => !open && setExpandedWidget(null)}
-              title={widget.title}
-              icon={widget.icon}
-            >
-              <Expanded />
-            </WidgetExpandedView>
-          );
-        })()}
+          {/* Expanded widget dialog */}
+          {expandedWidget && (() => {
+            const widget = WIDGETS[expandedWidget];
+            const Expanded = widget.expanded;
+            return (
+              <WidgetExpandedView
+                open={true}
+                onOpenChange={(open) => !open && setExpandedWidget(null)}
+                title={widget.title}
+                icon={widget.icon}
+              >
+                <Expanded />
+              </WidgetExpandedView>
+            );
+          })()}
 
-        <WidgetCustomizer
-          open={customizerOpen}
-          onOpenChange={setCustomizerOpen}
-          widgets={WIDGETS}
-          activeWidgets={activeWidgets}
-          onToggle={toggleWidget}
-        />
-      </main>
+          <WidgetCustomizer
+            open={customizerOpen}
+            onOpenChange={setCustomizerOpen}
+            widgets={WIDGETS}
+            activeWidgets={activeWidgets}
+            onToggle={toggleWidget}
+          />
+        </main>
+      </div>
     </div>
   );
 };
