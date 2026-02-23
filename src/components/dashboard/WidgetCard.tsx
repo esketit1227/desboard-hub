@@ -143,8 +143,7 @@ const WidgetCard = ({ id, title, icon, accentColor, size = "small", tintIndex, o
           />
         )}
         {/* Header — actions only, no duplicate title */}
-        <div className="flex items-center justify-between px-3.5 pt-2.5 pb-0">
-          <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest">{title}</span>
+        <div className="flex items-center justify-end px-3.5 pt-2.5 pb-0">
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               {...attributes}
