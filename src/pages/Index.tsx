@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -271,10 +272,12 @@ const Index = () => {
               </SortableContext>
             </DndContext> : (
 
-          /* Mobile: Minimal stacked cards */
-          <div className="space-y-3 pb-24">
+          /* Mobile: Cards with preview content */
+          <div className="grid grid-cols-2 gap-3 pb-24">
               {activeWidgets.filter(id => WIDGETS[id]).map((id, i) => {
               const widget = WIDGETS[id];
+              const Preview = widget.preview;
+              const isFirst = i === 0;
               return (
                 <motion.div
                   key={id}
@@ -282,16 +285,23 @@ const Index = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: i * 0.03 }}
                   onClick={() => handleExpand(id)}
-                  className="glass-strong rounded-2xl px-5 py-4 active:scale-[0.98] transition-transform cursor-pointer">
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-muted/50 flex items-center justify-center">
+                  className={cn(
+                    "rounded-2xl bg-card border border-border/30 overflow-hidden active:scale-[0.97] transition-transform cursor-pointer",
+                    isFirst ? "col-span-2" : "col-span-1"
+                  )}>
+                    <div className={cn("flex flex-col", isFirst ? "min-h-[160px]" : "min-h-[140px]")}>
+                      {/* Card header */}
+                      <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                        <div className="flex items-center gap-2">
                           <span className="text-muted-foreground">{widget.icon}</span>
+                          <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">{widget.title}</h3>
                         </div>
-                        <h3 className="text-sm font-medium text-foreground">{widget.title}</h3>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50" />
                       </div>
-                      <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
+                      {/* Preview content */}
+                      <div className="flex-1 px-3 pb-3 overflow-hidden">
+                        <Preview pixelSize={isFirst ? { width: 360, height: 120 } : { width: 160, height: 100 }} />
+                      </div>
                     </div>
                   </motion.div>);
 
