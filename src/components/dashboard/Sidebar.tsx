@@ -6,7 +6,8 @@ import {
   Moon, Sun, HelpCircle, Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import desboardLogo from "@/assets/desboard-logo.png";
+import desboardIcon from "@/assets/desboard-icon.png";
+import desboardFull from "@/assets/desboard-full.png";
 
 const mainNavItems = [
   { id: "home", label: "Dashboard", icon: Home },
@@ -104,11 +105,10 @@ const Sidebar = ({ activeNav, onNavChange, collapsed, onCollapsedChange }: Sideb
       >
         {/* Header: Logo + Collapse */}
         <div className={cn("flex items-center mb-5", collapsed ? "justify-center px-2" : "justify-between px-4")}>
-          {!collapsed && (
-            <img src={desboardLogo} alt="Desboard" className="h-5 object-contain dark:invert" />
-          )}
-          {collapsed && (
-            <img src={desboardLogo} alt="Desboard" className="h-4 w-8 object-contain object-left dark:invert" style={{ clipPath: "inset(0 60% 0 0)" }} />
+          {!collapsed ? (
+            <img src={desboardFull} alt="Desboard" className="h-6 object-contain dark:invert" />
+          ) : (
+            <img src={desboardIcon} alt="Desboard" className="h-8 w-8 object-contain dark:invert" />
           )}
           {!collapsed && (
             <button
