@@ -198,12 +198,12 @@ const Index = () => {
   };
 
   return (
-    <div className="p-5 md:p-8 lg:p-10">
-      {/* Top Island */}
-      <TopIsland />
+    <div className={cn("p-3 md:p-8 lg:p-10", isMobile && "pt-4")}>
+      {/* Top Island - desktop only */}
+      {!isMobile && <TopIsland />}
 
-          {/* Top bar */}
-          <motion.header
+          {/* Top bar - desktop only */}
+          {!isMobile && <motion.header
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -233,7 +233,7 @@ const Index = () => {
                 J
               </div>
             </div>
-          </motion.header>
+          </motion.header>}
 
           {/* Widget grid - Desktop */}
           {!isMobile ?

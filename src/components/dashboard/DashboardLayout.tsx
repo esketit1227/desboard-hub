@@ -48,8 +48,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-3 md:p-5 lg:p-6">
-      <div className="dashboard-container min-h-[calc(100vh-3rem)] flex overflow-hidden">
+    <div className="min-h-screen bg-background p-0 md:p-5 lg:p-6">
+      <div className="dashboard-container min-h-screen md:min-h-[calc(100vh-3rem)] flex overflow-hidden">
         <Sidebar
           activeNav={activeNav}
           onNavChange={handleNavChange}
