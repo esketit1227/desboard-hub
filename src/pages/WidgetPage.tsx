@@ -44,7 +44,7 @@ const WidgetPage = () => {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <header className="sticky top-0 z-50 px-5 py-4 flex items-center gap-3 border-b border-border/30">
+      <header className="sticky top-0 z-50 px-3 md:px-5 py-3 md:py-4 flex items-center gap-3 border-b border-border/30">
         <button
           onClick={() => navigate(-1)}
           className="rounded-xl p-2 hover:bg-muted/50 transition-colors"
@@ -58,7 +58,7 @@ const WidgetPage = () => {
       </header>
 
       {/* Content */}
-      <div className="flex-1 p-5 md:p-8 lg:p-10 overflow-auto">
+      <div className="flex-1 p-3 md:p-8 lg:p-10 pb-20 md:pb-10 overflow-auto">
         <Expanded />
       </div>
     </div>
