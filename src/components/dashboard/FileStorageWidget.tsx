@@ -4,8 +4,9 @@ import {
   ChevronRight, ChevronDown, Folder, MoreHorizontal, Grid3X3, List,
   Upload, Filter, X, File, Music, Archive, HardDrive, Star,
   Download, Trash2, Copy, Move, Eye, Edit2, Clock, ArrowUpDown,
-  CheckCircle2, Circle, Bookmark, Palette,
+  CheckCircle2, Circle, Bookmark, Palette, FolderTree,
 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -162,6 +163,7 @@ export const FilesPreview = ({ pixelSize }: { pixelSize?: { width: number; heigh
 
 /* ─── Expanded Full Page ─── */
 export const FilesExpanded = () => {
+  const isMobile = useIsMobile();
   const [files, setFiles] = useState<FileItem[]>(initialFiles);
   const [search, setSearch] = useState("");
   const [currentFolder, setCurrentFolder] = useState("all");
@@ -177,6 +179,7 @@ export const FilesExpanded = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [showMobileFolders, setShowMobileFolders] = useState(false);
 
   // Breadcrumb path
   const getBreadcrumb = (folderId: string): FolderItem[] => {
@@ -359,8 +362,53 @@ export const FilesExpanded = () => {
   };
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-10rem)]">
-      {/* Sidebar — Folder Tree */}
+    <div className={`flex gap-6 ${isMobile ? "flex-col h-full" : "h-[calc(100vh-10rem)]"}`}>
+      {/* Mobile folder toggle + upload */}
+      {isMobile && (
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1.5 rounded-xl border-foreground/15 text-muted-foreground" onClick={() => setShowMobileFolders(!showMobileFolders)}>
+            <FolderTree className="w-3.5 h-3.5" />
+            {FOLDERS.find(f => f.id === currentFolder)?.name || "All Files"}
+            <ChevronDown className={`w-3 h-3 transition-transform ${showMobileFolders ? "rotate-180" : ""}`} />
+          </Button>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" className="gap-1.5 rounded-xl border-dashed border-foreground/15 text-muted-foreground">
+            <Upload className="w-3.5 h-3.5" /> Upload
+          </Button>
+        </div>
+      )}
+
+      {/* Mobile folder drawer */}
+      {isMobile && showMobileFolders && (
+        <div className="rounded-xl bg-foreground/3 border border-foreground/8 p-3 space-y-0.5">
+          <button
+            onClick={() => { setCurrentFolder("all"); setShowMobileFolders(false); }}
+            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${
+              currentFolder === "all" ? "bg-foreground/10 text-foreground font-medium" : "text-muted-foreground"
+            }`}
+          >
+            <HardDrive className="w-4 h-4" />
+            <span className="flex-1 text-left">All Files</span>
+            <span className="text-[10px] text-muted-foreground">{files.length}</span>
+          </button>
+          {FOLDERS.filter(f => !f.parent && f.id !== "all").map(folder => (
+            <button
+              key={folder.id}
+              onClick={() => { setCurrentFolder(folder.id); setShowMobileFolders(false); }}
+              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${
+                currentFolder === folder.id ? "bg-foreground/10 text-foreground font-medium" : "text-muted-foreground"
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full ${folder.color || "bg-muted-foreground"} shrink-0`} />
+              <span className="truncate flex-1 text-left">{folder.name}</span>
+              <span className="text-[10px] text-muted-foreground">{folder.fileCount}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Sidebar — Folder Tree (desktop only) */}
+      {!isMobile && (
       <div className="w-56 shrink-0 flex flex-col gap-3">
         <Button variant="outline" className="w-full gap-2 rounded-xl border-dashed border-foreground/15 text-muted-foreground hover:text-foreground">
           <Upload className="w-4 h-4" /> Upload Files
@@ -383,10 +431,9 @@ export const FilesExpanded = () => {
               onClick={() => {
                 setFiles(prev => {
                   const starredFiles = prev.filter(f => f.starred);
-                  return prev; // Just filter display
+                  return prev;
                 });
                 setCurrentFolder("all");
-                // We'll filter by starred in a simpler way
               }}
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-muted-foreground hover:bg-foreground/5 transition-colors"
             >
@@ -412,6 +459,7 @@ export const FilesExpanded = () => {
           <p className="text-[10px] text-muted-foreground">{usedPct}% used</p>
         </div>
       </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col gap-4 min-w-0">
@@ -435,13 +483,13 @@ export const FilesExpanded = () => {
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
+        <div className={`flex items-center gap-2 ${isMobile ? "flex-wrap" : "gap-3"}`}>
+          <div className={`relative ${isMobile ? "w-full" : "flex-1 max-w-sm"}`}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search files, clients, tags…"
+              placeholder="Search files…"
               className="pl-9 rounded-xl bg-foreground/5 border-foreground/10"
             />
             {search && (
@@ -458,24 +506,26 @@ export const FilesExpanded = () => {
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="w-3.5 h-3.5" />
-            Filters
+            {!isMobile && "Filters"}
             {activeFilters > 0 && (
               <span className="w-4 h-4 rounded-full bg-foreground/20 text-[10px] flex items-center justify-center">{activeFilters}</span>
             )}
           </Button>
 
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-            <SelectTrigger className="w-32 rounded-xl border-foreground/10">
-              <ArrowUpDown className="w-3 h-3 mr-1" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">Date</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="size">Size</SelectItem>
-              <SelectItem value="type">Type</SelectItem>
-            </SelectContent>
-          </Select>
+          {!isMobile && (
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+              <SelectTrigger className="w-32 rounded-xl border-foreground/10">
+                <ArrowUpDown className="w-3 h-3 mr-1" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="size">Size</SelectItem>
+                <SelectItem value="type">Type</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
 
           <div className="flex border border-foreground/10 rounded-xl overflow-hidden">
             <button
@@ -501,7 +551,7 @@ export const FilesExpanded = () => {
               className="flex flex-wrap gap-2 overflow-hidden"
             >
               <Select value={filterTag} onValueChange={setFilterTag}>
-                <SelectTrigger className="w-28 rounded-xl border-foreground/10 text-xs h-8">
+                <SelectTrigger className={`rounded-xl border-foreground/10 text-xs h-8 ${isMobile ? "flex-1 min-w-[calc(50%-4px)]" : "w-28"}`}>
                   <Tag className="w-3 h-3 mr-1" /> <SelectValue placeholder="Tag" />
                 </SelectTrigger>
                 <SelectContent>
@@ -511,7 +561,7 @@ export const FilesExpanded = () => {
               </Select>
 
               <Select value={filterClient} onValueChange={setFilterClient}>
-                <SelectTrigger className="w-32 rounded-xl border-foreground/10 text-xs h-8">
+                <SelectTrigger className={`rounded-xl border-foreground/10 text-xs h-8 ${isMobile ? "flex-1 min-w-[calc(50%-4px)]" : "w-32"}`}>
                   <Users className="w-3 h-3 mr-1" /> <SelectValue placeholder="Client" />
                 </SelectTrigger>
                 <SelectContent>
@@ -521,7 +571,7 @@ export const FilesExpanded = () => {
               </Select>
 
               <Select value={filterLabel} onValueChange={setFilterLabel}>
-                <SelectTrigger className="w-32 rounded-xl border-foreground/10 text-xs h-8">
+                <SelectTrigger className={`rounded-xl border-foreground/10 text-xs h-8 ${isMobile ? "flex-1 min-w-[calc(50%-4px)]" : "w-32"}`}>
                   <Bookmark className="w-3 h-3 mr-1" /> <SelectValue placeholder="Label" />
                 </SelectTrigger>
                 <SelectContent>
@@ -531,7 +581,7 @@ export const FilesExpanded = () => {
               </Select>
 
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-28 rounded-xl border-foreground/10 text-xs h-8">
+                <SelectTrigger className={`rounded-xl border-foreground/10 text-xs h-8 ${isMobile ? "flex-1 min-w-[calc(50%-4px)]" : "w-28"}`}>
                   <File className="w-3 h-3 mr-1" /> <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -581,7 +631,7 @@ export const FilesExpanded = () => {
         <div className="flex gap-4 flex-1 min-h-0">
           <ScrollArea className="flex-1">
             {/* Select all header */}
-            {viewMode === "list" && filteredFiles.length > 0 && (
+            {viewMode === "list" && filteredFiles.length > 0 && !isMobile && (
               <div className="flex items-center gap-3 px-3 py-1.5 text-[10px] uppercase tracking-widest text-muted-foreground/50 font-semibold border-b border-border/20">
                 <button onClick={selectAll} className="shrink-0">
                   {selectedFiles.size === filteredFiles.length ? <CheckCircle2 className="w-3.5 h-3.5 text-foreground/40" /> : <Circle className="w-3.5 h-3.5" />}
@@ -608,7 +658,7 @@ export const FilesExpanded = () => {
                     key={file.id}
                     layout
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors cursor-pointer group/row ${
+                    className={`flex items-center gap-2 md:gap-3 px-2 md:px-3 py-2 md:py-2.5 rounded-xl transition-colors cursor-pointer group/row ${
                       selectedFiles.has(file.id) ? "bg-foreground/8" : "hover:bg-foreground/4"
                     } ${detailFile?.id === file.id ? "ring-1 ring-foreground/15" : ""}`}
                     onClick={() => setDetailFile(file)}
@@ -635,21 +685,27 @@ export const FilesExpanded = () => {
                           onClick={e => e.stopPropagation()}
                         />
                       ) : (
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium truncate">{file.name}</p>
-                          {file.label && (
-                            <span className={`w-1.5 h-1.5 rounded-full ${file.label.color} shrink-0`} title={file.label.text} />
+                        <>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium truncate">{file.name}</p>
+                            {file.label && (
+                              <span className={`w-1.5 h-1.5 rounded-full ${file.label.color} shrink-0`} title={file.label.text} />
+                            )}
+                            {file.version > 1 && !isMobile && (
+                              <span className="text-[9px] text-muted-foreground bg-foreground/5 px-1 rounded">v{file.version}</span>
+                            )}
+                          </div>
+                          {isMobile && (
+                            <p className="text-[10px] text-muted-foreground">{file.size} · {file.date}</p>
                           )}
-                          {file.version > 1 && (
-                            <span className="text-[9px] text-muted-foreground bg-foreground/5 px-1 rounded">v{file.version}</span>
-                          )}
-                        </div>
+                        </>
                       )}
                     </div>
 
-                    <span className="w-20 text-right text-xs text-muted-foreground">{file.size}</span>
-                    <span className="w-24 text-xs text-muted-foreground">{file.date}</span>
+                    {!isMobile && <span className="w-20 text-right text-xs text-muted-foreground">{file.size}</span>}
+                    {!isMobile && <span className="w-24 text-xs text-muted-foreground">{file.date}</span>}
 
+                    {!isMobile && (
                     <div className="w-24">
                       {file.client ? (
                         <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
@@ -658,17 +714,20 @@ export const FilesExpanded = () => {
                         </span>
                       ) : <span className="text-[10px] text-muted-foreground/30">—</span>}
                     </div>
+                    )}
 
+                    {!isMobile && (
                     <div className="w-20 flex gap-0.5 overflow-hidden">
                       {file.tags.slice(0, 2).map(t => (
                         <span key={t.label} className={`text-[8px] px-1.5 py-0.5 rounded-full shrink-0 ${t.color}`}>{t.label}</span>
                       ))}
                       {file.tags.length > 2 && <span className="text-[8px] text-muted-foreground">+{file.tags.length - 2}</span>}
                     </div>
+                    )}
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                        <button className="w-8 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity">
+                        <button className={`w-8 flex items-center justify-center transition-opacity ${isMobile ? "opacity-100" : "opacity-0 group-hover/row:opacity-100"}`}>
                           <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                         </button>
                       </DropdownMenuTrigger>
@@ -803,138 +862,242 @@ export const FilesExpanded = () => {
           {/* Detail Panel */}
           <AnimatePresence>
             {detailFile && (
-              <motion.div
-                initial={{ width: 0, opacity: 0 }} animate={{ width: 280, opacity: 1 }} exit={{ width: 0, opacity: 0 }}
-                className="shrink-0 overflow-hidden"
-              >
-                <div className="w-[280px] h-full rounded-2xl bg-foreground/3 border border-foreground/8 p-5 flex flex-col gap-4">
-                  <div className="flex items-start justify-between">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-foreground/5`}>
-                      <FileIcon type={detailFile.type} />
-                    </div>
-                    <button onClick={() => setDetailFile(null)} className="p-1 hover:bg-foreground/5 rounded-lg">
-                      <X className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-semibold break-words">{detailFile.name}</h3>
-                    {detailFile.description && <p className="text-xs text-muted-foreground mt-1">{detailFile.description}</p>}
-                  </div>
-
-                  <div className="space-y-3 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Size</span>
-                      <span className="font-medium">{detailFile.size}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Type</span>
-                      <span className="font-medium capitalize">{detailFile.type}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Added</span>
-                      <span className="font-medium">{detailFile.date}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Added by</span>
-                      <span className="font-medium">{detailFile.addedBy}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Version</span>
-                      <span className="font-medium">v{detailFile.version}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Folder</span>
-                      <span className="font-medium">{FOLDERS.find(f => f.id === detailFile.folder)?.name}</span>
-                    </div>
-                  </div>
-
-                  {/* Label */}
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Label</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {LABELS.map(l => (
-                        <button
-                          key={l.text}
-                          onClick={() => setLabel(detailFile.id, detailFile.label?.text === l.text ? undefined : l)}
-                          className={`flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-full border transition-colors ${
-                            detailFile.label?.text === l.text ? "bg-foreground/10 border-foreground/20 text-foreground" : "border-foreground/10 text-muted-foreground hover:border-foreground/20"
-                          }`}
-                        >
-                          <div className={`w-1.5 h-1.5 rounded-full ${l.color}`} />
-                          {l.text}
+              isMobile ? (
+                /* Mobile: full-screen overlay */
+                <motion.div
+                  initial={{ opacity: 0, y: "100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "100%" }}
+                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                  className="fixed inset-0 z-50 bg-background flex flex-col"
+                >
+                  <ScrollArea className="flex-1">
+                    <div className="p-4 flex flex-col gap-4 pb-24">
+                      <div className="flex items-start justify-between">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-foreground/5">
+                          <FileIcon type={detailFile.type} />
+                        </div>
+                        <button onClick={() => setDetailFile(null)} className="p-2 hover:bg-foreground/5 rounded-lg">
+                          <X className="w-5 h-5 text-muted-foreground" />
                         </button>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
 
-                  {/* Tags */}
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Tags</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {detailFile.tags.map(t => (
-                        <span key={t.label} className={`text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1 ${t.color}`}>
-                          {t.label}
-                          <button onClick={() => { removeTag(detailFile.id, t.label); setDetailFile({ ...detailFile, tags: detailFile.tags.filter(tt => tt.label !== t.label) }); }}>
-                            <X className="w-2.5 h-2.5" />
-                          </button>
-                        </span>
-                      ))}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="text-[9px] px-2 py-0.5 rounded-full border border-dashed border-foreground/15 text-muted-foreground hover:text-foreground">
-                            <Plus className="w-2.5 h-2.5" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          {TAGS.filter(t => !detailFile.tags.some(ft => ft.label === t.label)).map(t => (
-                            <DropdownMenuItem key={t.label} onClick={() => { addTag(detailFile.id, t); setDetailFile({ ...detailFile, tags: [...detailFile.tags, t] }); }}>
-                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${t.color} mr-2`}>{t.label}</span>
-                            </DropdownMenuItem>
+                      <div>
+                        <h3 className="text-base font-semibold break-words">{detailFile.name}</h3>
+                        {detailFile.description && <p className="text-sm text-muted-foreground mt-1">{detailFile.description}</p>}
+                      </div>
+
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between"><span className="text-muted-foreground">Size</span><span className="font-medium">{detailFile.size}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span className="font-medium capitalize">{detailFile.type}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Added</span><span className="font-medium">{detailFile.date}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Added by</span><span className="font-medium">{detailFile.addedBy}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Version</span><span className="font-medium">v{detailFile.version}</span></div>
+                        <div className="flex justify-between"><span className="text-muted-foreground">Folder</span><span className="font-medium">{FOLDERS.find(f => f.id === detailFile.folder)?.name}</span></div>
+                      </div>
+
+                      {/* Label */}
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Label</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {LABELS.map(l => (
+                            <button
+                              key={l.text}
+                              onClick={() => setLabel(detailFile.id, detailFile.label?.text === l.text ? undefined : l)}
+                              className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border transition-colors ${
+                                detailFile.label?.text === l.text ? "bg-foreground/10 border-foreground/20 text-foreground" : "border-foreground/10 text-muted-foreground"
+                              }`}
+                            >
+                              <div className={`w-1.5 h-1.5 rounded-full ${l.color}`} />
+                              {l.text}
+                            </button>
                           ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        </div>
+                      </div>
+
+                      {/* Tags */}
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Tags</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {detailFile.tags.map(t => (
+                            <span key={t.label} className={`text-xs px-2.5 py-1 rounded-full flex items-center gap-1 ${t.color}`}>
+                              {t.label}
+                              <button onClick={() => { removeTag(detailFile.id, t.label); setDetailFile({ ...detailFile, tags: detailFile.tags.filter(tt => tt.label !== t.label) }); }}>
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="text-xs px-2.5 py-1 rounded-full border border-dashed border-foreground/15 text-muted-foreground">
+                                <Plus className="w-3 h-3" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              {TAGS.filter(t => !detailFile.tags.some(ft => ft.label === t.label)).map(t => (
+                                <DropdownMenuItem key={t.label} onClick={() => { addTag(detailFile.id, t); setDetailFile({ ...detailFile, tags: [...detailFile.tags, t] }); }}>
+                                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${t.color} mr-2`}>{t.label}</span>
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+
+                      {/* Client */}
+                      <div>
+                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Client</p>
+                        <Select
+                          value={detailFile.client?.name || "none"}
+                          onValueChange={(v) => {
+                            const client = v === "none" ? undefined : CLIENTS.find(c => c.name === v);
+                            setClient(detailFile.id, client);
+                            setDetailFile({ ...detailFile, client });
+                          }}
+                        >
+                          <SelectTrigger className="h-9 rounded-xl text-sm border-foreground/10">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No client</SelectItem>
+                            {CLIENTS.map(c => (
+                              <SelectItem key={c.name} value={c.name}>
+                                <span className="flex items-center gap-2">
+                                  <span className="w-4 h-4 rounded-full bg-foreground/10 text-[8px] font-bold flex items-center justify-center">{c.avatar}</span>
+                                  {c.name}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex gap-2 mt-2">
+                        <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1 text-sm border-foreground/10 h-10">
+                          <Download className="w-4 h-4" /> Download
+                        </Button>
+                        <Button variant="outline" size="sm" className="rounded-xl text-sm border-foreground/10 text-red-400 h-10" onClick={() => deleteFiles([detailFile.id])}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </motion.div>
+              ) : (
+                /* Desktop: side panel */
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }} animate={{ width: 280, opacity: 1 }} exit={{ width: 0, opacity: 0 }}
+                  className="shrink-0 overflow-hidden"
+                >
+                  <div className="w-[280px] h-full rounded-2xl bg-foreground/3 border border-foreground/8 p-5 flex flex-col gap-4">
+                    <div className="flex items-start justify-between">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-foreground/5">
+                        <FileIcon type={detailFile.type} />
+                      </div>
+                      <button onClick={() => setDetailFile(null)} className="p-1 hover:bg-foreground/5 rounded-lg">
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-semibold break-words">{detailFile.name}</h3>
+                      {detailFile.description && <p className="text-xs text-muted-foreground mt-1">{detailFile.description}</p>}
+                    </div>
+
+                    <div className="space-y-3 text-xs">
+                      <div className="flex justify-between"><span className="text-muted-foreground">Size</span><span className="font-medium">{detailFile.size}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span className="font-medium capitalize">{detailFile.type}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Added</span><span className="font-medium">{detailFile.date}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Added by</span><span className="font-medium">{detailFile.addedBy}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Version</span><span className="font-medium">v{detailFile.version}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Folder</span><span className="font-medium">{FOLDERS.find(f => f.id === detailFile.folder)?.name}</span></div>
+                    </div>
+
+                    {/* Label */}
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Label</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {LABELS.map(l => (
+                          <button
+                            key={l.text}
+                            onClick={() => setLabel(detailFile.id, detailFile.label?.text === l.text ? undefined : l)}
+                            className={`flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-full border transition-colors ${
+                              detailFile.label?.text === l.text ? "bg-foreground/10 border-foreground/20 text-foreground" : "border-foreground/10 text-muted-foreground hover:border-foreground/20"
+                            }`}
+                          >
+                            <div className={`w-1.5 h-1.5 rounded-full ${l.color}`} />
+                            {l.text}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Tags</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {detailFile.tags.map(t => (
+                          <span key={t.label} className={`text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1 ${t.color}`}>
+                            {t.label}
+                            <button onClick={() => { removeTag(detailFile.id, t.label); setDetailFile({ ...detailFile, tags: detailFile.tags.filter(tt => tt.label !== t.label) }); }}>
+                              <X className="w-2.5 h-2.5" />
+                            </button>
+                          </span>
+                        ))}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="text-[9px] px-2 py-0.5 rounded-full border border-dashed border-foreground/15 text-muted-foreground hover:text-foreground">
+                              <Plus className="w-2.5 h-2.5" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            {TAGS.filter(t => !detailFile.tags.some(ft => ft.label === t.label)).map(t => (
+                              <DropdownMenuItem key={t.label} onClick={() => { addTag(detailFile.id, t); setDetailFile({ ...detailFile, tags: [...detailFile.tags, t] }); }}>
+                                <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${t.color} mr-2`}>{t.label}</span>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+
+                    {/* Client */}
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Client</p>
+                      <Select
+                        value={detailFile.client?.name || "none"}
+                        onValueChange={(v) => {
+                          const client = v === "none" ? undefined : CLIENTS.find(c => c.name === v);
+                          setClient(detailFile.id, client);
+                          setDetailFile({ ...detailFile, client });
+                        }}
+                      >
+                        <SelectTrigger className="h-8 rounded-xl text-xs border-foreground/10">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No client</SelectItem>
+                          {CLIENTS.map(c => (
+                            <SelectItem key={c.name} value={c.name}>
+                              <span className="flex items-center gap-2">
+                                <span className="w-4 h-4 rounded-full bg-foreground/10 text-[8px] font-bold flex items-center justify-center">{c.avatar}</span>
+                                {c.name}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="mt-auto flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1 text-xs border-foreground/10">
+                        <Download className="w-3.5 h-3.5" /> Download
+                      </Button>
+                      <Button variant="outline" size="sm" className="rounded-xl text-xs border-foreground/10 text-red-400 hover:text-red-300" onClick={() => deleteFiles([detailFile.id])}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   </div>
-
-                  {/* Client */}
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-semibold mb-2">Client</p>
-                    <Select
-                      value={detailFile.client?.name || "none"}
-                      onValueChange={(v) => {
-                        const client = v === "none" ? undefined : CLIENTS.find(c => c.name === v);
-                        setClient(detailFile.id, client);
-                        setDetailFile({ ...detailFile, client });
-                      }}
-                    >
-                      <SelectTrigger className="h-8 rounded-xl text-xs border-foreground/10">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No client</SelectItem>
-                        {CLIENTS.map(c => (
-                          <SelectItem key={c.name} value={c.name}>
-                            <span className="flex items-center gap-2">
-                              <span className="w-4 h-4 rounded-full bg-foreground/10 text-[8px] font-bold flex items-center justify-center">{c.avatar}</span>
-                              {c.name}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="mt-auto flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 rounded-xl gap-1 text-xs border-foreground/10">
-                      <Download className="w-3.5 h-3.5" /> Download
-                    </Button>
-                    <Button variant="outline" size="sm" className="rounded-xl text-xs border-foreground/10 text-red-400 hover:text-red-300" onClick={() => deleteFiles([detailFile.id])}>
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              )
             )}
           </AnimatePresence>
         </div>
