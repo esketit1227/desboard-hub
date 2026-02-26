@@ -200,7 +200,7 @@ const Index = () => {
   return (
     <div className={cn("p-3 md:p-8 lg:p-10", isMobile && "pt-4")}>
       {/* Notification bar - visible when there are today's events */}
-      {!isMobile && <NotificationBar />}
+      <NotificationBar />
 
           {/* Top bar - desktop only */}
           {!isMobile && <motion.header
