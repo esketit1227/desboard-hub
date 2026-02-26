@@ -34,7 +34,7 @@ const COLOR_OPTIONS = [
   "hsl(280 50% 50%)",
 ];
 
-const INITIAL_EVENTS: CalendarEvent[] = [
+export const INITIAL_EVENTS: CalendarEvent[] = [
   { id: "1", title: "Client Review — Flux", date: getDateStr(18), time: "10:00", duration: 60, color: "hsl(0 0% 20%)" },
   { id: "2", title: "Design Sprint", date: getDateStr(20), time: "14:00", duration: 120, color: "hsl(200 70% 50%)" },
   { id: "3", title: "Hand-off Deadline", date: getDateStr(22), time: "17:00", duration: 30, color: "hsl(0 60% 50%)" },
