@@ -14,7 +14,7 @@ const mainNavItems = [
   { id: "projects", label: "Projects", icon: FolderKanban },
   { id: "messages", label: "Messages", icon: MessageSquare, badge: 3 },
   { id: "calendar", label: "Calendar", icon: CalendarDays },
-  { id: "studio", label: "Studio", icon: Briefcase },
+  { id: "workspace", label: "Workspace", icon: Briefcase },
 ];
 
 const secondaryNavItems = [

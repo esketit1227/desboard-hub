@@ -27,11 +27,11 @@ import { FilesPreview, FilesExpanded } from "@/components/dashboard/FileStorageW
 import { TasksPreview, TasksExpanded } from "@/components/dashboard/TasksWidget";
 import { MessagesPreview, MessagesExpanded } from "@/components/dashboard/MessagesWidget";
 import { AnalyticsPreview, AnalyticsExpanded } from "@/components/dashboard/AnalyticsWidget";
-import { StudioPreview, StudioExpanded } from "@/components/dashboard/StudioWidget";
+import { WorkspacePreview, WorkspaceExpanded } from "@/components/dashboard/WorkspaceWidget";
 import WidgetCustomizer from "@/components/dashboard/WidgetCustomizer";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "tasks" | "messages" | "analytics" | "studio";
+type WidgetId = "projects" | "calendar" | "finances" | "clients" | "files" | "tasks" | "messages" | "analytics" | "workspace";
 
 const WIDGETS: Record<
   WidgetId,
@@ -136,20 +136,20 @@ const WIDGETS: Record<
     bgColor: "",
     textColor: ""
   },
-  studio: {
-    title: "Studio",
+  workspace: {
+    title: "Workspace",
     icon: <Briefcase className="w-4 h-4" />,
     accentColor: "#ec4899",
-    preview: StudioPreview,
-    expanded: StudioExpanded,
+    preview: WorkspacePreview,
+    expanded: WorkspaceExpanded,
     cols: 1,
-    component: StudioPreview,
+    component: WorkspacePreview,
     bgColor: "",
     textColor: ""
   }
 };
 
-const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "tasks", "messages", "analytics", "studio"];
+const DEFAULT_WIDGETS: WidgetId[] = ["projects", "calendar", "finances", "clients", "files", "tasks", "messages", "analytics", "workspace"];
 
 const Index = () => {
   const isMobile = useIsMobile();

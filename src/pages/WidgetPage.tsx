@@ -12,7 +12,7 @@ import { FilesExpanded } from "@/components/dashboard/FileStorageWidget";
 import { TasksExpanded } from "@/components/dashboard/TasksWidget";
 import { MessagesExpanded } from "@/components/dashboard/MessagesWidget";
 import { AnalyticsExpanded } from "@/components/dashboard/AnalyticsWidget";
-import { StudioExpanded } from "@/components/dashboard/StudioWidget";
+import { WorkspaceExpanded } from "@/components/dashboard/WorkspaceWidget";
 
 const WIDGET_MAP: Record<string, { title: string; icon: React.ReactNode; expanded: React.ComponentType }> = {
   projects: { title: "Projects", icon: <FolderKanban className="w-5 h-5" />, expanded: ProjectsExpanded },
@@ -23,7 +23,7 @@ const WIDGET_MAP: Record<string, { title: string; icon: React.ReactNode; expande
   tasks: { title: "Tasks", icon: <ListTodo className="w-5 h-5" />, expanded: TasksExpanded },
   messages: { title: "Messages", icon: <MessageSquare className="w-5 h-5" />, expanded: MessagesExpanded },
   analytics: { title: "Analytics", icon: <BarChart3 className="w-5 h-5" />, expanded: AnalyticsExpanded },
-  studio: { title: "Studio", icon: <Briefcase className="w-5 h-5" />, expanded: StudioExpanded },
+  workspace: { title: "Workspace", icon: <Briefcase className="w-5 h-5" />, expanded: WorkspaceExpanded },
 };
 
 const WidgetPage = () => {
