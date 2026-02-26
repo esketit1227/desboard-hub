@@ -3,6 +3,7 @@ import { CalendarDays, X, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { INITIAL_EVENTS } from "@/components/dashboard/CalendarWidget";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function getDateStr(day: number) {
   const now = new Date();
@@ -18,12 +19,53 @@ function formatTime(time: string) {
 
 const NotificationBar = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [dismissed, setDismissed] = useState(false);
 
   const todayStr = getDateStr(new Date().getDate());
   const todayEvents = INITIAL_EVENTS.filter((e) => e.date === todayStr);
 
   if (todayEvents.length === 0 || dismissed) return null;
+
+  if (isMobile) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.25 }}
+          className="w-full mb-3"
+        >
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border/30 cursor-pointer"
+            onClick={() => navigate("/widget/calendar")}
+          >
+            <CalendarDays className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <div className="flex-1 flex items-center gap-1.5 overflow-hidden min-w-0">
+              <span className="text-[11px] font-semibold text-foreground shrink-0">
+                {todayEvents.length} event{todayEvents.length > 1 ? "s" : ""}
+              </span>
+              <span className="text-[10px] text-muted-foreground/60 shrink-0">·</span>
+              <span className="text-[11px] text-muted-foreground truncate">
+                {todayEvents.map((e) => e.title).join(", ")}
+              </span>
+            </div>
+            <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setDismissed(true);
+              }}
+              className="rounded p-0.5 shrink-0"
+            >
+              <X className="w-3 h-3 text-muted-foreground/40" />
+            </button>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
 
   return (
     <AnimatePresence>
