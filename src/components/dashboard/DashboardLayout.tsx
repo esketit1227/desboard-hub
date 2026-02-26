@@ -13,7 +13,7 @@ const navToRoute: Record<string, string> = {
   tasks: "/widget/tasks",
   messages: "/widget/messages",
   analytics: "/widget/analytics",
-  studio: "/widget/studio",
+  workspace: "/widget/workspace",
 };
 
 const routeToNav = (pathname: string): string => {
