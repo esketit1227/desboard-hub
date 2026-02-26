@@ -15,7 +15,7 @@ import {
   ArrowUpRight, Briefcase, Search, SlidersHorizontal, Plus } from
 "lucide-react";
 
-import TopIsland from "@/components/dashboard/TopIsland";
+import NotificationBar from "@/components/dashboard/NotificationBar";
 import WidgetCard from "@/components/dashboard/WidgetCard";
 // WidgetExpandedView no longer used — widgets navigate to full page
 import { ProjectsPreview, ProjectsExpanded } from "@/components/dashboard/ProjectsWidget";
@@ -199,8 +199,8 @@ const Index = () => {
 
   return (
     <div className={cn("p-3 md:p-8 lg:p-10", isMobile && "pt-4")}>
-      {/* Top Island - desktop only */}
-      {!isMobile && <TopIsland />}
+      {/* Notification bar - visible when there are today's events */}
+      {!isMobile && <NotificationBar />}
 
           {/* Top bar - desktop only */}
           {!isMobile && <motion.header
