@@ -4,6 +4,8 @@ import {
   ChevronDown, ChevronRight, Clock, Users, CheckCircle2, Circle,
   AlertCircle, ArrowUpRight, Trash2, Edit3, X, GripVertical,
   Target, Flag, Tag, Paperclip, MessageSquare, FolderKanban,
+  Upload, FileText, Image, Film, Music, Archive, File, Palette,
+  Link2, HardDrive, Eye, Download, Star, ListTodo,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -32,10 +34,16 @@ interface Task {
 
 interface Milestone { id: string; title: string; dueDate: string; completed: boolean; }
 
+interface ProjectFile {
+  id: string; name: string; type: "pdf" | "design" | "image" | "video" | "audio" | "archive" | "doc";
+  size: string; addedBy: string; date: string; source: "upload" | "vault"; vaultFileId?: string;
+}
+
 interface Project {
   id: string; name: string; client: string; status: ProjectStatus;
   progress: number; deadline: string; description: string; team: string[];
   tasks: Task[]; milestones: Milestone[]; color: string; budget: number; spent: number;
+  files: ProjectFile[];
 }
 
 const TEAM = ["Alex M.", "Sarah K.", "James L.", "Nina P.", "Tom R.", "Yuki H."];
@@ -72,6 +80,10 @@ const INITIAL_PROJECTS: Project[] = [
       { id: "m2", title: "Brand book draft", dueDate: "Mar 10", completed: false },
       { id: "m3", title: "Final delivery", dueDate: "Mar 15", completed: false },
     ],
+    files: [
+      { id: "pf1", name: "Logo-concepts-v3.fig", type: "design", size: "12 MB", addedBy: "Alex M.", date: "Feb 20", source: "upload" },
+      { id: "pf2", name: "brand-guide-final.pdf", type: "pdf", size: "6.1 MB", addedBy: "Sarah K.", date: "Feb 18", source: "vault", vaultFileId: "4" },
+    ],
   },
   {
     id: "p2", name: "Website Redesign", client: "Mono Studio", status: "active",
@@ -87,6 +99,9 @@ const INITIAL_PROJECTS: Project[] = [
       { id: "m4", title: "Research complete", dueDate: "Mar 5", completed: true },
       { id: "m5", title: "Design approval", dueDate: "Mar 20", completed: false },
     ],
+    files: [
+      { id: "pf3", name: "wireframes-v2.fig", type: "design", size: "8.4 MB", addedBy: "James L.", date: "Feb 22", source: "vault", vaultFileId: "9" },
+    ],
   },
   {
     id: "p3", name: "Mobile App UI", client: "Nextwave", status: "active",
@@ -101,6 +116,7 @@ const INITIAL_PROJECTS: Project[] = [
     milestones: [
       { id: "m7", title: "Core screens done", dueDate: "Mar 15", completed: false },
     ],
+    files: [],
   },
   {
     id: "p4", name: "Packaging Design", client: "Verdant Co", status: "completed",
@@ -113,6 +129,9 @@ const INITIAL_PROJECTS: Project[] = [
     milestones: [
       { id: "m9", title: "Concept approval", dueDate: "Jan 20", completed: true },
       { id: "m10", title: "Final delivery", dueDate: "Feb 10", completed: true },
+    ],
+    files: [
+      { id: "pf4", name: "packaging-final.pdf", type: "pdf", size: "3.2 MB", addedBy: "Nina P.", date: "Feb 8", source: "upload" },
     ],
   },
 ];
@@ -313,6 +332,202 @@ const KanbanColumn = ({
   );
 };
 
+const VAULT_FILES: { id: string; name: string; type: ProjectFile["type"]; size: string; folder: string }[] = [
+  { id: "v1", name: "Onboarding-Guide.pdf", type: "pdf", size: "4.2 MB", folder: "Onboarding" },
+  { id: "v2", name: "Product-Roadmap.docx", type: "doc", size: "1.8 MB", folder: "Onboarding" },
+  { id: "v3", name: "hero-mockup-v3.fig", type: "design", size: "18 MB", folder: "Mockups" },
+  { id: "v4", name: "brand-guide-final.pdf", type: "pdf", size: "6.1 MB", folder: "Branding" },
+  { id: "v5", name: "NDA-AcmeCorp.pdf", type: "pdf", size: "520 KB", folder: "Contracts" },
+  { id: "v6", name: "social-media-pack.zip", type: "archive", size: "42 MB", folder: "Branding" },
+  { id: "v7", name: "product-demo.mp4", type: "video", size: "120 MB", folder: "General" },
+  { id: "v8", name: "wireframes-v2.fig", type: "design", size: "8.4 MB", folder: "Mockups" },
+  { id: "v9", name: "hero-banner.png", type: "image", size: "2.8 MB", folder: "Branding" },
+  { id: "v10", name: "invoice-template.docx", type: "doc", size: "890 KB", folder: "Templates" },
+  { id: "v11", name: "proposal-zenith.pdf", type: "pdf", size: "3.4 MB", folder: "Proposals" },
+  { id: "v12", name: "contract-template.docx", type: "doc", size: "1.2 MB", folder: "Templates" },
+];
+
+const FILE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  pdf: FileText, design: Palette, image: Image, video: Film, audio: Music, archive: Archive, doc: File,
+};
+const FILE_COLOR_MAP: Record<string, string> = {
+  pdf: "text-red-400", design: "text-purple-400", image: "text-blue-400",
+  video: "text-pink-400", audio: "text-amber-400", archive: "text-emerald-400", doc: "text-sky-400",
+};
+
+const ProjectFilesTab = ({
+  project,
+  onUpdate,
+}: {
+  project: Project;
+  onUpdate: (p: Project) => void;
+}) => {
+  const [showVaultPicker, setShowVaultPicker] = useState(false);
+  const [vaultSearch, setVaultSearch] = useState("");
+  const [selectedVaultFiles, setSelectedVaultFiles] = useState<Set<string>>(new Set());
+
+  const linkedVaultIds = new Set(project.files.filter(f => f.vaultFileId).map(f => f.vaultFileId));
+  const availableVaultFiles = VAULT_FILES.filter(f => !linkedVaultIds.has(f.id));
+  const filteredVault = availableVaultFiles.filter(f =>
+    !vaultSearch || f.name.toLowerCase().includes(vaultSearch.toLowerCase()) || f.folder.toLowerCase().includes(vaultSearch.toLowerCase())
+  );
+
+  const linkFromVault = () => {
+    const newFiles: ProjectFile[] = [];
+    selectedVaultFiles.forEach(vId => {
+      const vf = VAULT_FILES.find(f => f.id === vId);
+      if (vf) {
+        newFiles.push({
+          id: uid(), name: vf.name, type: vf.type, size: vf.size,
+          addedBy: TEAM[0], date: "Mar 2", source: "vault", vaultFileId: vf.id,
+        });
+      }
+    });
+    onUpdate({ ...project, files: [...project.files, ...newFiles] });
+    setSelectedVaultFiles(new Set());
+    setShowVaultPicker(false);
+  };
+
+  const uploadFile = () => {
+    const mockFile: ProjectFile = {
+      id: uid(), name: `upload-${Date.now().toString(36)}.pdf`, type: "pdf",
+      size: `${(Math.random() * 10 + 1).toFixed(1)} MB`, addedBy: TEAM[0], date: "Mar 2", source: "upload",
+    };
+    onUpdate({ ...project, files: [...project.files, mockFile] });
+  };
+
+  const removeFile = (fileId: string) => {
+    onUpdate({ ...project, files: project.files.filter(f => f.id !== fileId) });
+  };
+
+  const toggleVaultSelect = (id: string) => {
+    setSelectedVaultFiles(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={() => setShowVaultPicker(true)}>
+          <Link2 className="w-3.5 h-3.5" /> Link from Vault
+        </Button>
+        <Button size="sm" className="rounded-xl gap-1.5" onClick={uploadFile}>
+          <Upload className="w-3.5 h-3.5" /> Upload File
+        </Button>
+        <span className="text-xs text-muted-foreground ml-auto">{project.files.length} file{project.files.length !== 1 ? "s" : ""}</span>
+      </div>
+
+      {project.files.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+            <Paperclip className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-muted-foreground">No files attached</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Upload files or link from the vault</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <AnimatePresence>
+            {project.files.map(file => {
+              const Icon = FILE_ICON_MAP[file.type] || File;
+              const color = FILE_COLOR_MAP[file.type] || "text-muted-foreground";
+              return (
+                <motion.div
+                  key={file.id}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="group flex items-center gap-3 bg-background/60 backdrop-blur-sm border border-border/40 rounded-xl px-4 py-3 hover:border-border/70 transition-all"
+                >
+                  <div className={`w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center shrink-0 ${color}`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{file.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] text-muted-foreground">{file.size}</span>
+                      <span className="text-[10px] text-muted-foreground">·</span>
+                      <span className="text-[10px] text-muted-foreground">{file.addedBy}</span>
+                      <span className="text-[10px] text-muted-foreground">·</span>
+                      <span className="text-[10px] text-muted-foreground">{file.date}</span>
+                    </div>
+                  </div>
+                  {file.source === "vault" && (
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-md gap-1 shrink-0">
+                      <Link2 className="w-2.5 h-2.5" /> Vault
+                    </Badge>
+                  )}
+                  <button
+                    onClick={() => removeFile(file.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-destructive/60" />
+                  </button>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Vault Picker Dialog */}
+      <Dialog open={showVaultPicker} onOpenChange={setShowVaultPicker}>
+        <DialogContent className="rounded-2xl max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><HardDrive className="w-4 h-4" /> Link from File Vault</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={vaultSearch} onChange={e => setVaultSearch(e.target.value)} placeholder="Search vault files…" className="pl-9 rounded-xl" />
+            </div>
+            <div className="max-h-[300px] overflow-y-auto space-y-1.5">
+              {filteredVault.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">No available files to link</p>
+              ) : (
+                filteredVault.map(vf => {
+                  const Icon = FILE_ICON_MAP[vf.type] || File;
+                  const color = FILE_COLOR_MAP[vf.type] || "text-muted-foreground";
+                  const selected = selectedVaultFiles.has(vf.id);
+                  return (
+                    <button
+                      key={vf.id}
+                      onClick={() => toggleVaultSelect(vf.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${
+                        selected ? "bg-foreground/10 border border-foreground/20" : "hover:bg-muted/50 border border-transparent"
+                      }`}
+                    >
+                      <div className={`w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0 ${color}`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{vf.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{vf.folder} · {vf.size}</p>
+                      </div>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                        selected ? "border-foreground bg-foreground" : "border-muted-foreground/30"
+                      }`}>
+                        {selected && <CheckCircle2 className="w-3 h-3 text-background" />}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl" onClick={() => setShowVaultPicker(false)}>Cancel</Button>
+            <Button className="rounded-xl gap-1" onClick={linkFromVault} disabled={selectedVaultFiles.size === 0}>
+              <Link2 className="w-3.5 h-3.5" /> Link {selectedVaultFiles.size > 0 ? `${selectedVaultFiles.size} file${selectedVaultFiles.size > 1 ? "s" : ""}` : ""}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 const ProjectDetail = ({
   project,
   onBack,
@@ -322,6 +537,7 @@ const ProjectDetail = ({
   onBack: () => void;
   onUpdate: (p: Project) => void;
 }) => {
+  const [activeTab, setActiveTab] = useState<"tasks" | "files">("tasks");
   const [view, setView] = useState<"board" | "list">("board");
   const [search, setSearch] = useState("");
   const [filterPriority, setFilterPriority] = useState<string>("all");
@@ -374,11 +590,11 @@ const ProjectDetail = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Progress", value: `${project.progress}%` },
           { label: "Tasks", value: `${doneCount}/${project.tasks.length}` },
-          { label: "Team", value: `${project.team.length}` },
+          { label: "Files", value: `${project.files.length}` },
           { label: "Budget", value: `$${(project.budget / 1000).toFixed(0)}k` },
         ].map(s => (
           <div key={s.label} className="bg-secondary/30 rounded-xl p-3 text-center">
@@ -388,69 +604,101 @@ const ProjectDetail = ({
         ))}
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tasks…" className="pl-9 rounded-xl" />
-        </div>
-        <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-[130px] rounded-xl"><Filter className="w-3 h-3 mr-1" /><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Priority</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="flex rounded-xl border border-border overflow-hidden">
-          <button onClick={() => setView("board")} className={`p-2 ${view === "board" ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}>
-            <LayoutGrid className="w-4 h-4" />
+      {/* Tabs: Tasks / Files */}
+      <div className="flex items-center gap-1 border-b border-border/30 pb-0">
+        {(["tasks", "files"] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-sm font-medium rounded-t-xl transition-colors relative ${
+              activeTab === tab
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground/70"
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              {tab === "tasks" ? <ListTodo className="w-3.5 h-3.5" /> : <Paperclip className="w-3.5 h-3.5" />}
+              {tab === "tasks" ? "Tasks" : "Files"}
+              <span className="text-[10px] bg-muted/60 px-1.5 py-0.5 rounded-md">
+                {tab === "tasks" ? project.tasks.length : project.files.length}
+              </span>
+            </span>
+            {activeTab === tab && (
+              <motion.div layoutId="project-tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />
+            )}
           </button>
-          <button onClick={() => setView("list")} className={`p-2 ${view === "list" ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}>
-            <List className="w-4 h-4" />
-          </button>
-        </div>
-        <Button size="sm" className="rounded-xl gap-1" onClick={() => setShowAddTask(true)}>
-          <Plus className="w-4 h-4" /> Add Task
-        </Button>
+        ))}
       </div>
 
-      {view === "board" ? (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {(["todo", "in_progress", "review", "done"] as TaskStatus[]).map(status => (
-            <KanbanColumn key={status} status={status} tasks={filteredTasks.filter(t => t.status === status)} onStatusChange={changeStatus} onDeleteTask={deleteTask} />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <AnimatePresence>
-            {filteredTasks.map(task => (
-              <TaskCard key={task.id} task={task} onStatusChange={changeStatus} onDelete={deleteTask} />
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
-
-      <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
-        <DialogContent className="rounded-2xl">
-          <DialogHeader><DialogTitle>Add Task</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <Input placeholder="Task title" value={newTask.title} onChange={e => setNewTask(p => ({ ...p, title: e.target.value }))} className="rounded-xl" />
-            <Textarea placeholder="Description (optional)" value={newTask.description} onChange={e => setNewTask(p => ({ ...p, description: e.target.value }))} className="rounded-xl" />
-            <Select value={newTask.priority} onValueChange={v => setNewTask(p => ({ ...p, priority: v as Priority }))}>
-              <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+      {activeTab === "tasks" ? (
+        <>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tasks…" className="pl-9 rounded-xl" />
+            </div>
+            <Select value={filterPriority} onValueChange={setFilterPriority}>
+              <SelectTrigger className="w-[130px] rounded-xl"><Filter className="w-3 h-3 mr-1" /><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Priority</SelectItem>
                 <SelectItem value="urgent">Urgent</SelectItem>
                 <SelectItem value="high">High</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="low">Low</SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex rounded-xl border border-border overflow-hidden">
+              <button onClick={() => setView("board")} className={`p-2 ${view === "board" ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}>
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button onClick={() => setView("list")} className={`p-2 ${view === "list" ? "bg-primary text-primary-foreground" : "hover:bg-secondary"}`}>
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+            <Button size="sm" className="rounded-xl gap-1" onClick={() => setShowAddTask(true)}>
+              <Plus className="w-4 h-4" /> Add Task
+            </Button>
           </div>
-          <DialogFooter><Button onClick={addTask} className="rounded-xl">Add Task</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          {view === "board" ? (
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {(["todo", "in_progress", "review", "done"] as TaskStatus[]).map(status => (
+                <KanbanColumn key={status} status={status} tasks={filteredTasks.filter(t => t.status === status)} onStatusChange={changeStatus} onDeleteTask={deleteTask} />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <AnimatePresence>
+                {filteredTasks.map(task => (
+                  <TaskCard key={task.id} task={task} onStatusChange={changeStatus} onDelete={deleteTask} />
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+
+          <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+            <DialogContent className="rounded-2xl">
+              <DialogHeader><DialogTitle>Add Task</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                <Input placeholder="Task title" value={newTask.title} onChange={e => setNewTask(p => ({ ...p, title: e.target.value }))} className="rounded-xl" />
+                <Textarea placeholder="Description (optional)" value={newTask.description} onChange={e => setNewTask(p => ({ ...p, description: e.target.value }))} className="rounded-xl" />
+                <Select value={newTask.priority} onValueChange={v => setNewTask(p => ({ ...p, priority: v as Priority }))}>
+                  <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <DialogFooter><Button onClick={addTask} className="rounded-xl">Add Task</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      ) : (
+        <ProjectFilesTab project={project} onUpdate={onUpdate} />
+      )}
     </div>
   );
 };
