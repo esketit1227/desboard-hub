@@ -7,6 +7,7 @@ import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import Index from "./pages/Index";
 import WidgetPage from "./pages/WidgetPage";
 import ClientPortalPage from "./pages/ClientPortalPage";
+import ClientExternalPage from "./pages/ClientExternalPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<DashboardLayout><Index /></DashboardLayout>} />
           <Route path="/widget/:id" element={<DashboardLayout><WidgetPage /></DashboardLayout>} />
           <Route path="/portal/:portalId" element={<DashboardLayout><ClientPortalPage /></DashboardLayout>} />
+          <Route path="/client/:projectId" element={<ClientExternalPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

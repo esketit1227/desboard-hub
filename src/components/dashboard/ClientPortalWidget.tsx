@@ -5,7 +5,7 @@ import {
   Clock, Eye, PenLine, ThumbsUp, Paperclip, X, ArrowLeft,
   LayoutDashboard, ListChecks, Activity, Receipt, History,
   ChevronRight, Download, Calendar, DollarSign,
-  Users, Zap, Search, Filter, Plus, Trash2,
+  Users, Zap, Search, Filter, Plus, Trash2, ExternalLink, Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -539,16 +539,38 @@ export const ClientsExpanded = () => {
             <span>R{selected.revisionRound}</span>
           </div>
         </div>
-        {selected.status !== "approved" && (
-          <div className="flex gap-2 shrink-0">
-            <Button size="sm" onClick={handleApprove} className="rounded-xl gap-1.5">
-              <ThumbsUp className="w-3.5 h-3.5" /> Approve
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleRequestChanges} className="rounded-xl gap-1.5">
-              <PenLine className="w-3.5 h-3.5" /> Changes
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2 shrink-0 flex-wrap">
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-xl gap-1.5 text-xs"
+            onClick={() => {
+              const url = `${window.location.origin}/client/${selected.id}`;
+              navigator.clipboard.writeText(url);
+              toast.success("Client link copied to clipboard");
+            }}
+          >
+            <Copy className="w-3.5 h-3.5" /> Copy Link
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-xl gap-1.5 text-xs"
+            onClick={() => window.open(`/client/${selected.id}`, "_blank")}
+          >
+            <ExternalLink className="w-3.5 h-3.5" /> Preview
+          </Button>
+          {selected.status !== "approved" && (
+            <>
+              <Button size="sm" onClick={handleApprove} className="rounded-xl gap-1.5">
+                <ThumbsUp className="w-3.5 h-3.5" /> Approve
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleRequestChanges} className="rounded-xl gap-1.5">
+                <PenLine className="w-3.5 h-3.5" /> Changes
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
