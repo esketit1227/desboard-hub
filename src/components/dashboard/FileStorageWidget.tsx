@@ -4,7 +4,7 @@ import {
   ChevronRight, ChevronDown, Folder, MoreHorizontal, Grid3X3, List,
   Upload, Filter, X, File, Music, Archive, HardDrive, Star,
   Download, Trash2, Copy, Move, Eye, Edit2, Clock, ArrowUpDown,
-  CheckCircle2, Circle, Bookmark, Palette, FolderTree,
+  CheckCircle2, Circle, Bookmark, Palette, FolderTree, Link2,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +15,34 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSizeTier } from "./WidgetCard";
+
+/* ─── Process Tags ─── */
+const PROCESS_TAGS = ["Final", "Draft", "On-going"] as const;
+type ProcessTag = typeof PROCESS_TAGS[number];
+
+/* ─── Mock Projects for linking ─── */
+const MOCK_PROJECTS = [
+  { id: "p1", name: "Website Redesign", client: "Acme Corp" },
+  { id: "p2", name: "Brand Identity", client: "Stellar Labs" },
+  { id: "p3", name: "Mobile App", client: "NovaTech" },
+  { id: "p4", name: "Marketing Campaign", client: "Orbit Inc" },
+  { id: "p5", name: "Dashboard MVP", client: "Zenith Co" },
+];
+
+/* ─── Upload Form State ─── */
+interface UploadFormData {
+  fileName: string;
+  clientName: string;
+  processTag: ProcessTag | "";
+  linkedProjectId: string;
+  version: number;
+}
 
 /* ─── Types ─── */
 type FileTag = { label: string; color: string };
@@ -180,6 +206,50 @@ export const FilesExpanded = () => {
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [showMobileFolders, setShowMobileFolders] = useState(false);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [uploadForm, setUploadForm] = useState<UploadFormData>({
+    fileName: "", clientName: "", processTag: "", linkedProjectId: "", version: 1,
+  });
+
+  const resetUploadForm = () => {
+    setUploadForm({ fileName: "", clientName: "", processTag: "", linkedProjectId: "", version: 1 });
+    setShowUploadForm(false);
+  };
+
+  const handleUploadSubmit = () => {
+    if (!uploadForm.fileName.trim()) return;
+    const linkedProject = MOCK_PROJECTS.find(p => p.id === uploadForm.linkedProjectId);
+    const client = uploadForm.clientName
+      ? CLIENTS.find(c => c.name === uploadForm.clientName) || { name: uploadForm.clientName, avatar: uploadForm.clientName.slice(0, 2).toUpperCase() }
+      : undefined;
+    const processTagObj = uploadForm.processTag
+      ? TAGS.find(t => t.label === uploadForm.processTag) || TAGS[0]
+      : undefined;
+
+    const newFile: FileItem = {
+      id: `upload-${Date.now()}`,
+      name: uploadForm.fileName,
+      type: uploadForm.fileName.endsWith(".pdf") ? "pdf"
+        : uploadForm.fileName.endsWith(".fig") ? "design"
+        : uploadForm.fileName.match(/\.(png|jpg|jpeg|webp|svg)$/i) ? "image"
+        : uploadForm.fileName.match(/\.(mp4|mov|avi)$/i) ? "video"
+        : uploadForm.fileName.match(/\.(mp3|wav)$/i) ? "audio"
+        : uploadForm.fileName.match(/\.(zip|rar|tar)$/i) ? "archive"
+        : "doc",
+      folder: currentFolder === "all" ? "general" : currentFolder,
+      size: "0 KB",
+      sizeBytes: 0,
+      addedBy: "You",
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      tags: processTagObj ? [processTagObj] : [],
+      client,
+      starred: false,
+      version: uploadForm.version,
+      description: linkedProject ? `Linked to ${linkedProject.name}` : undefined,
+    };
+    setFiles(prev => [newFile, ...prev]);
+    resetUploadForm();
+  };
 
   // Breadcrumb path
   const getBreadcrumb = (folderId: string): FolderItem[] => {
@@ -372,7 +442,7 @@ export const FilesExpanded = () => {
             <ChevronDown className={`w-3 h-3 transition-transform ${showMobileFolders ? "rotate-180" : ""}`} />
           </Button>
           <div className="flex-1" />
-          <Button variant="outline" size="sm" className="gap-1.5 rounded-xl border-dashed border-foreground/15 text-muted-foreground">
+          <Button variant="outline" size="sm" className="gap-1.5 rounded-xl border-dashed border-foreground/15 text-muted-foreground" onClick={() => setShowUploadForm(true)}>
             <Upload className="w-3.5 h-3.5" /> Upload
           </Button>
         </div>
@@ -410,7 +480,7 @@ export const FilesExpanded = () => {
       {/* Sidebar — Folder Tree (desktop only) */}
       {!isMobile && (
       <div className="w-56 shrink-0 flex flex-col gap-3">
-        <Button variant="outline" className="w-full gap-2 rounded-xl border-dashed border-foreground/15 text-muted-foreground hover:text-foreground">
+        <Button variant="outline" className="w-full gap-2 rounded-xl border-dashed border-foreground/15 text-muted-foreground hover:text-foreground" onClick={() => setShowUploadForm(true)}>
           <Upload className="w-4 h-4" /> Upload Files
         </Button>
 
@@ -1102,6 +1172,132 @@ export const FilesExpanded = () => {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* ─── Upload Form Dialog ─── */}
+      <Dialog open={showUploadForm} onOpenChange={(open) => { if (!open) resetUploadForm(); else setShowUploadForm(true); }}>
+        <DialogContent className="sm:max-w-md bg-background border-foreground/10">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-primary" /> Upload New File
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* File Name */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">File Name <span className="text-red-400">*</span></Label>
+              <Input
+                placeholder="e.g. brand-guide-v2.pdf"
+                value={uploadForm.fileName}
+                onChange={e => setUploadForm(prev => ({ ...prev, fileName: e.target.value }))}
+                className="rounded-xl bg-foreground/5 border-foreground/10"
+              />
+            </div>
+
+            {/* Client Name */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">Client Name</Label>
+              <Select value={uploadForm.clientName || "none"} onValueChange={v => setUploadForm(prev => ({ ...prev, clientName: v === "none" ? "" : v }))}>
+                <SelectTrigger className="rounded-xl bg-foreground/5 border-foreground/10">
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No client</SelectItem>
+                  {CLIENTS.map(c => (
+                    <SelectItem key={c.name} value={c.name}>
+                      <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full bg-foreground/10 text-[8px] font-bold flex items-center justify-center">{c.avatar}</span>
+                        {c.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Process Tag */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">Process Tag</Label>
+              <div className="flex gap-2 flex-wrap">
+                {PROCESS_TAGS.map(tag => {
+                  const isActive = uploadForm.processTag === tag;
+                  const colorMap: Record<ProcessTag, string> = {
+                    "Final": "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+                    "Draft": "bg-amber-500/15 text-amber-400 border-amber-500/30",
+                    "On-going": "bg-blue-500/15 text-blue-400 border-blue-500/30",
+                  };
+                  return (
+                    <button
+                      key={tag}
+                      onClick={() => setUploadForm(prev => ({ ...prev, processTag: isActive ? "" : tag }))}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                        isActive ? colorMap[tag] : "border-foreground/10 text-muted-foreground hover:border-foreground/20"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Project Linking */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <Link2 className="w-3.5 h-3.5" /> Link to Project
+              </Label>
+              <Select value={uploadForm.linkedProjectId || "none"} onValueChange={v => setUploadForm(prev => ({ ...prev, linkedProjectId: v === "none" ? "" : v }))}>
+                <SelectTrigger className="rounded-xl bg-foreground/5 border-foreground/10">
+                  <SelectValue placeholder="Select a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No project</SelectItem>
+                  {MOCK_PROJECTS.map(p => (
+                    <SelectItem key={p.id} value={p.id}>
+                      <span className="flex items-center gap-2">
+                        <FolderOpen className="w-3.5 h-3.5 text-muted-foreground" />
+                        {p.name}
+                        <span className="text-[10px] text-muted-foreground">— {p.client}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Version */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">Version</Label>
+              <div className="flex items-center gap-2">
+                <button
+                  className="w-8 h-8 rounded-lg border border-foreground/10 flex items-center justify-center text-sm hover:bg-foreground/5 transition-colors"
+                  onClick={() => setUploadForm(prev => ({ ...prev, version: Math.max(1, prev.version - 1) }))}
+                >
+                  −
+                </button>
+                <span className="w-12 text-center font-mono text-sm font-medium">v{uploadForm.version}</span>
+                <button
+                  className="w-8 h-8 rounded-lg border border-foreground/10 flex items-center justify-center text-sm hover:bg-foreground/5 transition-colors"
+                  onClick={() => setUploadForm(prev => ({ ...prev, version: prev.version + 1 }))}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="rounded-xl border-foreground/10" onClick={resetUploadForm}>Cancel</Button>
+            <Button
+              className="rounded-xl"
+              disabled={!uploadForm.fileName.trim()}
+              onClick={handleUploadSubmit}
+            >
+              <Upload className="w-4 h-4 mr-1.5" /> Upload File
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
